@@ -20,3 +20,5 @@ const updateComment = async (id: string, comment: IComment): Promise<IComment | 
 const deleteComment = async (id: string): Promise<IComment | null> => {
     return await CommentModel.findByIdAndDelete(id);
 }
+
+export { createComment, getComments, getCommentById, updateComment, deleteComment };
