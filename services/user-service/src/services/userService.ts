@@ -42,7 +42,7 @@ const deleteUser = async (id: string): Promise<IUser | null> => {
 }
 
 const updatePassword = async (id: string, newPassword: string,oldPassword:string): Promise<IUser | null> => {
-	const user = await UserModel.findById(id).select("+password");
+	const user = await UserModel.findById(id);
 	if (!user) return null;
 	const isMatch = await bcrypt.compare(oldPassword, user.password);
 	if (!isMatch) return null;
@@ -51,4 +51,4 @@ const updatePassword = async (id: string, newPassword: string,oldPassword:string
 	return await user.save();
 }
 
-export { createUser, getUserByEmail };
+export { createUser, getUserByEmail, updateUser, getAllUsers, getUserById, deleteUser, updatePassword };
