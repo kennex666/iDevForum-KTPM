@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "start": "nodemon server.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/mongoose": "^5.11.96",
