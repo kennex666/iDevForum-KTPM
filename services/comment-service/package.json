@@ -1,7 +1,8 @@
 {
   "scripts": {
-    "start": "nodemon server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "start": "npx ts-node src/server.ts",
+  "dev": "nodemon --ext ts --exec ts-node src/server.ts",
+  "build": "tsc -p ."
   },
   "devDependencies": {
     "@types/express": "^5.0.1",
