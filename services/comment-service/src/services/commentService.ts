@@ -41,8 +41,15 @@ const updateComment = async (id: string, content: string): Promise<IComment | nu
     }
 };
 
-const deleteComment = async (id: string): Promise<IComment | null> => {
-    return await CommentModel.findByIdAndDelete(id);
-}
+
+const deleteComment = async (id: string): Promise<boolean> => {
+    try {
+        const result = await CommentModel.findByIdAndDelete(id);
+        return result !== null;
+    } catch (err) {
+        console.error("Error while deleting comment:", err);
+        throw new Error("Không thể xóa bình luận. Vui lòng thử lại sau.");
+    }
+};
 
 export { createComment, getComments, getCommentById, updateComment, deleteComment };
