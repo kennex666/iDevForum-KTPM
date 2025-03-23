@@ -30,9 +30,16 @@ const getCommentById = async (id: string): Promise<IComment | null> => {
 }
    
 
-const updateComment = async (id: string, comment: IComment): Promise<IComment | null> => {
-    return await CommentModel.findByIdAndUpdate (id, comment, {new: true});
-}
+const updateComment = async (id: string, content: string): Promise<IComment | null> => {
+    try {
+        const comment = await CommentModel.findByIdAndUpdate(id, { content }, { new: true });
+        console.log(comment);
+        return comment;
+    } catch (err) {
+        console.error("Error while updating comment:", err);
+        throw new Error("Không thể cập nhật bình luận. Vui lòng thử lại sau.");
+    }
+};
 
 const deleteComment = async (id: string): Promise<IComment | null> => {
     return await CommentModel.findByIdAndDelete(id);

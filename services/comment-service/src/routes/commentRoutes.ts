@@ -69,11 +69,29 @@ commentRoutes.get('/comment/:id', async (req, res) => {
 });
 
 commentRoutes.put('/comment/:id', async (req, res) => {
+    const { content } = req.body;
+    const { id } = req.params;
+    if (!content || content.trim().length === 0) {
+        res.status(400).json({
+            message: "Vui lòng nhập nội dung bình luận"
+        });
+        return;
+    }
+
     try {
-        const comment = await updateComment(req.params.id, req.body);
+        const comment = await updateComment(id,content);
         res.status(200).json(comment);
     } catch (err) {
-        res.status(400).json(err);
+        console.error("Error while updating comment:", err);
+        if (err instanceof Error) {
+            res.status(400).json({
+                message: err.message
+            });
+        } else {
+            res.status(400).json({
+                message: "Lỗi không xác định. Vui lòng thử lại sau."
+            });
+        }
     }
 });
 
