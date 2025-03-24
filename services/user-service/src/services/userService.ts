@@ -9,6 +9,8 @@ const createUser = async (
 	email: string,
 	password: string,
 ): Promise<IUser> => {
+	const CheckExistUser = await UserModel.findOne({ email });
+	if (CheckExistUser) throw new Error("Email already exists");
 	const passwordHash = await bcrypt.hash(password, 10);
 	const user = new UserModel({ name, role, accountState, username, email, password: passwordHash });
 	return await user.save();
@@ -45,7 +47,7 @@ const updatePassword = async (id: string, newPassword: string,oldPassword:string
 	const user = await UserModel.findById(id);
 	if (!user) return null;
 	const isMatch = await bcrypt.compare(oldPassword, user.password);
-	if (!isMatch) return null;
+	if (!isMatch) throw new Error("Old password is incorrect");
 	const passwordHash = await bcrypt.hash(newPassword, 10);
 	user.password = passwordHash;
 	return await user.save();

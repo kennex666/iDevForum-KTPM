@@ -11,8 +11,8 @@ router.post("/register", async (req, res) => {
 		const { name, role, accountState, username, email, password } = req.body;
 		const user = await createUser(name, role, accountState, username, email, password);
 		res.status(201).json(user);
-	} catch (error) {
-		res.status(500).json({ error: "Error creating user" });
+	} catch (error:any) {
+		res.status(500).json({ error: error.message });
 	}
 });
 
@@ -20,29 +20,31 @@ router.get("/getall", async (req: any, res: any) => {
 	try {
 		const users = await getAllUsers();
 		res.json(users);
-	} catch (error) {
-		res.status(500).json({ error: "Error fetching users" });
+	} catch (error:any) {
+		res.status(500).json({ error: error.message });
 	}
 });
 
 router.get("/:id", async (req: any, res: any) => {
 	try {
+		if (!req.params.id) return res.status(400).json({ message: "User id is required" });
 		const user = await getUserById(req.params.id);
 		if (!user) return res.status(404).json({ message: "User not found" });
 		res.json(user);
-	} catch (error) {
-		res.status(500).json({ error: "Error fetching user" });
+	} catch (error:any) {
+		res.status(500).json({ error: error.message });
 	}
 });
 
 router.get("/email/:email", async (req: any, res: any) => {
 	try {
 		console.log("email", req.params.email);
+		if (!req.params.email) return res.status(400).json({ message: "User email is required" });
 		const user = await getUserByEmail(req.params.email);
 		if (!user) return res.status(404).json({ message: "User not found" });
 		res.json(user);
-	} catch (error) {
-		res.status(500).json({ error: "Error fetching user" });
+	} catch (error:any) {
+		res.status(500).json({ error: error.message });
 	}
 });
 
@@ -55,8 +57,8 @@ router.put("/:id", async (req: any, res: any) => {
 		const user = await updateUser(id, updateData);
 		if (!user) return res.status(404).json({ message: "User not found" });
 		res.json(user);
-	} catch (error) {
-		res.status(500).json({ error: "Error updating user" });
+	} catch (error:any) {
+		res.status(500).json({ error: error.message });
 	}
 });
 
@@ -67,8 +69,8 @@ router.delete("/:id", async (req: any, res: any) => {
 		if (!user) return res.status(404).json({ message: "User not found" });
 		res.json(user);
 	}
-	catch (error) {
-		res.status(500).json({ error: "Error deleting user" });
+	catch (error:any) {
+		res.status(500).json({ error: error.message });
 	}
 });
 
@@ -80,8 +82,8 @@ router.put("/updatepassword/:id", async (req: any, res: any) => {
 		if (!user) return res.status(404).json({ message: "User not found" });
 		res.json(user);
 	}
-	catch (error) {
-		res.status(500).json({ error: "Error updating password" });
+	catch (error:any) {
+		res.status(500).json({ error: error.message });
 	}
 });
 

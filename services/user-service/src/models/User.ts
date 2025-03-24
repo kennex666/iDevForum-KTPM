@@ -15,11 +15,15 @@ interface IUser extends Document {
 	createdAt: Date;
 	updatedAt: Date;
 }
-
+// vidu: email:my-email@sub.domain.com
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 // Định nghĩa Schema
 const UserSchema = new Schema<IUser>(
 	{
-		name: { type: String, required: true },
+		name: { 
+			type: String, 
+			required: [true, "name is required!"],
+		},
 		role: {
 			type: Number,
 			enum: [0, 1],
@@ -30,14 +34,36 @@ const UserSchema = new Schema<IUser>(
 			enum: ["EXPIRED", "BANNED", "RESTRICTED", "ACTIVE", "WAIT_FOR_ACTIVATION"],
 			default: "WAIT_FOR_ACTIVATION",
 		},
-		coverPicture: { type: String },
-		description: { type: String },
-		username: { type: String, required: true, unique: false },
-		email: { type: String, required: true, unique: true },
-		title: { type: String },
-		password: { type: String, required: true },
-		profilePicture: { type: String },
-		bio: { type: String },
+		coverPicture: { 
+			type: String 
+		},
+		description: { 
+			type: String 
+		},
+		username: { 
+			type: String, 
+			required: [true, "username is required!"],
+			unique: false, 
+		},
+		email: { 
+			type: String, 
+			required: [true, "email is required!"], 
+			unique: true, 
+			match: [emailRegex, "Invalid email format!, ex:user@example.com"]
+		},
+		title: { 
+			type: String 
+		},
+		password: { 
+			type: String, 
+			required: [true, "password is required!"]
+		},
+		profilePicture: { 
+			type: String 
+		},
+		bio: { 
+			type: String 
+		},
 	},
 	{
 		timestamps: true, // Tự động thêm createdAt & updatedAt
