@@ -6,6 +6,8 @@ import postRoute from './routes/postRoute';
 dotenv.config();
 const app = express();
 
+console.log('Hello, world!'+ process.env.PORT);
+
 app.use(express.json());
 
 // Add routes
