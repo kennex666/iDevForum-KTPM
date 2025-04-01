@@ -23,6 +23,7 @@ const UserSchema = new Schema<IUser>(
 		name: { 
 			type: String, 
 			required: [true, "name is required!"],
+			minlength: [6, 'Name must be at least 6 characters'],
 		},
 		role: {
 			type: Number,
@@ -43,7 +44,7 @@ const UserSchema = new Schema<IUser>(
 		username: { 
 			type: String, 
 			required: [true, "username is required!"],
-			unique: false, 
+			minlength: [6, 'Username must be at least 6 characters'],
 		},
 		email: { 
 			type: String, 
@@ -55,7 +56,8 @@ const UserSchema = new Schema<IUser>(
 			type: String 
 		},
 		password: { 
-			type: String, 
+			type: String,
+			minlength: [6, 'Password must be at least 6 characters'],
 			required: [true, "password is required!"]
 		},
 		profilePicture: { 

@@ -1,37 +1,65 @@
 import express from "express";
 import {
 	createUser, getUserByEmail,
-	updateUser, getAllUsers, getUserById, deleteUser, updatePassword
+	updateUser, getAllUsers, getUserById, deleteUser, updatePassword,
+	searchUsers
 } from "../services/userService";
 
 const router = express.Router();
 
-router.post("/register", async (req, res) => {
+router.post("/register", async (req: any, res: any) => {
 	try {
 		const { name, role, accountState, username, email, password } = req.body;
+		if(!name) 
+			return res.status(400).json({ message: "Name is required" });
+		if(username.length <0 || username.trim() === "")
+			return res.status(400).json({ message: "Username is required" });
+		if(email.length <0 || email.trim() === "")
+			return res.status(400).json({ message: "Email is required" });
+		if(password.length <0 || password.trim() === "")
+			return res.status(400).json({ message: "Password is required" });
+		if(password.length < 6)
+			return res.status(400).json({ message: "Password must be at least 6 characters" });
 		const user = await createUser(name, role, accountState, username, email, password);
-		res.status(201).json(user);
-	} catch (error:any) {
+		return res.status(201).json(user);
+	} catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
 });
 
 router.get("/getall", async (req: any, res: any) => {
+
 	try {
 		const users = await getAllUsers();
 		res.json(users);
-	} catch (error:any) {
+	} catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
 });
 
+router.get("/search", async (req: any, res: any) => {
+	try {
+		const filters = req.query;
+		console.log("Filters:", filters);
+		if (Object.keys(filters).length === 0) {
+			return res.status(400).json({ message: "No filters provided" });
+		}
+		const users = await searchUsers(filters);
+
+		if (!users) return res.status(404).json({ message: "User not found" });
+		return res.status(200).json(users);
+
+	} catch (error: any) {
+		res.status(500).json({ error: error.message });
+	}
+});
 router.get("/:id", async (req: any, res: any) => {
 	try {
 		if (!req.params.id) return res.status(400).json({ message: "User id is required" });
 		const user = await getUserById(req.params.id);
 		if (!user) return res.status(404).json({ message: "User not found" });
 		res.json(user);
-	} catch (error:any) {
+	} catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
 });
@@ -43,7 +71,7 @@ router.get("/email/:email", async (req: any, res: any) => {
 		const user = await getUserByEmail(req.params.email);
 		if (!user) return res.status(404).json({ message: "User not found" });
 		res.json(user);
-	} catch (error:any) {
+	} catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
 });
@@ -57,7 +85,7 @@ router.put("/:id", async (req: any, res: any) => {
 		const user = await updateUser(id, updateData);
 		if (!user) return res.status(404).json({ message: "User not found" });
 		res.json(user);
-	} catch (error:any) {
+	} catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
 });
@@ -69,7 +97,7 @@ router.delete("/:id", async (req: any, res: any) => {
 		if (!user) return res.status(404).json({ message: "User not found" });
 		res.json(user);
 	}
-	catch (error:any) {
+	catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
 });
@@ -78,11 +106,17 @@ router.put("/updatepassword/:id", async (req: any, res: any) => {
 	try {
 		const { id } = req.params;
 		const { newPassword, oldPassword } = req.body;
+		if(!newPassword)
+			return res.status(400).json({ message: "New password is required" });
+		if(newPassword.length < 6)
+			return res.status(400).json({ message: "New password must be at least 6 characters" });
+		if(!oldPassword)
+			return res.status(400).json({ message: "Old password is required" });
 		const user = await updatePassword(id, newPassword, oldPassword);
 		if (!user) return res.status(404).json({ message: "User not found" });
 		res.json(user);
 	}
-	catch (error:any) {
+	catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
 });
