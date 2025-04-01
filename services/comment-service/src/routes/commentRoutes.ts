@@ -1,19 +1,32 @@
 import express from 'express';
 import { createComment, getComments, getCommentById, updateComment, deleteComment } from '../services/commentService';
+import { error } from 'console';
 
 const commentRoutes = express.Router();
 
 commentRoutes.get('/', async (req, res) => {
     try {
         const comments = await getComments();
-        res.status(200).json(comments);
+        res.status(200).json({
+            errorCode: 0,
+            errorMessage: "Lấy danh sách bình luận thành công",
+            data: comments,
+        });
     } catch (err) {
         console.error("Error while getting comments:", err);
-
-        res.status(400).json({
-            message: "Lỗi khi lấy dữ liệu bình luận, vui lòng thử lại sau",
-            error: err,
-        });
+        if (err instanceof Error) {
+            res.status(400).json({
+                errorCode: 400,
+                errorMessage: err.message,
+                data: null,
+            });
+        } else {
+            res.status(400).json({
+                errorCode: 400,
+                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
+            });
+        }
     }
 });
 
@@ -21,22 +34,36 @@ commentRoutes.post('/save', async (req, res) => {
     try {
         const { postId, userId, content } = req.body;
         if (!postId || !userId || !content || content.trim().length === 0) {
-            throw new Error("Vui lòng nhập đủ thông tin bình luận");
+            res.status(400).json({
+                errorCode: 400,
+                errorMessage: "Vui lòng nhập đầy đủ thông tin bình luận",
+                data: null,
+            });
         }
 
         const comment = await createComment({ postId, userId, content });
-        res.status(201).json(comment);
+        res.status(201).json(
+            {
+                errorCode: 201,
+                errorMessage: "Tạo bình luận thành công",
+                data: comment,
+            }
+        );
 
     } catch (err) {
         console.error("Error while creating comment:", err);
-        
-        if(err instanceof Error) {
+
+        if (err instanceof Error) {
             res.status(400).json({
-                message: err.message
+                errorCode: 400,
+                errorMessage: err.message,
+                data: null,
             });
         } else {
             res.status(400).json({
-                message: "Lỗi không xác định. Vui lòng thử lại sau."
+                errorCode: 400,
+                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
             });
         }
     }
@@ -49,20 +76,32 @@ commentRoutes.get('/comment/:id', async (req, res) => {
         const comment = await getCommentById(id);
         if (!comment) {
             res.status(404).json({
-                message: "Không tìm thấy bình luận"
+                errorCode: 404,
+                errorMessage: "Không tìm thấy bình luận",
+                data: null,
             });
         } else {
-            res.status(200).json(comment);
+            res.status(200).json(
+                {
+                    errorCode: 200,
+                    errorMessage: "Lấy bình luận thành công",
+                    data: comment,
+                }
+            );
         }
     } catch (err) {
         console.error("Error while processing request:", err);
         if (err instanceof Error) {
             res.status(400).json({
-                message: err.message
+                errorCode: 400,
+                errorMessage: err.message,
+                data: null,
             });
         } else {
             res.status(400).json({
-                message: "Lỗi không xác định. Vui lòng thử lại sau."
+                errorCode: 400,
+                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
             });
         }
     }
@@ -73,16 +112,53 @@ commentRoutes.put('/comment/:id', async (req, res) => {
     const { id } = req.params;
     if (!content || content.trim().length === 0) {
         res.status(400).json({
-            message: "Vui lòng nhập nội dung bình luận"
+            errorCode: 400,
+            errorMessage: "Vui lòng nhập nội dung bình luận",
+            data: null,
         });
         return;
     }
 
     try {
-        const comment = await updateComment(id,content);
-        res.status(200).json(comment);
+        const comment = await updateComment(id, content);
+        res.status(200).json(
+            {
+                errorCode: 200,
+                errorMessage: "Cập nhật bình luận thành công",
+                data: comment,
+            }
+        );
     } catch (err) {
         console.error("Error while updating comment:", err);
+        if (err instanceof Error) {
+            res.status(400).json({
+                errorCode: 400,
+                errorMessage: err.message,
+                data: null,
+            });
+        } else {
+            res.status(400).json({
+                errorCode: 400,
+                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
+            });
+        }
+    }
+});
+
+commentRoutes.delete('/comment/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const comment = await deleteComment(id);
+        if (!comment) {
+            res.status(404).json({
+                message: "Không tìm thấy bình luận"
+            });
+        } else {
+            res.status(200).json(comment);
+        }
+    } catch (err) {
+        console.error("Error while deleting comment:", err);
         if (err instanceof Error) {
             res.status(400).json({
                 message: err.message
@@ -92,15 +168,6 @@ commentRoutes.put('/comment/:id', async (req, res) => {
                 message: "Lỗi không xác định. Vui lòng thử lại sau."
             });
         }
-    }
-});
-
-commentRoutes.delete('/comment/:id', async (req, res) => {
-    try {
-        const comment = await deleteComment(req.params.id);
-        res.status(200).json(comment);
-    } catch (err) {
-        res.status(400).json(err);
     }
 });
 
