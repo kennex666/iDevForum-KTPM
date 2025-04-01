@@ -1,5 +1,5 @@
 import express from 'express';
-import { createComment, getComments, getCommentById, updateComment, deleteComment } from '../services/commentService';
+import { createComment, getComments, getCommentById, updateComment, deleteComment, searchComments} from '../services/commentService';
 import { error } from 'console';
 
 const commentRoutes = express.Router();
@@ -232,6 +232,65 @@ commentRoutes.delete('/comment/:id', async (req, res) => {
         }
     } catch (err) {
         console.error("Error while deleting comment:", err);
+        if (err instanceof Error) {
+            res.status(400).json({
+                errorCode: 400,
+                errorMessage: err.message,
+                data: null,
+            });
+        } else {
+            res.status(400).json({
+                errorCode: 400,
+                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
+            });
+        }
+    }
+});
+
+// Tim kiem theo nhieu dieu kien theo người dung, bai viet, noi dung, thoi gian
+commentRoutes.post('/search', async (req, res) => {
+    try {
+        const { postId, userId, content, createdAt } = req.body;
+        const query: any = {};
+
+        console.log("Search parameters:", req.body);
+
+        if (postId) {
+            query.postId = { $regex: postId, $options: 'i' }; // Tìm kiếm postId chứa giá trị
+        }
+        if (userId) {
+            query.userId = { $regex: userId, $options: 'i' }; // Tìm kiếm userId chứa giá trị
+        }
+        if (content) {
+            query.content = { $regex: content, $options: 'i' }; // Tìm kiếm nội dung chứa giá trị
+        }
+        if (createdAt) {
+            const parsedDate = new Date(createdAt as string);
+            if (isNaN(parsedDate.getTime())) {
+                res.status(400).json({
+                    errorCode: 400,
+                    errorMessage: "Ngày tạo không hợp lệ. Vui lòng nhập đúng định dạng ngày (YYYY-MM-DD hoặc ISO 8601).",
+                    data: null,
+                });
+                return;
+            }
+        
+            // Tạo khoảng thời gian từ đầu ngày đến cuối ngày
+            const startOfDay = new Date(parsedDate.setUTCHours(0, 0, 0, 0));
+            const endOfDay = new Date(parsedDate.setUTCHours(23, 59, 59, 999));
+        
+            query.createdAt = { $gte: startOfDay, $lte: endOfDay }; // Tìm kiếm trong khoảng thời gian của ngày
+        }
+
+        const comments = await searchComments(query);
+        res.status(200).json({
+            errorCode: 200,
+            errorMessage: "Lấy bình luận thành công",
+            data: comments,
+        });
+    } catch (err) {
+        console.error("Error while searching comments:", err);
         if (err instanceof Error) {
             res.status(400).json({
                 errorCode: 400,

@@ -52,4 +52,14 @@ const deleteComment = async (id: string): Promise<boolean> => {
     }
 };
 
-export { createComment, getComments, getCommentById, updateComment, deleteComment };
+const searchComments = async (query: any): Promise<IComment[]> => {
+    try {
+        const comments = await CommentModel.find(query); // Use the query object directly
+        return comments;
+    } catch (err) {
+        console.error("Error while searching comments:", err);
+        throw new Error("Không thể tìm kiếm bình luận. Vui lòng thử lại sau.");
+    }
+};
+
+export { createComment, getComments, getCommentById, updateComment, deleteComment, searchComments };
