@@ -23,7 +23,7 @@ const UserSchema = new Schema<IUser>(
 		name: { 
 			type: String, 
 			required: [true, "name is required!"],
-			minlength: [6, 'Name must be at least 6 characters'],
+			minlength: [1, 'Name must be at least 1 characters'],
 		},
 		role: {
 			type: Number,

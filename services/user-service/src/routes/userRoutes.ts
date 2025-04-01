@@ -10,18 +10,12 @@ const router = express.Router();
 router.post("/register", async (req: any, res: any) => {
 	try {
 		const { name, role, accountState, username, email, password } = req.body;
-		if(!name) 
-			return res.status(400).json({ message: "Name is required" });
-		if(username.length <0 || username.trim() === "")
-			return res.status(400).json({ message: "Username is required" });
-		if(email.length <0 || email.trim() === "")
-			return res.status(400).json({ message: "Email is required" });
-		if(password.length <0 || password.trim() === "")
-			return res.status(400).json({ message: "Password is required" });
-		if(password.length < 6)
-			return res.status(400).json({ message: "Password must be at least 6 characters" });
+		if (!name) return res.status(400).json({ message: "Name is required" });
+        if (!username || username.trim() === "") return res.status(400).json({ message: "Username is required" });
+        if (!email || email.trim() === "") return res.status(400).json({ message: "Email is required" });
+        if (!password || password.length < 6) return res.status(400).json({ message: "Password must be at least 6 characters" });
 		const user = await createUser(name, role, accountState, username, email, password);
-		return res.status(201).json(user);
+		return res.status(201).json({message:"User registered successfully", user});
 	} catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
@@ -31,7 +25,7 @@ router.get("/getall", async (req: any, res: any) => {
 
 	try {
 		const users = await getAllUsers();
-		res.json(users);
+		res.status(200).json(users);
 	} catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
@@ -58,7 +52,7 @@ router.get("/:id", async (req: any, res: any) => {
 		if (!req.params.id) return res.status(400).json({ message: "User id is required" });
 		const user = await getUserById(req.params.id);
 		if (!user) return res.status(404).json({ message: "User not found" });
-		res.json(user);
+		res.status(200).json(user);
 	} catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
@@ -70,7 +64,7 @@ router.get("/email/:email", async (req: any, res: any) => {
 		if (!req.params.email) return res.status(400).json({ message: "User email is required" });
 		const user = await getUserByEmail(req.params.email);
 		if (!user) return res.status(404).json({ message: "User not found" });
-		res.json(user);
+		res.status(200).json(user);
 	} catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
@@ -84,7 +78,7 @@ router.put("/:id", async (req: any, res: any) => {
 		console.log("updateData", updateData);
 		const user = await updateUser(id, updateData);
 		if (!user) return res.status(404).json({ message: "User not found" });
-		res.json(user);
+		res.status(200).json(user);
 	} catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
@@ -95,7 +89,8 @@ router.delete("/:id", async (req: any, res: any) => {
 		const { id } = req.params;
 		const user = await deleteUser(id);
 		if (!user) return res.status(404).json({ message: "User not found" });
-		res.json(user);
+		res.status(200).json({ message: "User deleted successfully", user });
+
 	}
 	catch (error: any) {
 		res.status(500).json({ error: error.message });
@@ -114,7 +109,7 @@ router.put("/updatepassword/:id", async (req: any, res: any) => {
 			return res.status(400).json({ message: "Old password is required" });
 		const user = await updatePassword(id, newPassword, oldPassword);
 		if (!user) return res.status(404).json({ message: "User not found" });
-		res.json(user);
+		return res.status(200).json({ message: "Password updated successfully", user });
 	}
 	catch (error: any) {
 		res.status(500).json({ error: error.message });

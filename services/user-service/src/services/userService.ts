@@ -15,7 +15,7 @@ const createUser = async (
 		const passwordHash = await bcrypt.hash(password, 10);
 		const user = new UserModel({ name, role, accountState, username, email, password: passwordHash });
 		return await user.save();
-	} catch (error: any) {
+	} catch (error:any) {
 		throw new Error(error.message);
 	}
 
