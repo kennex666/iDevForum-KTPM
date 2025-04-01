@@ -50,7 +50,7 @@ commentRoutes.post('/save', async (req, res) => {
             });
             return;
         }
-        
+
         const  { postId, userId, content } = req.body;
         
         if (!postId || !userId || !content || content.trim().length === 0) {
@@ -91,7 +91,19 @@ commentRoutes.post('/save', async (req, res) => {
 
 commentRoutes.get('/comment/:id', async (req, res) => {
     try {
+       // chi gom chu so va chu cai
+        const regex = /^[a-zA-Z0-9]+$/;
+        if (!regex.test(req.params.id)) {
+            res.status(400).json({
+                errorCode: 400,
+                errorMessage: "ID không hợp lệ",
+                data: null,
+            });
+            return;
+        }
+
         const { id } = req.params;
+
         console.log(id);
         const comment = await getCommentById(id);
         if (!comment) {
