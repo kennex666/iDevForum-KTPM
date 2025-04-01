@@ -140,8 +140,37 @@ commentRoutes.get('/comment/:id', async (req, res) => {
 });
 
 commentRoutes.put('/comment/:id', async (req, res) => {
+    // chi gom chu so va chu cai
+    const regex = /^[a-zA-Z0-9]+$/;
+    if (!regex.test(req.params.id)) {
+        res.status(400).json({
+            errorCode: 400,
+            errorMessage: "ID không hợp lệ",
+            data: null,
+        });
+        return;
+    }
+
+    // kiem tra content
+    // chi gom chu so va chu cai
+    const allowedFiled = ['content'];
+    const requestedFields = Object.keys(req.body);
+    const isValid = requestedFields.filter((field) => {
+        return !allowedFiled.includes(field);
+    }
+    ).length > 0;
+    if (isValid || req.body.content === undefined) {
+        res.status(400).json({
+            errorCode: 400,
+            errorMessage: "Vui lòng nhập đúng định dạng",
+            data: null,
+        });
+        return;
+    }
+    
     const { content } = req.body;
     const { id } = req.params;
+    
     if (!content || content.trim().length === 0) {
         res.status(400).json({
             errorCode: 400,
@@ -180,11 +209,23 @@ commentRoutes.put('/comment/:id', async (req, res) => {
 
 commentRoutes.delete('/comment/:id', async (req, res) => {
     try {
+        // chi gom chu so va chu cai va dung giong id trong db
+        const regex = /^[a-zA-Z0-9]+$/;
+        if (!regex.test(req.params.id)) {
+            res.status(400).json({
+                errorCode: 400,
+                errorMessage: "ID không hợp lệ",
+                data: null,
+            });
+            return;
+        }
         const { id } = req.params;
         const comment = await deleteComment(id);
         if (!comment) {
             res.status(404).json({
-                message: "Không tìm thấy bình luận"
+                errorCode: 404,
+                errorMessage: "Không tìm thấy bình luận",
+                data: null,
             });
         } else {
             res.status(200).json(comment);
@@ -193,11 +234,15 @@ commentRoutes.delete('/comment/:id', async (req, res) => {
         console.error("Error while deleting comment:", err);
         if (err instanceof Error) {
             res.status(400).json({
-                message: err.message
+                errorCode: 400,
+                errorMessage: err.message,
+                data: null,
             });
         } else {
             res.status(400).json({
-                message: "Lỗi không xác định. Vui lòng thử lại sau."
+                errorCode: 400,
+                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
             });
         }
     }
