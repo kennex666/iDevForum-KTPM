@@ -32,7 +32,27 @@ commentRoutes.get('/', async (req, res) => {
 
 commentRoutes.post('/save', async (req, res) => {
     try {
-        const { postId, userId, content } = req.body;
+        const allowedFiled = ['postId', 'userId', 'content'];
+        const requestedFields = Object.keys(req.body);
+
+        console.log(requestedFields);
+        const isValid = requestedFields.filter((field) => {
+            return !allowedFiled.includes(field);
+        }
+        ).length > 0;
+        
+        console.log(isValid);
+        if (!isValid) {
+            res.status(400).json({
+                errorCode: 400,
+                errorMessage: "Vui lòng nhập đúng định dạng",
+                data: null,
+            });
+            return;
+        }
+        
+        const  { postId, userId, content } = req.body;
+        
         if (!postId || !userId || !content || content.trim().length === 0) {
             res.status(400).json({
                 errorCode: 400,
