@@ -51,7 +51,7 @@ postRoute.post('/save', async (req, res) => {
         } = req.body;
 
         // Kiểm tra dữ liệu đầu vào
-        if (!postId || !title || !content || !userId || !tagId) {
+        if (!title || !content || !userId || !tagId) {
             res.status(400).json({
                 errorCode: 400,
                 message: "Vui lòng nhập đầy đủ thông tin bài viết",
@@ -236,11 +236,11 @@ postRoute.post('/search', async (req, res) => {
             query.createdAt = { $gte: startOfDay, $lte: endOfDay }; // Tìm kiếm trong khoảng thời gian của ngày
         }
 
-        const comments = await searchPost(query);
+        const posts = await searchPost(query);
         res.status(200).json({
             errorCode: 200,
             errorMessage: "Lấy bài đắng thành công",
-            data: comments,
+            data: posts,
         });
     } catch (err) {
         console.error("Error while searching comments:", err);
