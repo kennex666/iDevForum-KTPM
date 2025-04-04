@@ -1,5 +1,6 @@
 import express from 'express';
 import { createPost, getPosts, getPostById, updatePost, deletePost, searchPost } from '../services/postService';
+import e from 'express';
 
 const postRoute = express.Router();
 
@@ -108,20 +109,30 @@ postRoute.get('/post/:id', async (req, res) => {
         const post = await getPostById(id);
         if (!post) {
             res.status(404).json({
-                message: "Không tìm thấy bai dang"
+                errorCode: 404,
+                message: "Không tìm thấy bài đăng",
+                data: null,
             });
         } else {
-            res.status(200).json(post);
+            res.status(200).json({
+                errorCode: 200,
+                errorMessage: "Lấy bài đăng thành công",
+                data: post,
+            });
         }
     } catch (err) {
         console.error("Error while processing request:", err);
         if (err instanceof Error) {
             res.status(400).json({
-                message: err.message
+                errorCode: 400,
+                message: err.message,
+                data: null,
             });
         } else {
             res.status(400).json({
-                message: "Lỗi không xác định. Vui lòng thử lại sau."
+                errorCode: 400,
+                message: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
             });
         }
     }
