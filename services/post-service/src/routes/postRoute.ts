@@ -149,23 +149,34 @@ postRoute.put('/post/:id', async (req, res) => {
     const { id } = req.params;
     if (!content || content.trim().length === 0) {
         res.status(400).json({
-            message: "Vui lòng nhập nội dung chinh sua"
+            errorCode: 400,
+            message: "Vui lòng nhập nội dung chỉnh sửa",
+            data: null,
         });
         return;
     }
 
     try {
         const post = await updatePost(id,title,description,content,url);
-        res.status(200).json(post);
+        res.status(200).json({
+            errorCode: 200,
+            errorMessage: "Cập nhật bài viết thành công",
+            data: post,
+        }
+        );
     } catch (err) {
         console.error("Error while updating post:", err);
         if (err instanceof Error) {
             res.status(400).json({
-                message: err.message
+                errorCode: 400,
+                message: err.message,
+                data: null,
             });
         } else {
             res.status(400).json({
-                message: "Lỗi không xác định. Vui lòng thử lại sau."
+                errorCode: 400,
+                message: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
             });
         }
     }
