@@ -51,7 +51,11 @@ postRoute.post('/save', async (req, res) => {
 
         // Kiểm tra dữ liệu đầu vào
         if (!postId || !title || !content || !userId || !tagId) {
-            throw new Error("Vui lòng nhập đầy đủ thông tin bài viết");
+            res.status(400).json({
+                errorCode: 400,
+                message: "Vui lòng nhập đầy đủ thông tin bài viết",
+                data: null,
+            });
         }
 
         const post = await createPost({
@@ -70,20 +74,30 @@ postRoute.post('/save', async (req, res) => {
             tagId
         });
 
-        res.status(201).json(post);
+        res.status(201).json({
+            errorCode: 200,
+            errorMessage: "Tạo bài viết thành công",
+            data: post,
+        });
 
     } catch (err) {
         console.error("Error while creating post:", err);
 
         if (err instanceof Error) {
-            res.status(400).json({ message: err.message });
+            res.status(400).json({
+                errorCode: 400,
+                errorMessage: err.message,
+                data: null,
+            });
         } else {
-            res.status(400).json({ message: "Lỗi không xác định. Vui lòng thử lại sau." });
+            res.status(400).json({
+                errorCode: 400,
+                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
+            });
         }
     }
 });
-
-
 
 
 // Lấy bài viết theo ID
