@@ -1,9 +1,9 @@
 {
-  "scripts": {
-  "start": "npx ts-node src/server.ts",
-  "dev": "nodemon --ext ts --exec ts-node src/server.ts",
-  "build": "tsc -p ."
-  },
+	"scripts": {
+	  "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+	  "build": "tsc",
+	  "start": "node dist/server.js"
+	},
   "devDependencies": {
     "@types/express": "^5.0.1",
     "@types/mongoose": "^5.11.96",
