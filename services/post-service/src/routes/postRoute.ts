@@ -6,14 +6,26 @@ const postRoute = express.Router();
 postRoute.get('/', async (req, res) => {
     try {
         const post = await getPosts();
-        res.status(200).json(post);
+        res.status(200).json({
+            errorCode: 0,
+            errorMessage: "Lấy danh sách bình luận thành công",
+            data: post,
+        });
     } catch (err) {
         console.error("Error while getting comments:", err);
-
-        res.status(400).json({
-            message: "Lỗi khi lấy dữ liệu bai dang, vui lòng thử lại sau",
-            error: err,
-        });
+        if (err instanceof Error) {
+            res.status(400).json({
+                errorCode: 400,
+                errorMessage: err.message,
+                data: null,
+            });
+        } else {
+            res.status(400).json({
+                errorCode: 400,
+                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
+            });
+        }
     }
 }
 );
