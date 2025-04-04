@@ -42,7 +42,7 @@ commentRoutes.post('/save', async (req, res) => {
         ).length > 0;
         
         console.log(isValid);
-        if (!isValid) {
+        if (isValid) {
             res.status(400).json({
                 errorCode: 400,
                 errorMessage: "Vui lòng nhập đúng định dạng",
@@ -59,6 +59,7 @@ commentRoutes.post('/save', async (req, res) => {
                 errorMessage: "Vui lòng nhập đầy đủ thông tin bình luận",
                 data: null,
             });
+            return;
         }
 
         const comment = await createComment({ postId, userId, content });
@@ -79,12 +80,14 @@ commentRoutes.post('/save', async (req, res) => {
                 errorMessage: err.message,
                 data: null,
             });
+            return;
         } else {
             res.status(400).json({
                 errorCode: 400,
                 errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
                 data: null,
             });
+            return;
         }
     }
 });
@@ -249,7 +252,7 @@ commentRoutes.delete('/comment/:id', async (req, res) => {
 });
 
 // Tim kiem theo nhieu dieu kien theo người dung, bai viet, noi dung, thoi gian
-commentRoutes.post('/search', async (req, res) => {
+commentRoutes.get('/search', async (req, res) => {
     try {
         const { postId, userId, content, createdAt } = req.body;
         const query: any = {};
