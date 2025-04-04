@@ -10,7 +10,7 @@ app.use(express.json()); // Middleware xử lý JSON
 app.use("/api/auth", authRoutes);
 
 // Kết nối DB và chạy server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3005;
 connectDB().then(() => {
 	app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 });
