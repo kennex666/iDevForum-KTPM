@@ -186,11 +186,17 @@ postRoute.put('/post/:id', async (req, res) => {
 postRoute.delete('/post/:id', async (req, res) => {
     try {
         const deletedPost = await deletePost(req.params.id);
-        res.status(200).json(deletedPost);
+        res.status(200).json({
+            errorCode: 200,
+            errorMessage: "Xóa bài viết thành công",
+            data: deletedPost,
+        });
     } catch (err) {
         console.error("Error while deleting post:", err);
         res.status(400).json({
-            message: err instanceof Error ? err.message : "Lỗi không xác định. Vui lòng thử lại sau."
+            errorCode: 400,
+            message: err instanceof Error ? err.message : "Lỗi không xác định. Vui lòng thử lại sau.",
+            data: null,
         });
     }
 });
