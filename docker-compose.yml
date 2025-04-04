@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # MongoDB
+  mongodb:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    volumes:
+      - mongo_data:/data/db
+
+  # RabbitMQ (nếu bạn dùng message-broker kiểu AMQP)
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # Web UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - authenticate-service
+      - comment-service
+      - post-service
+      - user-service
+
+  # Comment Service
+  comment-service:
+    build: ./services/comment-service
+    ports:
+      - "3001:3001"
+    environment:
+      MONGO_URI: mongodb://admin:secret@mongodb:27017/commentdb?authSource=admin
+    depends_on:
+      - mongodb
+
+  # Post Service
+  post-service:
+    build: ./services/post-service
+    ports:
+      - "3002:3002"
+    environment:
+      MONGO_URI: mongodb://admin:secret@mongodb:27017/postdb?authSource=admin
+    depends_on:
+      - mongodb
+
+  # File Service
+  file-service:
+    build: ./services/file-service
+    ports:
+      - "3003:3003"
+    environment:
+      MONGO_URI: mongodb://admin:secret@mongodb:27017/filedb?authSource=admin
+    depends_on:
+      - mongodb
+
+  # Reaction Service
+  reaction-service:
+    build: ./services/reaction-service
+    ports:
+      - "3004:3004"
+    environment:
+      MONGO_URI: mongodb://admin:secret@mongodb:27017/reactiondb?authSource=admin
+    depends_on:
+      - mongodb
+
+  # Authenticate Service
+  authenticate-service:
+    build: ./services/authenticate-service
+    ports:
+      - "3005:3005"
+    environment:
+      MONGO_URI: mongodb://admin:secret@mongodb:27017/authdb?authSource=admin
+    depends_on:
+      - mongodb
+
+  # User Service
+  user-service:
+    build: ./services/user-service
+    ports:
+      - "3006:3006"
+    environment:
+      MONGO_URI: mongodb://admin:secret@mongodb:27017/userdb?authSource=admin
+    depends_on:
+      - mongodb
+
+volumes:
+  mongo_data:

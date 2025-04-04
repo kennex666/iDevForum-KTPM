@@ -1,13 +1,20 @@
 {
+	"scripts": {
+	  "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+	  "build": "tsc",
+	  "start": "node dist/server.js"
+	},
   "devDependencies": {
-    "@types/express": "^5.0.0",
+    "@types/express": "^5.0.1",
     "@types/mongoose": "^5.11.96",
-    "@types/node": "^22.13.5",
+    "@types/node": "^22.13.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   },
   "dependencies": {
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "mongoose": "^8.11.0"
+    "mongoose": "^8.11.0",
+    "nodemon": "^3.1.9"
   }
 }
