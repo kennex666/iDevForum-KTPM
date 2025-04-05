@@ -1,5 +1,4 @@
 import UserModel, { IUser } from "../models/User";
-const bcrypt = require("bcryptjs");
 
 const createUser = async (
 	name: string,
@@ -12,7 +11,7 @@ const createUser = async (
 	const CheckExistUser = await UserModel.findOne({ email });
 	if (CheckExistUser) throw new Error("Email already exists");
 	try {
-		const passwordHash = await bcrypt.hash(password, 10);
+		const passwordHash = password; // Tạm bỏ hash vì lỗi trên docker
 		const user = new UserModel({ name, role, accountState, username, email, password: passwordHash });
 		return await user.save();
 	} catch (error:any) {
