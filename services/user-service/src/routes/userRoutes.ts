@@ -7,6 +7,12 @@ import {
 
 const router = express.Router();
 
+
+router.get("/ping", (req, res) => {
+	res.send("User Service is running");
+});
+
+
 router.post("/register", async (req: any, res: any) => {
 	try {
 		const { name, role, accountState, username, email, password } = req.body;

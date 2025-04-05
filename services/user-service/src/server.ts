@@ -7,11 +7,7 @@ dotenv.config();
 const app = express();
 
 app.use(express.json()); // Middleware xử lý JSON
-app.use("/api/users", userRoutes);
-app.get("/", (req, res) => {
-	res.send("User Service is running");
-});
-
+app.use("/", userRoutes);
 // Kết nối DB và chạy server
 const PORT = process.env.PORT || 3006;
 connectDB().then(() => {

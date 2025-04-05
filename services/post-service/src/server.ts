@@ -11,8 +11,16 @@ console.log('Hello, world!'+ process.env.PORT);
 app.use(express.json());
 
 // Add routes
-app.use('/api/post', postRoute);
 
+app.get("/ping", (req, res) => {
+	res.json({
+		errorCode: 200,
+		errorMessage: "Pong pong",
+		data: null,
+	});
+});
+
+app.use('/', postRoute);
 const PORT = process.env.PORT || 3002;
 
 connectDB().then(() => {
