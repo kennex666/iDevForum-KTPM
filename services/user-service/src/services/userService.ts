@@ -1,5 +1,5 @@
 import UserModel, { IUser } from "../models/User";
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 const createUser = async (
 	name: string,
