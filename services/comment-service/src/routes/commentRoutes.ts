@@ -1,12 +1,10 @@
 import express from 'express';
-import { createComment, getComments, getCommentById, updateComment, deleteComment, searchComments} from '../services/commentService';
-import { error } from 'console';
-
+import { commentService } from '../services/commentService';
 const commentRoutes = express.Router();
 
 commentRoutes.get('/', async (req, res) => {
     try {
-        const comments = await getComments();
+        const comments = await commentService.getAllComments();
         res.status(200).json({
             errorCode: 0,
             errorMessage: "Lấy danh sách bình luận thành công",
@@ -62,7 +60,7 @@ commentRoutes.post('/save', async (req, res) => {
             return;
         }
 
-        const comment = await createComment({ postId, userId, content });
+        const comment = await commentService.createComment({ postId, userId, content });
         res.status(201).json(
             {
                 errorCode: 201,
@@ -108,7 +106,7 @@ commentRoutes.get('/comment/:id', async (req, res) => {
         const { id } = req.params;
 
         console.log(id);
-        const comment = await getCommentById(id);
+        const comment = await commentService.getCommentById(id);
         if (!comment) {
             res.status(404).json({
                 errorCode: 404,
@@ -184,7 +182,7 @@ commentRoutes.put('/comment/:id', async (req, res) => {
     }
 
     try {
-        const comment = await updateComment(id, content);
+        const comment = await commentService.updateComment(id, content);
         res.status(200).json(
             {
                 errorCode: 200,
@@ -223,7 +221,7 @@ commentRoutes.delete('/comment/:id', async (req, res) => {
             return;
         }
         const { id } = req.params;
-        const comment = await deleteComment(id);
+        const comment = await commentService.deleteComment(id);
         if (!comment) {
             res.status(404).json({
                 errorCode: 404,
@@ -286,7 +284,7 @@ commentRoutes.get('/search', async (req, res) => {
             query.createdAt = { $gte: startOfDay, $lte: endOfDay }; // Tìm kiếm trong khoảng thời gian của ngày
         }
 
-        const comments = await searchComments(query);
+        const comments = await commentService.searchComments(query);
         res.status(200).json({
             errorCode: 200,
             errorMessage: "Lấy bình luận thành công",
