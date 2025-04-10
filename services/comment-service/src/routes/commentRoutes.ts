@@ -1,311 +1,191 @@
-import express from 'express';
+import express, { Request, Response, Router } from 'express';
 import { commentService } from '../services/commentService';
-const commentRoutes = express.Router();
+import { validateId, validateCommentInput } from '../middlewares/validators';
 
-commentRoutes.get('/', async (req, res) => {
-    try {
-        const comments = await commentService.getAllComments();
-        res.status(200).json({
-            errorCode: 0,
-            errorMessage: "Lấy danh sách bình luận thành công",
-            data: comments,
-        });
-    } catch (err) {
-        console.error("Error while getting comments:", err);
-        if (err instanceof Error) {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: err.message,
-                data: null,
-            });
-        } else {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
-                data: null,
-            });
-        }
-    }
+const router: Router = express.Router();
+
+/**
+ * Response interface for consistent API responses
+ */
+interface ApiResponse<T> {
+  errorCode: number;
+  errorMessage: string;
+  data: T | null;
+}
+
+/**
+ * Create success response
+ */
+const createSuccessResponse = <T>(data: T, message: string): ApiResponse<T> => ({
+  errorCode: 200,
+  errorMessage: message,
+  data
 });
 
-commentRoutes.post('/save', async (req, res) => {
-    try {
-        const allowedFiled = ['postId', 'userId', 'content'];
-        const requestedFields = Object.keys(req.body);
-
-        console.log(requestedFields);
-        const isValid = requestedFields.filter((field) => {
-            return !allowedFiled.includes(field);
-        }
-        ).length > 0;
-        
-        console.log(isValid);
-        if (isValid) {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: "Vui lòng nhập đúng định dạng",
-                data: null,
-            });
-            return;
-        }
-
-        const  { postId, userId, content } = req.body;
-        
-        if (!postId || !userId || !content || content.trim().length === 0) {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: "Vui lòng nhập đầy đủ thông tin bình luận",
-                data: null,
-            });
-            return;
-        }
-
-        const comment = await commentService.createComment({ postId, userId, content });
-        res.status(201).json(
-            {
-                errorCode: 201,
-                errorMessage: "Tạo bình luận thành công",
-                data: comment,
-            }
-        );
-
-    } catch (err) {
-        console.error("Error while creating comment:", err);
-
-        if (err instanceof Error) {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: err.message,
-                data: null,
-            });
-            return;
-        } else {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
-                data: null,
-            });
-            return;
-        }
-    }
+/**
+ * Create error response
+ */
+const createErrorResponse = (message: string, code: number = 400): ApiResponse<null> => ({
+  errorCode: code,
+  errorMessage: message,
+  data: null
 });
 
-commentRoutes.get('/comment/:id', async (req, res) => {
-    try {
-       // chi gom chu so va chu cai
-        const regex = /^[a-zA-Z0-9]+$/;
-        if (!regex.test(req.params.id)) {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: "ID không hợp lệ",
-                data: null,
-            });
-            return;
-        }
-
-        const { id } = req.params;
-
-        console.log(id);
-        const comment = await commentService.getCommentById(id);
-        if (!comment) {
-            res.status(404).json({
-                errorCode: 404,
-                errorMessage: "Không tìm thấy bình luận",
-                data: null,
-            });
-        } else {
-            res.status(200).json(
-                {
-                    errorCode: 200,
-                    errorMessage: "Lấy bình luận thành công",
-                    data: comment,
-                }
-            );
-        }
-    } catch (err) {
-        console.error("Error while processing request:", err);
-        if (err instanceof Error) {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: err.message,
-                data: null,
-            });
-        } else {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
-                data: null,
-            });
-        }
-    }
+/**
+ * Get all comments
+ */
+router.get('/', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const comments = await commentService.getAllComments();
+    res.status(200).json(createSuccessResponse(comments, 'Lấy danh sách bình luận thành công'));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Lỗi không xác định';
+    res.status(400).json(createErrorResponse(message));
+  }
 });
 
-commentRoutes.put('/comment/:id', async (req, res) => {
-    // chi gom chu so va chu cai
-    const regex = /^[a-zA-Z0-9]+$/;
-    if (!regex.test(req.params.id)) {
-        res.status(400).json({
-            errorCode: 400,
-            errorMessage: "ID không hợp lệ",
-            data: null,
-        });
-        return;
-    }
-
-    // kiem tra content
-    // chi gom chu so va chu cai
-    const allowedFiled = ['content'];
-    const requestedFields = Object.keys(req.body);
-    const isValid = requestedFields.filter((field) => {
-        return !allowedFiled.includes(field);
-    }
-    ).length > 0;
-    if (isValid || req.body.content === undefined) {
-        res.status(400).json({
-            errorCode: 400,
-            errorMessage: "Vui lòng nhập đúng định dạng",
-            data: null,
-        });
-        return;
-    }
+/**
+ * Create new comment
+ */
+router.post('/save', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { postId, userId, content } = req.body;
     
-    const { content } = req.body;
+    // Validate input
+    const validationError = validateCommentInput({ postId, userId, content });
+    if (validationError) {
+      res.status(400).json(createErrorResponse(validationError));
+      return;
+    }
+
+    const comment = await commentService.createComment({ postId, userId, content });
+    res.status(201).json(createSuccessResponse(comment, 'Tạo bình luận thành công'));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Lỗi không xác định';
+    res.status(400).json(createErrorResponse(message));
+  }
+});
+
+/**
+ * Get comment by ID
+ */
+router.get('/comment/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
     const { id } = req.params;
     
+    // Validate ID format
+    if (!validateId(id)) {
+      res.status(400).json(createErrorResponse('ID không hợp lệ'));
+      return;
+    }
+
+    const comment = await commentService.getCommentById(id);
+    if (!comment) {
+      res.status(404).json(createErrorResponse('Không tìm thấy bình luận', 404));
+      return;
+    }
+
+    res.status(200).json(createSuccessResponse(comment, 'Lấy bình luận thành công'));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Lỗi không xác định';
+    res.status(400).json(createErrorResponse(message));
+  }
+});
+
+/**
+ * Update comment
+ */
+router.put('/comment/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+
+    // Validate ID format
+    if (!validateId(id)) {
+      res.status(400).json(createErrorResponse('ID không hợp lệ'));
+      return;
+    }
+
+    // Validate content
     if (!content || content.trim().length === 0) {
-        res.status(400).json({
-            errorCode: 400,
-            errorMessage: "Vui lòng nhập nội dung bình luận",
-            data: null,
-        });
+      res.status(400).json(createErrorResponse('Vui lòng nhập nội dung bình luận'));
+      return;
+    }
+
+    const updatedComment = await commentService.updateComment(id, content);
+    if (!updatedComment) {
+      res.status(404).json(createErrorResponse('Không tìm thấy bình luận', 404));
+      return;
+    }
+
+    res.status(200).json(createSuccessResponse(updatedComment, 'Cập nhật bình luận thành công'));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Lỗi không xác định';
+    res.status(400).json(createErrorResponse(message));
+  }
+});
+
+/**
+ * Delete comment
+ */
+router.delete('/comment/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    // Validate ID format
+    if (!validateId(id)) {
+      res.status(400).json(createErrorResponse('ID không hợp lệ'));
+      return;
+    }
+
+    const isDeleted = await commentService.deleteComment(id);
+    if (!isDeleted) {
+      res.status(404).json(createErrorResponse('Không tìm thấy bình luận', 404));
+      return;
+    }
+
+    res.status(200).json(createSuccessResponse(true, 'Xóa bình luận thành công'));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Lỗi không xác định';
+    res.status(400).json(createErrorResponse(message));
+  }
+});
+
+/**
+ * Search comments
+ */
+router.get('/search', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { postId, userId, content, createdAt } = req.query;
+    const query: Record<string, any> = {};
+
+    // Build search query
+    if (postId) {
+      query.postId = { $regex: postId, $options: 'i' };
+    }
+    if (userId) {
+      query.userId = { $regex: userId, $options: 'i' };
+    }
+    if (content) {
+      query.content = { $regex: content, $options: 'i' };
+    }
+    if (createdAt) {
+      const date = new Date(createdAt as string);
+      if (isNaN(date.getTime())) {
+        res.status(400).json(createErrorResponse('Ngày tạo không hợp lệ'));
         return;
+      }
+      const startOfDay = new Date(date.setUTCHours(0, 0, 0, 0));
+      const endOfDay = new Date(date.setUTCHours(23, 59, 59, 999));
+      query.createdAt = { $gte: startOfDay, $lte: endOfDay };
     }
 
-    try {
-        const comment = await commentService.updateComment(id, content);
-        res.status(200).json(
-            {
-                errorCode: 200,
-                errorMessage: "Cập nhật bình luận thành công",
-                data: comment,
-            }
-        );
-    } catch (err) {
-        console.error("Error while updating comment:", err);
-        if (err instanceof Error) {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: err.message,
-                data: null,
-            });
-        } else {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
-                data: null,
-            });
-        }
-    }
+    const comments = await commentService.searchComments(query);
+    res.status(200).json(createSuccessResponse(comments, 'Tìm kiếm bình luận thành công'));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Lỗi không xác định';
+    res.status(400).json(createErrorResponse(message));
+  }
 });
 
-commentRoutes.delete('/comment/:id', async (req, res) => {
-    try {
-        // chi gom chu so va chu cai va dung giong id trong db
-        const regex = /^[a-zA-Z0-9]+$/;
-        if (!regex.test(req.params.id)) {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: "ID không hợp lệ",
-                data: null,
-            });
-            return;
-        }
-        const { id } = req.params;
-        const comment = await commentService.deleteComment(id);
-        if (!comment) {
-            res.status(404).json({
-                errorCode: 404,
-                errorMessage: "Không tìm thấy bình luận",
-                data: null,
-            });
-        } else {
-            res.status(200).json(comment);
-        }
-    } catch (err) {
-        console.error("Error while deleting comment:", err);
-        if (err instanceof Error) {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: err.message,
-                data: null,
-            });
-        } else {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
-                data: null,
-            });
-        }
-    }
-});
-
-// Tim kiem theo nhieu dieu kien theo người dung, bai viet, noi dung, thoi gian
-commentRoutes.get('/search', async (req, res) => {
-    try {
-        const { postId, userId, content, createdAt } = req.body;
-        const query: any = {};
-
-        console.log("Search parameters:", req.body);
-
-        if (postId) {
-            query.postId = { $regex: postId, $options: 'i' }; // Tìm kiếm postId chứa giá trị
-        }
-        if (userId) {
-            query.userId = { $regex: userId, $options: 'i' }; // Tìm kiếm userId chứa giá trị
-        }
-        if (content) {
-            query.content = { $regex: content, $options: 'i' }; // Tìm kiếm nội dung chứa giá trị
-        }
-        if (createdAt) {
-            const parsedDate = new Date(createdAt as string);
-            if (isNaN(parsedDate.getTime())) {
-                res.status(400).json({
-                    errorCode: 400,
-                    errorMessage: "Ngày tạo không hợp lệ. Vui lòng nhập đúng định dạng ngày (YYYY-MM-DD hoặc ISO 8601).",
-                    data: null,
-                });
-                return;
-            }
-        
-            // Tạo khoảng thời gian từ đầu ngày đến cuối ngày
-            const startOfDay = new Date(parsedDate.setUTCHours(0, 0, 0, 0));
-            const endOfDay = new Date(parsedDate.setUTCHours(23, 59, 59, 999));
-        
-            query.createdAt = { $gte: startOfDay, $lte: endOfDay }; // Tìm kiếm trong khoảng thời gian của ngày
-        }
-
-        const comments = await commentService.searchComments(query);
-        res.status(200).json({
-            errorCode: 200,
-            errorMessage: "Lấy bình luận thành công",
-            data: comments,
-        });
-    } catch (err) {
-        console.error("Error while searching comments:", err);
-        if (err instanceof Error) {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: err.message,
-                data: null,
-            });
-        } else {
-            res.status(400).json({
-                errorCode: 400,
-                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
-                data: null,
-            });
-        }
-    }
-});
-
-export default commentRoutes;
+export default router;
