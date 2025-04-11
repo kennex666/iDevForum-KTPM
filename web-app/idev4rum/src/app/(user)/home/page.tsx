@@ -31,10 +31,15 @@ export default function HomePage() {
 		bookMarks: [
 			{
 				post: {
-					postId: "1",
 					title: "Giới thiệu về Java",
-					createdAt: "2023-04-17",
+					description:
+						"Java là một ngôn ngữ lập trình hướng đối tượng, được phát triển bởi Sun Microsystems.",
 					topic: { tagId: "java", name: "Java" },
+					date: "2023-04-17",
+					totalUpVote: 100,
+					totalComments: 50,
+					url: "gioi-thieu-ve-java",
+
 					author: {
 						userId: "123",
 						name: "Duong Thai Bao",
@@ -47,7 +52,6 @@ export default function HomePage() {
 
 	return (
 		<>
-			<Navbar />
 			<div className="container mx-auto px-12 lg:w-10/12">
 				<div className="flex justify-between items-start py-4">
 					<div className="w-2/3 space-y-8">

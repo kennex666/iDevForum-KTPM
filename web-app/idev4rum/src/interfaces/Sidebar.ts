@@ -1,5 +1,6 @@
 export interface Bookmark {
 	post: {
+		date: string | number | Date;
 		postId: string;
 		title: string;
 		createdAt: string;

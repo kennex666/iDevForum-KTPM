@@ -34,7 +34,7 @@ const Sidebar = ({ currentUser }: SidebarProps) => {
 								<div className="flex items-center space-x-2 text-xs mt-2">
 									<p>
 										{new Date(
-											bookmark.post.createdAt
+											bookmark.post.date
 										).toLocaleDateString()}
 									</p>
 									<p>·</p>
