@@ -17,7 +17,7 @@ router.post("/register", async (req: any, res: any) => {
 	try {
 		const { name, role, accountState, username, email, password } = req.body;
 		if (!name) return res.status(400).json({ message: "Name is required" });
-        if (!username || username.trim() === "") return res.status(400).json({ message: "Username is required" });
+        // if (!username || username.trim() === "") return res.status(400).json({ message: "Username is required" });
         if (!email || email.trim() === "") return res.status(400).json({ message: "Email is required" });
         if (!password || password.length < 6) return res.status(400).json({ message: "Password must be at least 6 characters" });
 		const user = await createUser(name, role, accountState, username, email, password);

@@ -9,7 +9,7 @@ postRoute.get('/', async (req, res) => {
         const post = await getPosts();
         res.status(200).json({
             errorCode: 0,
-            errorMessage: "Lấy danh sách bình luận thành công",
+            errorMessage: "Lấy danh sách bài viết thành công",
             data: post,
         });
     } catch (err) {

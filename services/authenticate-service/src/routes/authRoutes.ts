@@ -4,17 +4,38 @@ import { UserClient } from "../clients/user.client";
 
 const router = express.Router();
 
-router.post("/register", async (req, res) => {
+router.post("/register", async (req: any, res: any) => {
 	try {
-		const { name, email, password } = req.body;
+		const { name, email, password, repassword } = req.body;
+
+		if (!name || name.trim() === "")
+			return res.status(400).json({ errorCode: 502, errorMessage: "Name is required" });
+		if (!email || email.trim() === "")
+			return res.status(400).json({ errorCode: 503, errorMessage: "Email is required" });
+		if (!password || password.length < 6)
+			return res.status(400).json({ errorCode: 504, errorMessage: "Password must be at least 6 characters" });
+		if (password !== repassword)
+			return res
+				.status(400)
+				.json({
+					errorCode: 501,
+					errorMessage: "Passwords do not match",
+				});
+
+				
 		const user = await UserClient.createUser({
 			name,
 			email,
 			password,
+			role: 0,
+			accountState: "ACTIVE",
 		});
-		res.status(201).json(user);
+		if (user.data)
+			res.status(201).json(user.data);
+		else
+			res.status(400).json(user);
 	} catch (error) {
-		res.status(500).json({ error: "Error creating user" });
+		res.status(500).json({ errorCode: 500, errorMessage: "Error creating user" });
 	}
 });
 

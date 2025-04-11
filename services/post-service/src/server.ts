@@ -15,7 +15,7 @@ app.use(express.json());
 app.get("/ping", (req, res) => {
 	res.json({
 		errorCode: 200,
-		errorMessage: "Pong pong",
+		errorMessage: "Pong",
 		data: null,
 	});
 });
