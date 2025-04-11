@@ -1,25 +1,5 @@
 import { CommentModel, IComment } from "../models/commentModel";
-
-/**
- * Comment service interface
- */
-interface ICommentService {
-  getAllComments(): Promise<IComment[]>;
-  createComment(data: CreateCommentDTO): Promise<IComment>;
-  getCommentById(id: string): Promise<IComment | null>;
-  updateComment(id: string, content: string): Promise<IComment | null>;
-  deleteComment(id: string): Promise<boolean>;
-  searchComments(query: Record<string, any>): Promise<IComment[]>;
-}
-
-/**
- * DTO for creating a new comment
- */
-interface CreateCommentDTO {
-  postId: string;
-  userId: string;
-  content: string;
-}
+import { ICommentService, CreateCommentDTO } from '../interfaces/commentService.interface';
 
 /**
  * Custom error class for comment service
@@ -42,7 +22,8 @@ class CommentService implements ICommentService {
     try {
       return await CommentModel.find();
     } catch (error) {
-      this.handleError(error, 'Lỗi khi lấy danh sách bình luận');
+      console.error('Error getting all comments:', error);
+      throw error;
     }
   }
 
@@ -54,7 +35,8 @@ class CommentService implements ICommentService {
       const comment = new CommentModel(data);
       return await comment.save();
     } catch (error) {
-      this.handleError(error, 'Không thể tạo bình luận');
+      console.error('Error creating comment:', error);
+      throw error;
     }
   }
 
@@ -65,7 +47,8 @@ class CommentService implements ICommentService {
     try {
       return await CommentModel.findById(id);
     } catch (error) {
-      this.handleError(error, 'Không thể tìm thấy bình luận');
+      console.error('Error getting comment by ID:', error);
+      throw error;
     }
   }
 
@@ -80,7 +63,8 @@ class CommentService implements ICommentService {
         { new: true }
       );
     } catch (error) {
-      this.handleError(error, 'Không thể cập nhật bình luận');
+      console.error('Error updating comment:', error);
+      throw error;
     }
   }
 
@@ -92,7 +76,8 @@ class CommentService implements ICommentService {
       const result = await CommentModel.findByIdAndDelete(id);
       return result !== null;
     } catch (error) {
-      this.handleError(error, 'Không thể xóa bình luận');
+      console.error('Error deleting comment:', error);
+      throw error;
     }
   }
 
@@ -103,7 +88,8 @@ class CommentService implements ICommentService {
     try {
       return await CommentModel.find(query);
     } catch (error) {
-      this.handleError(error, 'Không thể tìm kiếm bình luận');
+      console.error('Error searching comments:', error);
+      throw error;
     }
   }
 
