@@ -11,9 +11,17 @@ console.log('Hello, world!'+ process.env.PORT);
 app.use(express.json());
 
 // Add routes
-app.use('/api/post', postRoute);
 
-const PORT = process.env.PORT || 5000;
+app.get("/ping", (req, res) => {
+	res.json({
+		errorCode: 200,
+		errorMessage: "Pong pong",
+		data: null,
+	});
+});
+
+app.use('/', postRoute);
+const PORT = process.env.PORT || 3002;
 
 connectDB().then(() => {
 	app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

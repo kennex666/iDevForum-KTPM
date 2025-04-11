@@ -1,0 +1,16 @@
+FROM node:18
+
+WORKDIR /app
+
+# Copy package.json và cài gói
+COPY package*.json ./
+RUN npm install
+
+# Copy toàn bộ source code
+COPY . .
+
+# Cài thêm dev tool nếu chưa có trong package.json
+RUN npm install -g ts-node-dev
+
+# Chạy app ở chế độ dev
+CMD ["npm", "run", "dev"]
