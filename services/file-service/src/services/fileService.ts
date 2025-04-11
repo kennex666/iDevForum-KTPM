@@ -1,11 +1,15 @@
 import { fileModel, IFile } from "../models/fileModel";
+import uploadFile from "../helper/file.helper";
+import multer from "multer";
+import { Request } from "express";
+
 /**
  * File service interface
  */
 interface IFileService {
-    getFileById(id: string): Promise<IFile | null>;
     uploadImage(data: any): Promise<IFile>;
     uploadPdf(data: any): Promise<IFile>;
+    uploadVideo(data: any): Promise<IFile>;
 }
 
 /**
@@ -23,34 +27,30 @@ class FileServiceError extends Error {
  */
 class FileService implements IFileService {
     /**
-     * Get file by ID
-     */
-    async getFileById(id: string): Promise<IFile | null> {
-        try {
-            return await fileModel.findOne({ fileId: id });
-        } catch (error) {
-            this.handleError(error, 'Lỗi khi lấy file');
-        }
-        return null;
-    }
-
-    /**
      * Upload image file
      */
     async uploadImage(data: any): Promise<IFile> {
         try {
+            console.log('Uploading image... in fileService');
+            console.log('Data:', data);
+            // Upload file to storage (S3)
+            const fileUrl = await uploadFile(data.file);
+
+            // Create file record with data from Multer and request
             const file = new fileModel({
-                userId: data.userId,
-                fileName: data.fileName,
-                fileType: data.fileType,
-                fileSize: data.fileSize,
-                fileUrl: data.fileUrl
+                userId: data.userId || 'anonymous',
+                fileName: data.fileName || data.file.originalname,
+                fileNameOriginal: data.fileNameOriginal || data.file.originalname,
+                fileType: data.fileType || data.file.mimetype,
+                fileSize: data.fileSize || data.file.size,
+                fileUrl: fileUrl
             });
+            
             return await file.save();
         } catch (error) {
             this.handleError(error, 'Không thể tải lên ảnh');
+            throw error;
         }
-        throw new FileServiceError('Upload image failed due to an unknown error.');
     }
 
     /**
@@ -58,29 +58,49 @@ class FileService implements IFileService {
      */
     async uploadPdf(data: any): Promise<IFile> {
         try {
+            // Upload file to storage (S3)
+            const fileUrl = await uploadFile(data.file);
+
+            // Create file record with data from Multer and request
             const file = new fileModel({
-                userId: data.userId,
-                fileName: data.fileName,
-                fileType: data.fileType,
-                fileSize: data.fileSize,
-                fileUrl: data.fileUrl
+                userId: data.userId || 'anonymous',
+                fileName: data.fileName || data.file.originalname,
+                fileNameOriginal: data.fileNameOriginal || data.file.originalname,
+                fileType: data.fileType || data.file.mimetype,
+                fileSize: data.fileSize || data.file.size,
+                fileUrl: fileUrl
             });
+            
             return await file.save();
         } catch (error) {
             this.handleError(error, 'Không thể tải lên PDF');
+            throw error;
         }
-        throw new FileServiceError('Upload PDF failed due to an unknown error.');
     }   
 
+    /**
+     * Upload video file
+     */
     async uploadVideo(data: any): Promise<IFile> {
         try {
+            // Upload file to storage (S3)
+            const fileUrl = await uploadFile(data.file);
+
+            // Create file record with data from Multer and request
             const file = new fileModel({
-                userId: data.userId,
+                userId: data.userId || 'anonymous',
+                fileName: data.fileName || data.file.originalname,
+                fileNameOriginal: data.fileNameOriginal || data.file.originalname,
+                fileType: data.fileType || data.file.mimetype,
+                fileSize: data.fileSize || data.file.size,
+                fileUrl: fileUrl
             });
+            
+            return await file.save();
         } catch (error) {
             this.handleError(error, 'Không thể tải lên video');
+            throw error;
         }
-        throw new FileServiceError('Upload video failed due to an unknown error.');
     }
 
     /**

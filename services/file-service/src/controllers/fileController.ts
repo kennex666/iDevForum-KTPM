@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
 import FileService from '../services/fileService';
+import { IFile } from '../models/fileModel';
 
 /**
  * File controller
  */
 interface IFileController {
-    uploadImage(req: Request, res: Response): Promise<void>;
-    uploadVideo(req: Request, res: Response): Promise<void>;
+    uploadImage(data: any): Promise<IFile>;
+    uploadVideo(data: any): Promise<IFile>;
+    uploadPdf(data: any): Promise<IFile>;
 }
 
 class FileControllerError extends Error {
@@ -23,35 +25,30 @@ class FileController implements IFileController {
         this.fileService = new FileService();
     }
 
-    async getFileById(id: string): Promise<void> {
+    async uploadImage(data: any): Promise<IFile> {
         try {
-            const file = await this.fileService.getFileById(id);
+            return await this.fileService.uploadImage(data);
         } catch (error) {
-            this.handleError(error, 'Lỗi khi lấy file');
+            this.handleError(error, 'Lỗi khi tải lên ảnh');
+            throw error;
         }
     }
 
-    async uploadImage(data: any): Promise<void> {
+    async uploadVideo(data: any): Promise<IFile> {
         try {
-            const file = await this.fileService.uploadImage(data);
-            } catch (error) {
-                this.handleError(error, 'Lỗi khi tải lên ảnh');
-        }
-    }
-
-    async uploadVideo(data: any): Promise<void> {
-        try {
-            const file = await this.fileService.uploadVideo(data);
+            return await this.fileService.uploadVideo(data);
         } catch (error) {
             this.handleError(error, 'Lỗi khi tải lên video');
+            throw error;
         }
     }
 
-    async uploadPdf(data: any): Promise<void> {
+    async uploadPdf(data: any): Promise<IFile> {
         try {
-            const file = await this.fileService.uploadPdf(data);
+            return await this.fileService.uploadPdf(data);
         } catch (error) {
             this.handleError(error, 'Lỗi khi tải lên PDF');
+            throw error;
         }
     }
     
