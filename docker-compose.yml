@@ -111,6 +111,16 @@ services:
     networks:
       - app-network
 
+  # Web UI
+  web-app:
+    build: ./web-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - api-gateway
+    networks:
+      - app-network
+      
 volumes:
   mongo_data:
 

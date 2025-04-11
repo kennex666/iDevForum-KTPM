@@ -1,0 +1,13 @@
+FROM node:18
+
+WORKDIR /app
+
+# Copy package.json và cài gói
+COPY package*.json ./
+RUN npm install
+
+# Copy toàn bộ source code
+COPY . .
+
+# Chạy app ở chế độ dev: npx next dev -p 4000
+CMD ["npm", "run", "dev", "--", "-p", "8080"]
