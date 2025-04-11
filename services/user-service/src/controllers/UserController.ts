@@ -8,13 +8,14 @@ import {
 
 const registerUser = async (req: any, res: any) => {
   try {
-    const { name, role, accountState, username, email, password } = req.body;
+    let { name, role, accountState, username, email, password } = req.body;
     if (!name)
       return res.status(200).json({ errorCode: 400, errorMessage: "Name is required", data: null });
     // if (!username || username.trim() === "")
     //   return res.status(200).json({ errorCode: 400, errorMessage: "Username is required", data: null });
     if (!email || email.trim() === "")
       return res.status(200).json({ errorCode: 400, errorMessage: "Email is required", data: null });
+    email = email.trim().toLowerCase();
     if (!password || password.length < 6)
       return res.status(200).json({ errorCode: 400, errorMessage: "Password must be at least 6 characters", data: null });
     const user = await createUser(name, role, accountState, username, email, password);
@@ -99,15 +100,17 @@ const getAllUsersHandler = async (req: any, res: any) => {
 }
 const getUserByEmailHandler = async (req: any, res: any) => {
   try {
-    const { email } = req.params;
+    let { email } = req.body;
+    email.trim() === "" ? email = req.query.email : email = req.body.email;
+    email = email.trim().toLowerCase();
     console.log("email", email);
-    if (!req.params.email || req.params.email.trim() === "") return res.status(200).json({
+    if (!email || email.trim() === "") return res.status(200).json({
       errorCode: 400,
       errorMessage: "Email is required",
       data: null
     });
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(req.params.email)) return res.status(200).json({
+    if (!emailRegex.test(email)) return res.status(200).json({
       errorCode: 400,
       errorMessage: "Email is invalid",
       data: null
