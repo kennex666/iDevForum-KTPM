@@ -5,6 +5,7 @@ import { UserClient } from "../clients/user.client";
 const router = express.Router();
 
 router.post("/register", async (req: any, res: any) => {
+	console.log("Registering user", req.body);
 	try {
 		const { name, email, password, repassword } = req.body;
 

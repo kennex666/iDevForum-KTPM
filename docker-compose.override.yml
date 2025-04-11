@@ -7,7 +7,6 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./api-gateway/src:/app/src
-      - /app/node_modules
     ports:
       - "3000:3000"
 
@@ -17,7 +16,7 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./services/authenticate-service/src:/app/src
-      - /app/node_modules
+      - /app 
     ports:
       - "3005:3005"
 
@@ -27,7 +26,6 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./services/comment-service/src:/app/src
-      - /app/node_modules
     ports:
       - "3001:3001"
 
@@ -37,7 +35,6 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./services/file-service/src:/app/src
-      - /app/node_modules
     ports:
       - "3003:3003"
 
@@ -47,7 +44,6 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./services/post-service/src:/app/src
-      - /app/node_modules
     ports:
       - "3002:3002"
 
@@ -57,7 +53,6 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./services/reaction-service/src:/app/src
-      - /app/node_modules
     ports:
       - "3004:3004"
 
@@ -67,6 +62,5 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./services/user-service/src:/app/src
-      - /app/node_modules
     ports:
       - "3006:3006"

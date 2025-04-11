@@ -5,7 +5,7 @@ import axios from "axios";
 
 
 const POST_SERVICE_URL =
-	process.env.POST_SERVICE_URL || "http://api-gateway:3000";
+	process.env.POST_SERVICE_URL || "http://api-gateway:3000/api/user";
 
 export const UserClient = {
 	createUser: async (data: any) => {

@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post("/register", UserController.registerUser);
 
-router.get("/user/:id", UserController.getUserByIdHandler);
+router.get("/:id", UserController.getUserByIdHandler);
 
 router.get("/getall", UserController.getAllUsersHandler);
 
@@ -15,9 +15,9 @@ router.get("/search", UserController.searchUsersHandler);
 
 router.get("/email/:email", UserController.getUserByEmailHandler);
 
-router.put("/user/:id", UserController.updateUserHandler);
+router.put("/:id", UserController.updateUserHandler);
 
-router.delete("/user/:id", UserController.deleteUserHandler);
+router.delete("/:id", UserController.deleteUserHandler);
 
 router.put("/updatepassword/:id", UserController.updatePasswordHandler);
 
