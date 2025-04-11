@@ -1,20 +1,21 @@
 {
-  "scripts": {
-        "start": "nodemon --exec ts-node src/server.ts",
-        "build": "tsc"
-    },
-  "devDependencies": {
-    "@types/express": "^5.0.0",
-    "@types/mongoose": "^5.11.96",
-    "@types/node": "^22.13.5",
-    "nodemon": "^3.1.9",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
-  },
-  "dependencies": {
-    "bcrypt": "^5.1.1",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "mongoose": "^8.11.0"
-  }
+	"scripts": {
+		"dev": "ts-node-dev --respawn --transpile-only --poll src/server.ts",
+		"build": "tsc",
+		"start": "node dist/server.js"
+	},
+	"devDependencies": {
+		"@types/express": "^5.0.0",
+		"@types/mongoose": "^5.11.96",
+		"@types/node": "^22.13.5",
+		"nodemon": "^3.1.9",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.7.3"
+	},
+	"dependencies": {
+		"bcryptjs": "^3.0.2",
+		"dotenv": "^16.4.7",
+		"express": "^4.21.2",
+		"mongoose": "^8.11.0"
+	}
 }

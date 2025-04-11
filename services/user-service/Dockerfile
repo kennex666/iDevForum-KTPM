@@ -1,23 +1,18 @@
-# Sử dụng Node.js 18 làm base image
-FROM node:18
+# Build stage
+FROM node:18 AS builder
 
-# Thiết lập thư mục làm việc trong container
 WORKDIR /app
-
-# Copy package.json và package-lock.json vào container
 COPY package*.json ./
-
-# Cài đặt dependencies
 RUN npm install
-
-# Copy toàn bộ mã nguồn vào container
 COPY . .
+RUN npm run build
 
-# Biên dịch TypeScript sang JavaScript
-RUN npx tsc
+# Run stage
+FROM node:18-alpine
 
-# Expose cổng chạy ứng dụng
-EXPOSE 3000
+WORKDIR /app
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
+RUN npm install --omit=dev
 
-# Chạy ứng dụng
-CMD ["node", "dist/server.js"]
+CMD ["node", "dist/index.js"]
