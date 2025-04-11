@@ -81,5 +81,6 @@ services:
       - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
     environment:
       - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
     ports:
       - "8080:8080"
