@@ -1,5 +1,4 @@
 import { fileModel, IFile } from "../models/fileModel";
-
 /**
  * File service interface
  */
@@ -71,6 +70,17 @@ class FileService implements IFileService {
             this.handleError(error, 'Không thể tải lên PDF');
         }
         throw new FileServiceError('Upload PDF failed due to an unknown error.');
+    }   
+
+    async uploadVideo(data: any): Promise<IFile> {
+        try {
+            const file = new fileModel({
+                userId: data.userId,
+            });
+        } catch (error) {
+            this.handleError(error, 'Không thể tải lên video');
+        }
+        throw new FileServiceError('Upload video failed due to an unknown error.');
     }
 
     /**
@@ -81,3 +91,5 @@ class FileService implements IFileService {
         throw new FileServiceError(message);
     }
 };
+
+export default FileService;
