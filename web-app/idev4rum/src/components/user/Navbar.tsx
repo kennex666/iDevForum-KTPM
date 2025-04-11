@@ -2,6 +2,15 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import {
+	FaSearch,
+	FaPen,
+	FaBell,
+	FaUser,
+	FaBookmark,
+	FaLock,
+	FaRightFromBracket,
+} from "react-icons/fa";
 
 export default function Navbar() {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -24,7 +33,7 @@ export default function Navbar() {
 				</a>
 
 				<div className="flex items-center bg-gray-100 rounded-full px-4 py-2 transition-all duration-300 focus-within:w-64">
-					<i className="fas fa-search text-gray-500" />
+					<FaSearch className="text-gray-500" />
 					<input
 						type="text"
 						placeholder="Tìm kiếm..."
@@ -41,11 +50,11 @@ export default function Navbar() {
 					href="/write"
 					className="text-gray-500 focus:outline-none space-x-2 flex items-center"
 				>
-					<i className="fas fa-pen" />
+					<FaPen />
 					<span>Viết bài</span>
 				</a>
 				<button className="text-gray-500 focus:outline-none">
-					<i className="fas fa-bell" />
+					<FaBell />
 				</button>
 
 				{/* Profile Dropdown */}
@@ -68,32 +77,32 @@ export default function Navbar() {
 							<div className="py-1 space-y-1">
 								<a
 									href="/profile"
-									className="block px-4 py-2 text-sm text-gray-700"
+									className="block px-4 py-2 text-sm text-gray-700 flex items-center"
 								>
-									<i className="fa-solid fa-user" />
+									<FaUser />
 									<span className="ps-3">Hồ sơ</span>
 								</a>
 								<a
 									href="/admin"
-									className="block px-4 py-2 text-sm text-gray-700"
+									className="block px-4 py-2 text-sm text-gray-700 flex items-center"
 								>
-									<i className="fa-solid fa-bookmark" />
+									<FaBookmark />
 									<span className="ps-3">
 										Bài viết đã lưu
 									</span>
 								</a>
 								<a
 									href="/admin"
-									className="block px-4 py-2 text-sm text-gray-700"
+									className="block px-4 py-2 text-sm text-gray-700 flex items-center"
 								>
-									<i className="fa-solid fa-lock" />
+									<FaLock />
 									<span className="ps-3">Trang quản trị</span>
 								</a>
 								<a
 									href="/logout"
-									className="border-t block px-4 py-2 text-sm font-semibold mt-2 pt-4 text-red-500"
+									className="border-t block px-4 py-2 text-sm font-semibold mt-2 pt-4 text-red-500 flex items-center"
 								>
-									<i className="fa-solid fa-right-from-bracket" />
+									<FaRightFromBracket />
 									<span className="ps-3">Đăng xuất</span>
 								</a>
 							</div>

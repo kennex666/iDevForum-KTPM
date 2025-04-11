@@ -47,7 +47,7 @@ export default function Home() {
 					</p>
 
 					<form onSubmit={handleSubmit}>
-						<div className="flex flex-col gap-4">
+						<div className="flex flex-col gap-4 mt-6">
 							<label
 								htmlFor="username"
 								className="text-gray-500 flex items-center gap-2"
@@ -60,7 +60,7 @@ export default function Home() {
 								value={form.username}
 								onChange={handleChange}
 								className="border-2 border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
-								placeholder="Tên đăng nhập"
+								placeholder="Nhập email của bạn"
 							/>
 
 							<label
@@ -76,7 +76,7 @@ export default function Home() {
 									value={form.password}
 									onChange={handleChange}
 									className="w-full border-2 border-gray-300 rounded-lg p-2 focus:outline-none focus:border-blue-500"
-									placeholder="Mật khẩu"
+									placeholder="Nhập mật khẩu của bạn"
 								/>
 								<button
 									type="button"
@@ -110,7 +110,7 @@ export default function Home() {
 								Đăng nhập
 							</button>
 
-							<div className="flex flex-row justify-between items-center text-sm">
+							<div className="flex flex-row justify-between items-center text-sm mt-6">
 								<a href="register" className="text-blue-500">
 									Đăng ký tài khoản
 								</a>

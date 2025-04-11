@@ -8,6 +8,7 @@ export interface Post {
 		profilePicture: string;
 	};
 	topic: {
+		tagId: string;
 		name: string;
 	};
 	date: string;
