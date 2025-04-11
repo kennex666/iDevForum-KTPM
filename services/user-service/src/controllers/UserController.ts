@@ -11,8 +11,8 @@ const registerUser = async (req: any, res: any) => {
     const { name, role, accountState, username, email, password } = req.body;
     if (!name)
       return res.status(200).json({ errorCode: 400, errorMessage: "Name is required", data: null });
-    if (!username || username.trim() === "")
-      return res.status(200).json({ errorCode: 400, errorMessage: "Username is required", data: null });
+    // if (!username || username.trim() === "")
+    //   return res.status(200).json({ errorCode: 400, errorMessage: "Username is required", data: null });
     if (!email || email.trim() === "")
       return res.status(200).json({ errorCode: 400, errorMessage: "Email is required", data: null });
     if (!password || password.length < 6)
