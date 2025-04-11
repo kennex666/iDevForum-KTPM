@@ -18,8 +18,12 @@ export const UserClient = {
 		return res.data;
 	},
 
-	getUser: async (id: string) => {
-		const res = await axios.get(`${POST_SERVICE_URL}/user/${id}`);
+	getUserViaEmail: async (email: string) => {
+		const res = await axios.post(`${POST_SERVICE_URL}/search-email?password=true`, // showpassword is used to get the password for login
+			{
+				email
+			}
+		);
 		return res.data;
 	}
 };
