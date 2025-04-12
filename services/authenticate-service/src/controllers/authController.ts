@@ -104,27 +104,35 @@ export const loginUser = async (req: any, res: any) => {
 };
 
 export const queryMe = async (req: any, res: any) => {
-	const userId = req.user._id;
-	if (!userId)
-		return res.status(200).json({
-			errorCode: 503,
-			errorMessage: "User ID is required",
+	try {
+		const userId = req.user._id;
+		if (!userId)
+			return res.status(200).json({
+				errorCode: 503,
+				errorMessage: "User ID is required",
+			});
+		const result = await UserClient.getUserViaId(userId);
+		if (result.errorCode != 200) {
+			return res.status(200).json({
+				errorCode: result.errorCode,
+				errorMessage: result.errorMessage,
+			});
+		}
+		const user = result.data;
+		if (!user)
+			return res
+				.status(200)
+				.json({ errorCode: 404, errorMessage: "User not found" });
+		res.json({
+			errorCode: 200,
+			errorMessage: "Query user successfully",
+			data: user,
 		});
-	const result = await UserClient.getUserViaId(userId);
-	if (result.errorCode != 200) {
-		return res.status(200).json({
-			errorCode: result.errorCode,
-			errorMessage: result.errorMessage,
-		});
+	} catch (error) {
+		console.log("Error querying user", error);
+		res.status(200).json({
+			errorCode: 500,
+			errorMessage: "Internal server error",
+		} as any);
 	}
-	const user = result.data;
-	if (!user)
-		return res
-			.status(200)
-			.json({ errorCode: 404, errorMessage: "User not found" });
-	res.json({
-		errorCode: 200,
-		errorMessage: "Query user successfully",
-		data: user,
-	});
 }
