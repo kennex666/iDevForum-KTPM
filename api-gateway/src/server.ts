@@ -1,8 +1,18 @@
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
+import cors from 'cors';
 
 const app = express();
 const PORT = 3000;
+
+app.use(cors());
+
+// Nếu muốn giới hạn origin:
+app.use(cors({
+	origin: '*',
+	methods: ['GET', 'POST', 'PUT', 'DELETE'],
+	credentials: true
+}));
 
 // Proxy config
 app.use(
