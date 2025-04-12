@@ -126,7 +126,10 @@ export const queryMe = async (req: any, res: any) => {
 		res.json({
 			errorCode: 200,
 			errorMessage: "Query user successfully",
-			data: user,
+			data: {
+				...user,
+				password: undefined, // Remove password from response
+			},
 		});
 	} catch (error) {
 		console.log("Error querying user", error);

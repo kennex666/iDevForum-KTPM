@@ -28,7 +28,7 @@ export const UserClient = {
 	},
 
 	getUserViaId: async (userId: string) => {
-		const res = await axios.get(`${USER_SERVICE_URL}/${userId}`);
+		const res = await axios.get(`${USER_SERVICE_URL}/profile/${userId}`);
 		return res.data;
 	},
 };
