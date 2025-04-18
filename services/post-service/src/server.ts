@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/database';
 import postRoute from './routes/postRoute';
+import topicRoute from './routes/topicRoute';
 
 dotenv.config();
 const app = express();
@@ -20,7 +21,8 @@ app.get("/ping", (req, res) => {
 	});
 });
 
-app.use('/', postRoute);
+app.use('/posts', postRoute);
+app.use('/topics', topicRoute);
 const PORT = process.env.PORT || 3002;
 
 connectDB().then(() => {
