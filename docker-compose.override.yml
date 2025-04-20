@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./api-gateway:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+
+  authenticate-service:
+    build:
+      context: ./services/authenticate-service
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./services/authenticate-service:/app
+      - /app/node_modules
+    ports:
+      - "3005:3005"
+
+  comment-service:
+    build:
+      context: ./services/comment-service
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./services/comment-service:/app
+      - /app/node_modules
+    ports:
+      - "3001:3001"
+
+  file-service:
+    build:
+      context: ./services/file-service
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./services/file-service:/app
+      - /app/node_modules
+    ports:
+      - "3003:3003"
+
+  post-service:
+    build:
+      context: ./services/post-service
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./services/post-service:/app
+      - /app/node_modules
+    ports:
+      - "3002:3002"
+
+  reaction-service:
+    build:
+      context: ./services/reaction-service
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./services/reaction-service:/app
+      - /app/node_modules
+    ports:
+      - "3004:3004"
+
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./services/user-service:/app
+      - /app/node_modules
+    ports:
+      - "3006:3006"
