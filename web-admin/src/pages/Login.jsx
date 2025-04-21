@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 function Login() {
   return (
@@ -61,12 +62,9 @@ function Login() {
                             </div>
                           </div>
                         </div>
-                        <button
-                          className="btn btn-primary d-block btn-user w-100"
-                          type="submit"
-                        >
+                        <Link to="/dashboard" className="btn btn-primary d-block btn-user w-100 mb-2">
                           Login
-                        </button>
+                        </Link>
                         <hr />
                         <button className="btn btn-primary d-block btn-google btn-user w-100 mb-2" type="button">
                           <i className="fab fa-google"></i>&nbsp; Login with Google
@@ -77,14 +75,9 @@ function Login() {
                         <hr />
                       </form>
                       <div className="text-center">
-                        <a className="small" href="forgot-password.html">
+                       <Link className="small" to="/forgot-password">
                           Forgot Password?
-                        </a>
-                      </div>
-                      <div className="text-center">
-                        <a className="small" href="register.html">
-                          Create an Account!
-                        </a>
+                        </Link>
                       </div>
                     </div>
                   </div>
