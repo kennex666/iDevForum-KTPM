@@ -2,7 +2,7 @@
 
 export default function Footer() {
     return (
-		<footer className="text-left text-gray-500 text-sm mt-4">
+		<footer className="text-left text-gray-500 text-sm justify-center p-4">
 			<p>© {new Date().getFullYear()} iDev4rum. All rights reserved.</p>
 			<p>
 				Designed by{" "}
