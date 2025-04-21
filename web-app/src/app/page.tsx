@@ -1,9 +1,6 @@
-import Image from "next/image";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-	return (
-		<div className="flex flex-row min-h-screen">
-			<p>Whattt</p>
-		</div>
-	);
+    // Chuyển hướng đến /login
+    redirect("/login");
 }
