@@ -8,7 +8,7 @@ export default function RootLayout({
 }>) {
   return (
     <>
-      <head>
+      <>
         {/* Bootstrap CSS */}
         <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css" />
 
@@ -23,7 +23,7 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://use.fontawesome.com/releases/v5.12.0/css/all.css"
         />
-      </head>
+      </>
       <>
         <div className="flex">
           <Sidebar />
