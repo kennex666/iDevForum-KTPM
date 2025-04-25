@@ -1,7 +1,14 @@
+"use client";
+
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const Sidebar = () => {
+    const pathname = usePathname(); 
+    console.log("Sidebar pathname:", pathname); // Log the pathname to the console
+    const isActive = (path: string) => pathname === path ? 'active' : '';
+
     return (
         <nav className="navbar align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0">
             <div className="container-fluid d-flex flex-column p-0">
@@ -16,25 +23,25 @@ const Sidebar = () => {
                 <hr className="sidebar-divider my-0" />
                 <ul className="navbar-nav text-light" id="accordionSidebar">
                     <li className="nav-item">
-                        <Link className="nav-link active" href="/dashboard">
+                        <Link className={`nav-link ${isActive('/admin')}`} href="/dashboard">
                             <i className="fas fa-tachometer-alt"></i>
                             <span>Dashboard</span>
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <Link className="nav-link" href="/users">
+                        <Link className={`nav-link ${isActive('/users')}`} href="/users">
                             <i className="fas fa-user"></i>
                             <span>Manage Users</span>
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <Link className="nav-link" href="/posts">
+                        <Link className={`nav-link ${isActive('/posts')}`} href="/posts">
                             <i className="fas fa-file-alt"></i>
                             <span>Manage Posts</span>
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <Link className="nav-link" href="/comments">
+                        <Link className={`nav-link ${isActive('/comments')}`} href="/comments">
                             <i className="fas fa-comments"></i>
                             <span>Manage Comments</span>
                         </Link>
