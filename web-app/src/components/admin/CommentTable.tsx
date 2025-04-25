@@ -1,57 +1,113 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
-const Table = ({ items, handleDeleteComment }: { items: any[]; handleDeleteComment: (id: string) => void }) => {
+interface Comment {
+    id: string;
+    content: string;
+    createdAt: string;
+    user?: {
+        name: string;
+        avatar: string;
+    };
+    post?: {
+        title: string;
+        url: string;
+    };
+}
+
+interface CommentTableProps {
+    items: Comment[];
+    handleDeleteComment: (id: string) => void;
+}
+
+const CommentTable: React.FC<CommentTableProps> = ({ items, handleDeleteComment }) => {
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    const handleDelete = async (id: string) => {
+        try {
+            setDeletingId(id);
+            await handleDeleteComment(id);
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
     return (
         <div className="table-responsive">
-            <table className="table my-0">
-                <thead>
+            <table className="table table-hover table-striped">
+                <thead className="thead-dark">
                     <tr>
-                        <th>Người bình luận</th>
-                        <th>Nội dung</th>
-                        <th>Bài viết</th>
-                        <th>Ngày bình luận</th>
-                        <th>Thao tác</th>
+                        <th className="px-4">Người bình luận</th>
+                        <th className="px-4">Nội dung</th>
+                        <th className="px-4">Bài viết</th>
+                        <th className="px-4">Ngày bình luận</th>
+                        <th className="px-4">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {items.map((item, index) => (
-                        <tr key={index}>
-                            <td className="d-flex align-items-center">
-                                <img
-                                    className="rounded-circle me-2"
-                                    width="30"
-                                    height="30"
-                                    src={item.user?.avatar || 'https://picsum.photos/200'}
-                                    alt={item.id}
-                                />
-                                {item.user?.name || 'Người dùng ẩn danh'}
+                    {items.map((item) => (
+                        <tr key={item.id} className="align-middle">
+                            <td className="px-4">
+                                <div className="d-flex align-items-center">
+                                    <img
+                                        className="rounded-circle me-2"
+                                        width="40"
+                                        height="40"
+                                        src={item.user?.avatar || 'https://picsum.photos/200'}
+                                        alt={item.id}
+                                    />
+                                    <span className="fw-bold">{item.user?.name || 'Người dùng ẩn danh'}</span>
+                                </div>
                             </td>
-                            <td>{item.content}</td>
-                            <td>
-                                <a href={item.post?.url || '#'} target="_blank" rel="noopener noreferrer">
-                                    {item.post?.title || 'Không có tiêu đề'}
+                            <td className="px-4">
+                                <div className="text-wrap" style={{ maxWidth: '300px' }}>
+                                    {item.content}
+                                </div>
+                            </td>
+                            <td className="px-4">
+                                <a 
+                                    href={item.post?.url || '#'} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-decoration-none"
+                                >
+                                    <span className="text-primary">{item.post?.title || 'Không có tiêu đề'}</span>
                                 </a>
                             </td>
-                            <td>{item.createdAt}</td>
-                            <td>
+                            <td className="px-4 text-muted">
+                                {new Date(item.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="px-4">
                                 <button
-                                    className="btn btn-danger btn-sm"
-                                    onClick={() => handleDeleteComment(item.id)}
+                                    className={`btn btn-sm ${deletingId === item.id ? 'btn-secondary' : 'btn-danger'}`}
+                                    onClick={() => handleDelete(item.id)}
+                                    disabled={deletingId === item.id}
                                 >
-                                    <i className="fas fa-trash"></i> Xóa
+                                    {deletingId === item.id ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                            Đang xóa...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="fas fa-trash me-1"></i>
+                                            Xóa
+                                        </>
+                                    )}
                                 </button>
                             </td>
                         </tr>
                     ))}
                 </tbody>
-                <tfoot>
+                <tfoot className="table-light">
                     <tr>
-                        <th>Người bình luận</th>
-                        <th>Nội dung</th>
-                        <th>Bài viết</th>
-                        <th>Ngày bình luận</th>
-                        <th>Thao tác</th>
+                        <th className="px-4">Người bình luận</th>
+                        <th className="px-4">Nội dung</th>
+                        <th className="px-4">Bài viết</th>
+                        <th className="px-4">Ngày bình luận</th>
+                        <th className="px-4">Thao tác</th>
                     </tr>
                 </tfoot>
             </table>
@@ -59,7 +115,7 @@ const Table = ({ items, handleDeleteComment }: { items: any[]; handleDeleteComme
     );
 };
 
-Table.propTypes = {
+CommentTable.propTypes = {
     employees: PropTypes.arrayOf(
         PropTypes.shape({
             name: PropTypes.string.isRequired,
@@ -73,4 +129,4 @@ Table.propTypes = {
     ).isRequired,
 };
 
-export default Table;
+export default CommentTable;
