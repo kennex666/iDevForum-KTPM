@@ -38,6 +38,8 @@ export default function HomePage() {
 		const fetchPosts = async () => {
 			const params: Record<string, any> = {};
 
+			params.sort = -1
+
 			if (activeTab !== 'home') {
 				params.topicId = activeTab; // hoặc topicId ?? undefined để tránh null
 			}

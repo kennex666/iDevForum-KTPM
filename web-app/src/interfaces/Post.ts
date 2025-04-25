@@ -2,16 +2,14 @@ export interface Post {
 	title: string;
 	description: string;
 	url: string;
-	author: {
-		userId: string;
-		name: string;
-		profilePicture: string;
-	};
+	author: any;
 	topic: {
 		tagId: string;
 		name: string;
 	};
-	date: string;
-	totalUpVote: number;
+	createdAt: string;
+	totalUpvote: number;
+	totalDownvote: number;
 	totalComments: number;
+	coverImage?: string;
 }
