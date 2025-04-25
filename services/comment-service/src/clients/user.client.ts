@@ -10,7 +10,7 @@ export const userClient = {
 		const response = await axios.get(`${USER_SERVICE_URL}/profile/${userId}`);
 		if (!response.data)
 			return null;
-		response.data;
+		return response.data;
 	} catch (error) {
 	  console.error("Error fetching user by ID:", error);
 	  throw new Error("Failed to fetch user data");
