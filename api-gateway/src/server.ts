@@ -1,5 +1,7 @@
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
+import { authenticate } from "./middlewares/authenticate";
+import conditionalAuthenticate from "./middlewares/conditionalAuthenticate";
 
 const app = express();
 const PORT = 3000;
@@ -28,6 +30,7 @@ app.use(
 );
 app.use(
 	"/api/comment",
+	conditionalAuthenticate(["POST", "PUT", "DELETE"]),
 	createProxyMiddleware({
 		target: "http://comment-service:3001",
 		changeOrigin: true,
