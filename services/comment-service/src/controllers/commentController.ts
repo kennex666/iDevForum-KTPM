@@ -52,11 +52,9 @@ class CommentController {
   async createComment(req: Request, res: Response): Promise<void> {
     try {
       const { postId, content } = req.body;
-
-      const userId = req.user?.id; 
-      
-      // Validate input
-      const validationError = validateCommentInput({ postId, userId, content });
+      const id = req.headers["user"] ? JSON.parse(req.headers["user"] as string)._id : null;
+      const userId = id;
+      const validationError = validateCommentInput({ postId, userId , content });
       if (validationError) {
         res.status(200).json(createErrorResponse(validationError));
         return;

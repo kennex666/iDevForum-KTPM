@@ -18,25 +18,37 @@ class CommentService implements ICommentService {
   /**
    * Get all comments
    */
-  async getAllComments(): Promise<any []> {
+  async getAllComments(): Promise<any[]> {
     try {
       const items = await CommentModel.find();
-      const comments = items.map(
-        (item: any) => {
-          return {
-            id: item._id,
-            content: item.content,
-            postId: postClient.getPostById(item.postId),
-            user: userClient.getUserById(item.userId),
-            createdAt: item.createdAt,
-            updatedAt: item.updatedAt,
-          };
-        }
+  
+      // Use Promise.all to resolve all async operations in parallel
+      const comments = await Promise.all(
+        items.map(async (item: any) => {
+          try {
+            const post = await postClient.getPostById(item.postId);
+            const user = await userClient.getUserById(item.userId);
+  
+            return {
+              id: item._id,
+              content: item.content,
+              postId: post,
+              user: user,
+              createdAt: item.createdAt,
+              updatedAt: item.updatedAt,
+            };
+          } catch (error) {
+            console.error(`Error fetching related data for comment ID ${item._id}:`, error);
+            return null; // Handle errors gracefully for individual items
+          }
+        })
       );
-      return comments;
+  
+      // Filter out any null results due to errors
+      return comments.filter((comment: any) => comment !== null);
     } catch (error) {
       console.error('Error getting all comments:', error);
-      throw error;
+      throw new Error('Failed to fetch comments');
     }
   }
 
@@ -56,9 +68,29 @@ class CommentService implements ICommentService {
   /**
    * Get a comment by ID
    */
-  async getCommentById(id: string): Promise<IComment | null> {
+  async getCommentById(id: string): Promise<any> {
     try {
-      return await CommentModel.findById(id);
+      const item = await CommentModel.findById(id);
+      if (!item) {
+        throw new Error(`Comment with ID ${id} not found`);
+      }
+
+      try {
+        const post = await postClient.getPostById(item.postId);
+        const user = await userClient.getUserById(item.userId);
+
+        return {
+          id: item._id,
+          content: item.content,
+          postId: post,
+          user: user,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+        };
+      } catch (error) {
+        console.error(`Error fetching related data for comment ID ${id}:`, error);
+        throw new Error('Failed to fetch related data for the comment');
+      }
     } catch (error) {
       console.error('Error getting comment by ID:', error);
       throw error;
@@ -68,24 +100,70 @@ class CommentService implements ICommentService {
   /**
    * Get comments by post ID
    */
-  async getCommentsByPostId(postId: string): Promise<IComment[]> {
+  async getCommentsByPostId(postId: string): Promise<any[]> {
     try {
-      return await CommentModel.find({ postId });
+      const items = await CommentModel.find({ postId });
+
+      // Use Promise.all to resolve all async operations in parallel
+      const comments = await Promise.all(
+        items.map(async (item: any) => {
+          try {
+            const user = await userClient.getUserById(item.userId);
+            return {
+              id: item._id,
+              content: item.content,
+              postId: item.postId,
+              user: user,
+              createdAt: item.createdAt,
+              updatedAt: item.updatedAt,
+            };
+          } catch (error) {
+            console.error(`Error fetching related data for comment ID ${item._id}:`, error);
+            return null; // Handle errors gracefully for individual items
+          }
+        })
+      );
+
+      // Filter out any null results due to errors
+      return comments.filter((comment: any) => comment !== null);
     } catch (error) {
       console.error('Error getting comments by post ID:', error);
-      throw error;
+      throw new Error('Failed to fetch comments by post ID');
     }
   }
 
   /**
    * Get comments by user ID
    */
-  async getCommentsByUserId(userId: string): Promise<IComment[]> {
+  async getCommentsByUserId(userId: string): Promise<any[]> {
     try {
-      return await CommentModel.find({ userId });
+      const items = await CommentModel.find({ userId });
+
+      // Use Promise.all to resolve all async operations in parallel
+      const comments = await Promise.all(
+        items.map(async (item: any) => {
+          try {
+            const post = await postClient.getPostById(item.postId);
+            return {
+              id: item._id,
+              content: item.content,
+              postId: post,
+              userId: item.userId,
+              createdAt: item.createdAt,
+              updatedAt: item.updatedAt,
+            };
+          } catch (error) {
+            console.error(`Error fetching related data for comment ID ${item._id}:`, error);
+            return null; // Handle errors gracefully for individual items
+          }
+        })
+      );
+
+      // Filter out any null results due to errors
+      return comments.filter((comment: any) => comment !== null);
     } catch (error) {
       console.error('Error getting comments by user ID:', error);
-      throw error;
+      throw new Error('Failed to fetch comments by user ID');
     }
   }
 
@@ -121,12 +199,37 @@ class CommentService implements ICommentService {
   /**
    * Search comments by query
    */
-  async searchComments(query: Record<string, any>): Promise<IComment[]> {
+  async searchComments(query: Record<string, any>): Promise<any[]> {
     try {
-      return await CommentModel.find(query);
+      const items = await CommentModel.find(query);
+
+      // Use Promise.all to resolve all async operations in parallel
+      const comments = await Promise.all(
+        items.map(async (item: any) => {
+          try {
+            const post = await postClient.getPostById(item.postId);
+            const user = await userClient.getUserById(item.userId);
+
+            return {
+              id: item._id,
+              content: item.content,
+              postId: post,
+              user: user,
+              createdAt: item.createdAt,
+              updatedAt: item.updatedAt,
+            };
+          } catch (error) {
+            console.error(`Error fetching related data for comment ID ${item._id}:`, error);
+            return null; // Handle errors gracefully for individual items
+          }
+        })
+      );
+
+      // Filter out any null results due to errors
+      return comments.filter((comment: any) => comment !== null);
     } catch (error) {
       console.error('Error searching comments:', error);
-      throw error;
+      throw new Error('Failed to search comments');
     }
   }
 
