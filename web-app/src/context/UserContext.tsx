@@ -36,7 +36,7 @@ export const guestUser = {
 	description: "",
 	username: "no-login@" + Math.random().toString(36).substring(2, 7),
 	title: "",
-	profilePicture: "https://picsum.photos/400/400",
+	profilePicture: "/assets/img/avt-default.png",
 	bio: "Anonymous user",
 	createdAt: new Date(),
 	updatedAt: new Date(),
