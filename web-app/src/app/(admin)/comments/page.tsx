@@ -6,20 +6,21 @@ import Navbar from '@/components/admin/Navbar';
 import Table from '@/components/admin/CommentTable';
 
 const ManageUser = () => {
-
+    const [allItems, setAllItems] = useState([]);
     const [items, setItems] = useState([]);
     const [showFilter, setShowFilter] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://localhost:3001/');
+                const response = await fetch('http://localhost:3001');
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 const result = await response.json();
                 if (result.errorCode === 200) {
                     setItems(result.data);
+                    setAllItems(result.data);
                 } else {
                     console.error('Error fetching data:', result.errorMessage);
                 }

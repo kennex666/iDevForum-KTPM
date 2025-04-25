@@ -65,7 +65,7 @@ const getPostByIdController = async (req:Request, res:Response) => {
     }
 }
 
-const createPostController = async (req: Request, res:Response) => {
+const createPostController = async (req: Request, res: Response) => {
     try {
         const {
             postId,
@@ -79,13 +79,15 @@ const createPostController = async (req: Request, res:Response) => {
             totalDownvote,
             totalShare,
             totalView,
-            userId,
             tagId
         } = req.body;
 
+        const userId = req.user._id;
+        console.log("User ID from token:", userId);
+
         // Kiểm tra dữ liệu đầu vào
         if (!title || !content || !userId || !tagId) {
-            res.status(200).json({
+            return res.status(200).json({
                 errorCode: 400,
                 message: "Vui lòng nhập đầy đủ thông tin bài viết",
                 data: null,
@@ -104,11 +106,11 @@ const createPostController = async (req: Request, res:Response) => {
             totalDownvote,
             totalShare,
             totalView,
-            userId,
+            userId: userId,
             tagId
         });
 
-        res.status(200).json({
+        return res.status(200).json({
             errorCode: 200,
             errorMessage: "Tạo bài viết thành công",
             data: post,
@@ -118,20 +120,20 @@ const createPostController = async (req: Request, res:Response) => {
         console.error("Error while creating post:", err);
 
         if (err instanceof Error) {
-            res.status(200).json({
+            return res.status(200).json({
                 errorCode: 400,
                 errorMessage: err.message,
                 data: null,
             });
         } else {
-            res.status(200).json({
+            return res.status(200).json({
                 errorCode: 400,
                 errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
                 data: null,
             });
         }
     }
-}
+};
 
 const updatePostController = async (req:Request, res:Response) => {
     const {

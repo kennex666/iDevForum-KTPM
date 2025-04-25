@@ -1,12 +1,13 @@
 import express from 'express';
 import { createPostController, deletePostController, getPostByIdController, getPostController, searchPostController, updatePostController } from '../controllers/postController';
+import { authenticate } from '../utils/authenticate';
 
 const postRoute = express.Router();
 
 postRoute.get('/', getPostController);
 
 
-postRoute.post('/save', createPostController);
+postRoute.post('/save',authenticate ,createPostController);
 
 
 // Lấy bài viết theo ID
