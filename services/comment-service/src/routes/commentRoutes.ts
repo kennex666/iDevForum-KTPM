@@ -16,17 +16,27 @@ router.post('/save', commentController.createComment);
 /**
  * Get comment by ID
  */
-router.get('/comment/:id', commentController.getCommentById);
+router.get('/:id', commentController.getCommentById);
+
+/**
+ * Get comments by post ID
+ */
+router.get('/post/:postId', commentController.getCommentsByPostId);
+
+/**
+ * Get comments by user ID
+ * */
+router.get('/user/:userId', commentController.getCommentsByUserId);
 
 /**
  * Update comment
  */
-router.put('/comment/:id', commentController.updateComment);
+router.put('/:id', commentController.updateComment);
 
 /**
  * Delete comment
  */
-router.delete('/comment/:id', commentController.deleteComment);
+router.delete('/:id', commentController.deleteComment);
 
 /**
  * Search comments

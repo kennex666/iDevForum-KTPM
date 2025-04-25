@@ -1,108 +1,118 @@
-import React from 'react';
+"use client";
+
+import React, { useState,useEffect } from 'react';
 import Sidebar from '@/components/admin/Sidebar';
 import Navbar from '@/components/admin/Navbar';
-import Table from '@/components/admin/Table';
+import Table from '@/components/admin/CommentTable';
 
 const ManageUser = () => {
-    const employees = [
-        {
-            name: 'Airi Satou',
-            position: 'Accountant',
-            office: 'Tokyo',
-            age: 33,
-            startDate: '2008/11/28',
-            salary: '$162,700',
-            avatar: 'assets/img/avatars/avatar1.jpeg',
-        },
-        {
-            name: 'Angelica Ramos',
-            position: 'Chief Executive Officer(CEO)',
-            office: 'London',
-            age: 47,
-            startDate: '2009/10/09',
-            salary: '$1,200,000',
-            avatar: 'assets/img/avatars/avatar2.jpeg',
-        },
-        {
-            name: 'Ashton Cox',
-            position: 'Junior Technical Author',
-            office: 'San Francisco',
-            age: 66,
-            startDate: '2009/01/12',
-            salary: '$86,000',
-            avatar: 'assets/img/avatars/avatar3.jpeg',
-        },
-        {
-            name: 'Bradley Greer',
-            position: 'Software Engineer',
-            office: 'London',
-            age: 41,
-            startDate: '2012/10/13',
-            salary: '$132,000',
-            avatar: 'assets/img/avatars/avatar4.jpeg',
-        },
-        {
-            name: 'Brenden Wagner',
-            position: 'Software Engineer',
-            office: 'San Francisco',
-            age: 28,
-            startDate: '2011/06/07',
-            salary: '$206,850',
-            avatar: 'assets/img/avatars/avatar5.jpeg',
-        },
-        {
-            name: 'Brielle Williamson',
-            position: 'Integration Specialist',
-            office: 'New York',
-            age: 61,
-            startDate: '2012/12/02',
-            salary: '$372,000',
-            avatar: 'assets/img/avatars/avatar1.jpeg',
-        },
-        {
-            name: 'Bruno Nash',
-            position: 'Software Engineer',
-            office: 'London',
-            age: 38,
-            startDate: '2011/05/03',
-            salary: '$163,500',
-            avatar: 'assets/img/avatars/avatar2.jpeg',
-        },
-        {
-            name: 'Caesar Vance',
-            position: 'Pre-Sales Support',
-            office: 'New York',
-            age: 21,
-            startDate: '2011/12/12',
-            salary: '$106,450',
-            avatar: 'assets/img/avatars/avatar3.jpeg',
-        },
-        {
-            name: 'Cara Stevens',
-            position: 'Sales Assistant',
-            office: 'New York',
-            age: 46,
-            startDate: '2011/12/06',
-            salary: '$145,600',
-            avatar: 'assets/img/avatars/avatar4.jpeg',
-        },
-        {
-            name: 'Cedric Kelly',
-            position: 'Senior JavaScript Developer',
-            office: 'Edinburgh',
-            age: 22,
-            startDate: '2012/03/29',
-            salary: '$433,060',
-            avatar: 'assets/img/avatars/avatar5.jpeg',
-        },
-    ];
+
+    const [items, setItems] = useState([]);
+    const [showFilter, setShowFilter] = useState(false);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch('http://localhost:3001/');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const result = await response.json();
+                if (result.errorCode === 200) {
+                    setItems(result.data);
+                } else {
+                    console.error('Error fetching data:', result.errorMessage);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+        fetchData();
+    }, []);
+
+    const handleViewAll = () => {
+        setItems(allItems);
+    };
+
+    const handleViewNegative = () => {
+        // Giả lập bình luận tiêu cực bằng cách lọc các bình luận có từ khóa tiêu cực
+        const negativeComments = allItems.filter(item => 
+            item.content.toLowerCase().includes('mới') || 
+            item.content.toLowerCase().includes('chưa') ||
+            item.content.toLowerCase().includes('lỗi')
+        );
+        setItems(negativeComments);
+    };
+
+    const handleFilterByDate = (days: number) => {
+        const today = new Date();
+        const filteredItems = allItems.filter(item => {
+            const commentDate = new Date(item.commentDate);
+            const diffTime = Math.abs(today.getTime() - commentDate.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays <= days;
+        });
+        setItems(filteredItems);
+        setShowFilter(false);
+    };
+
     return (
         <div id="wrapper">
             <div id="content-wrapper" className="d-flex flex-column">
                 <div id="content">
                     <div className="container-fluid">
-                        <h3 className="text-dark mb-4">Team</h3>
-                        <Table employees={employees} />
+                        <div className="d-flex justify-content-between align-items-center py-4">
+                            <div className="d-flex gap-3">
+                                <button 
+                                    className="btn btn-primary d-flex align-items-center gap-2"
+                                    onClick={handleViewAll}
+                                >
+                                    <i className="fas fa-list"></i>
+                                    Xem tất cả
+                                </button>
+                                <button 
+                                    className="btn btn-danger d-flex align-items-center gap-2"
+                                    onClick={handleViewNegative}
+                                >
+                                    <i className="fas fa-exclamation-triangle"></i>
+                                    Bình luận tiêu cực
+                                </button>
+                            </div>
+                            <div className="d-flex gap-2 relative">
+                                <button 
+                                    className="btn btn-outline-secondary d-flex align-items-center gap-2"
+                                    onClick={() => setShowFilter(!showFilter)}
+                                >
+                                    <i className="fas fa-filter"></i>
+                                    Lọc
+                                </button>
+                                {showFilter && (
+                                    <div className="absolute right-0 top-full mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                                        <div className="py-1" role="menu" aria-orientation="vertical">
+                                            <button
+                                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                onClick={() => handleFilterByDate(7)}
+                                            >
+                                                Trong 7 ngày qua
+                                            </button>
+                                            <button
+                                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                onClick={() => handleFilterByDate(30)}
+                                            >
+                                                Trong 30 ngày qua
+                                            </button>
+                                            <button
+                                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                onClick={() => handleFilterByDate(90)}
+                                            >
+                                                Trong 90 ngày qua
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <Table items={items} />
                     </div>
                 </div>
                 <footer className="bg-white sticky-footer">

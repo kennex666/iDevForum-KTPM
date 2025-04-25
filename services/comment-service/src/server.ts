@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import connectDB from './config/database';
 import commentRoutes from './routes/commentRoutes';
 
@@ -9,6 +10,11 @@ const app = express();
 console.log('Hello, world!'+ process.env.PORT);
 
 app.use(express.json());
+app.use(cors({
+    origin: '*', 
+    methods: 'GET,POST,PUT,DELETE',
+    allowedHeaders: 'Content-Type,Authorization', 
+}));
 
 // Add routes
 

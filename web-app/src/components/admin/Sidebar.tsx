@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 
 const Sidebar = () => {
     const pathname = usePathname(); 
-    console.log("Sidebar pathname:", pathname); // Log the pathname to the console
     const isActive = (path: string) => pathname === path ? 'active' : '';
 
     return (
@@ -44,6 +43,12 @@ const Sidebar = () => {
                         <Link className={`nav-link ${isActive('/comments')}`} href="/comments">
                             <i className="fas fa-comments"></i>
                             <span>Manage Comments</span>
+                        </Link>
+                    </li>
+                    <li className="nav-item">
+                        <Link className={`nav-link ${isActive('/topics')}`} href="/topics">
+                            <i className="fas fa-comments"></i>
+                            <span>Manage Topics</span>
                         </Link>
                     </li>
                     <li className="nav-item">

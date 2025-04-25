@@ -1,6 +1,6 @@
 import { CommentModel, IComment } from "../models/commentModel";
 import { ICommentService, CreateCommentDTO } from '../interfaces/commentService.interface';
-
+import { postClient, userClient } from "../clients/user.client";
 /**
  * Custom error class for comment service
  */
@@ -18,9 +18,22 @@ class CommentService implements ICommentService {
   /**
    * Get all comments
    */
-  async getAllComments(): Promise<IComment[]> {
+  async getAllComments(): Promise<any []> {
     try {
-      return await CommentModel.find();
+      const items = await CommentModel.find();
+      const comments = items.map(
+        (item: any) => {
+          return {
+            id: item._id,
+            content: item.content,
+            postId: postClient.getPostById(item.postId),
+            user: userClient.getUserById(item.userId),
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+          };
+        }
+      );
+      return comments;
     } catch (error) {
       console.error('Error getting all comments:', error);
       throw error;
@@ -48,6 +61,30 @@ class CommentService implements ICommentService {
       return await CommentModel.findById(id);
     } catch (error) {
       console.error('Error getting comment by ID:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get comments by post ID
+   */
+  async getCommentsByPostId(postId: string): Promise<IComment[]> {
+    try {
+      return await CommentModel.find({ postId });
+    } catch (error) {
+      console.error('Error getting comments by post ID:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get comments by user ID
+   */
+  async getCommentsByUserId(userId: string): Promise<IComment[]> {
+    try {
+      return await CommentModel.find({ userId });
+    } catch (error) {
+      console.error('Error getting comments by user ID:', error);
       throw error;
     }
   }

@@ -51,7 +51,9 @@ class CommentController {
    */
   async createComment(req: Request, res: Response): Promise<void> {
     try {
-      const { postId, userId, content } = req.body;
+      const { postId, content } = req.body;
+
+      const userId = req.user?.id; 
       
       // Validate input
       const validationError = validateCommentInput({ postId, userId, content });
@@ -94,6 +96,57 @@ class CommentController {
     }
   }
 
+  /**
+   * Get comments by post ID
+   */
+  async getCommentsByPostId(req: Request, res: Response): Promise<void> {
+    try {
+      const { postId } = req.params;
+      
+      // Validate ID format
+      if (!validateId(postId)) {
+        res.status(200).json(createErrorResponse('ID không hợp lệ'));
+        return;
+      }
+
+      const comments = await commentService.getCommentsByPostId(postId);
+      if (!comments) {
+        res.status(200).json(createErrorResponse('Không tìm thấy bình luận cho bài viết này', 404));
+        return;
+      }
+
+      res.status(200).json(createSuccessResponse(comments, 'Lấy bình luận theo bài viết thành công'));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Lỗi không xác định';
+      res.status(200).json(createErrorResponse(message));
+    }
+  }
+
+  /**
+   * Get comments by user ID
+   */
+  async getCommentsByUserId(req: Request, res: Response): Promise<void> {
+    try {
+      const { userId } = req.params;
+      
+      // Validate ID format
+      if (!validateId(userId)) {
+        res.status(200).json(createErrorResponse('ID không hợp lệ'));
+        return;
+      }
+
+      const comments = await commentService.getCommentsByUserId(userId);
+      if (!comments) {
+        res.status(200).json(createErrorResponse('Không tìm thấy bình luận của người dùng này', 404));
+        return;
+      }
+
+      res.status(200).json(createSuccessResponse(comments, 'Lấy bình luận theo người dùng thành công'));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Lỗi không xác định';
+      res.status(200).json(createErrorResponse(message));
+    }
+  }
   /**
    * Update comment
    */

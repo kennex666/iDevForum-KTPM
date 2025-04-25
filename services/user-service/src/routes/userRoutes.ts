@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post("/register", UserController.registerUser);
 
-router.get("/profile", UserController.getUserByIdHandler);
+router.get("/profile/:id", UserController.getUserByIdHandler);
 
 router.get("/getall", UserController.getAllUsersHandler);
 

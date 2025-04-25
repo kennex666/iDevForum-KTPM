@@ -38,6 +38,7 @@ app.use(
 );
 app.use(
 	"/api/file",
+	conditionalAuthenticate(["POST", "PUT", "DELETE"]),
 	createProxyMiddleware({
 		target: "http://file-service:3003",
 		changeOrigin: true,
