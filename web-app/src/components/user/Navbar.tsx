@@ -9,7 +9,7 @@ import {
 	FaUser,
 	FaBookmark,
 	FaLock,
-	FaRightFromBracket,
+	FaSignOutAlt,
 } from "react-icons/fa";
 
 export default function Navbar() {
@@ -102,7 +102,7 @@ export default function Navbar() {
 									href="/logout"
 									className="border-t block px-4 py-2 text-sm font-semibold mt-2 pt-4 text-red-500 flex items-center"
 								>
-									<FaRightFromBracket />
+									<FaSignOutAlt />
 									<span className="ps-3">Đăng xuất</span>
 								</a>
 							</div>
