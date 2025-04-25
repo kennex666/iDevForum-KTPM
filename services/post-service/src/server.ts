@@ -20,9 +20,8 @@ app.get("/ping", (req, res) => {
 		data: null,
 	});
 });
-
-app.use('/posts', postRoute);
 app.use('/topics', topicRoute);
+app.use('/', postRoute);
 const PORT = process.env.PORT || 3002;
 
 connectDB().then(() => {
