@@ -11,6 +11,6 @@ app.use("/", authRoutes);
 
 // Kết nối DB và chạy server
 const PORT = process.env.PORT || 3005;
-connectDB().then(() => {
-	app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-});
+// connectDB().then(() => {
+// });
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

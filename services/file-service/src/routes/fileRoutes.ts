@@ -50,7 +50,7 @@ const uploadImage = multer({
 router.post('/image', uploadImage.single('file'), (req: Request, res: Response) => {
     const file = req.file;
     if (!file) {
-        res.status(400).json(uploadErrorResponse('No file uploaded'));
+        res.status(200).json(uploadErrorResponse('No file uploaded'));
         return;
     }
 
@@ -58,7 +58,7 @@ router.post('/image', uploadImage.single('file'), (req: Request, res: Response) 
     console.log('User ID:', req.body.userId);
 
     if(req.body.userId === undefined || req.body.userId === null) {
-        res.status(400).json(uploadErrorResponse('Người dùng không hợp lệ'));
+        res.status(200).json(uploadErrorResponse('Người dùng không hợp lệ'));
         return;
     }
     
@@ -78,7 +78,7 @@ router.post('/image', uploadImage.single('file'), (req: Request, res: Response) 
         })
         .catch((error) => {
             const message = error instanceof Error ? error.message : 'Unknown error';
-            res.status(400).json(uploadErrorResponse(message));
+            res.status(200).json(uploadErrorResponse(message));
         });
 });
 
