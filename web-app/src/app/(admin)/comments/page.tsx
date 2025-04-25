@@ -9,6 +9,7 @@ const ManageUser = () => {
     const [allItems, setAllItems] = useState([]);
     const [items, setItems] = useState([]);
     const [showFilter, setShowFilter] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -21,6 +22,7 @@ const ManageUser = () => {
                 if (result.errorCode === 200) {
                     setItems(result.data);
                     setAllItems(result.data);
+                    console.log(result.data);
                 } else {
                     console.error('Error fetching data:', result.errorMessage);
                 }
@@ -38,25 +40,60 @@ const ManageUser = () => {
     const handleViewNegative = () => {
         // Giả lập bình luận tiêu cực bằng cách lọc các bình luận có từ khóa tiêu cực
         const negativeComments = allItems.filter(item => 
-            item.content.toLowerCase().includes('mới') || 
-            item.content.toLowerCase().includes('chưa') ||
-            item.content.toLowerCase().includes('lỗi')
+            item.content.toLowerCase().includes('c*t') ||
+            item.content.toLowerCase().includes('xàm')
         );
         setItems(negativeComments);
     };
 
     const handleFilterByDate = (days: number) => {
-        const today = new Date();
-        const filteredItems = allItems.filter(item => {
-            const commentDate = new Date(item.commentDate);
-            const diffTime = Math.abs(today.getTime() - commentDate.getTime());
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const now = new Date();
+    
+        const filteredItems = allItems.filter((item: { createdAt: string }) => {
+            const createdDate = new Date(item.createdAt);
+            const diffTime = now.getTime() - createdDate.getTime();
+            const diffDays = diffTime / (1000 * 60 * 60 * 24); 
             return diffDays <= days;
         });
+    
         setItems(filteredItems);
         setShowFilter(false);
     };
 
+    const handleDeleteComment = async (commentId: string) => {
+        try {
+            const response = await fetch(`http://localhost:3001/${commentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODBiYzAwM2M2ODliZTQyOTMwMDRlMjEiLCJuYW1lIjoiTmd1eWVuIFRoYW5oIEx1YW4iLCJyb2xlIjowLCJlbWFpbCI6Im5ndGhsdWFuLm9yZ0BnbWFpbC5jb20iLCJpYXQiOjE3NDU2MDA1ODcsImV4cCI6MTc0NjIwNTM4N30.lydykLwH-pGBe0JQUU8m0dxRmSfeAPEa7YiGiOErtPU',
+                },
+            });
+            const result = await response.json();
+            if (result.errorCode === 200) {
+                const updatedItems = allItems.filter(item => item._id !== commentId);
+                setAllItems(updatedItems);
+                setItems(updatedItems);
+            } else {
+                console.error('Error deleting comment:', result.errorMessage);
+            }
+        }
+        catch (error) {
+            console.error('Error deleting comment:', error);
+        }
+    };
+
+    if (isLoading) {
+        <div className="flex items-center justify-center min-h-screen">
+            <div className="text-center">
+                <div className="spinner-border text-primary mb-3" role="status">
+                    <span className="sr-only">Loading...</span>
+                </div>
+                <p className="text-lg font-semibold">Đang tải dữ liệu, vui lòng chờ...</p>
+            </div>
+        </div>;
+    }
+    
     return (
         <div id="wrapper">
             <div id="content-wrapper" className="d-flex flex-column">
@@ -113,7 +150,7 @@ const ManageUser = () => {
                                 )}
                             </div>
                         </div>
-                        <Table items={items} />
+                        <Table items={items} handleDeleteComment={handleDeleteComment} />
                     </div>
                 </div>
                 <footer className="bg-white sticky-footer">

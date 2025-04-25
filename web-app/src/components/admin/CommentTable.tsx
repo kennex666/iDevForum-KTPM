@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Table = ({ items }: any) => {
+const Table = ({ items, handleDeleteComment }: { items: any[]; handleDeleteComment: (id: string) => void }) => {
     return (
         <div className="table-responsive">
             <table className="table my-0">
@@ -22,16 +22,25 @@ const Table = ({ items }: any) => {
                                     className="rounded-circle me-2"
                                     width="30"
                                     height="30"
-                                    src={item.avatar}
-                                    alt={item.commenter}
+                                    src={item.user?.avatar || 'https://picsum.photos/200'}
+                                    alt={item.id}
                                 />
-                                {item.commenter}
+                                {item.user?.name || 'Người dùng ẩn danh'}
                             </td>
                             <td>{item.content}</td>
-                            <td>{item.post}</td>
-                            <td>{item.commentDate}</td>
                             <td>
-                                <button className="btn btn-danger btn-sm">Xóa</button>
+                                <a href={item.post?.url || '#'} target="_blank" rel="noopener noreferrer">
+                                    {item.post?.title || 'Không có tiêu đề'}
+                                </a>
+                            </td>
+                            <td>{item.createdAt}</td>
+                            <td>
+                                <button
+                                    className="btn btn-danger btn-sm"
+                                    onClick={() => handleDeleteComment(item.id)}
+                                >
+                                    <i className="fas fa-trash"></i> Xóa
+                                </button>
                             </td>
                         </tr>
                     ))}
