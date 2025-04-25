@@ -11,7 +11,17 @@ console.log('Hello, world!'+ process.env.PORT);
 app.use(express.json());
 
 // Add routes
-app.use('/api/comments', commentRoutes);
+
+
+app.get("/ping", (req, res) => {
+	res.json({
+		errorCode: 200,
+		errorMessage: "Pong",
+		data: null,
+	});
+});
+
+app.use('/', commentRoutes);
 
 const PORT = process.env.PORT || 3001;
 

@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./api-gateway/src:/app/src
-      - /app/node_modules
+      - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
     ports:
       - "3000:3000"
 
@@ -17,7 +17,8 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./services/authenticate-service/src:/app/src
-      - /app/node_modules
+      - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
+
     ports:
       - "3005:3005"
 
@@ -27,7 +28,7 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./services/comment-service/src:/app/src
-      - /app/node_modules
+      - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
     ports:
       - "3001:3001"
 
@@ -37,7 +38,7 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./services/file-service/src:/app/src
-      - /app/node_modules
+      - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
     ports:
       - "3003:3003"
 
@@ -47,7 +48,7 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./services/post-service/src:/app/src
-      - /app/node_modules
+      - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
     ports:
       - "3002:3002"
 
@@ -57,7 +58,7 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./services/reaction-service/src:/app/src
-      - /app/node_modules
+      - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
     ports:
       - "3004:3004"
 
@@ -67,6 +68,18 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./services/user-service/src:/app/src
-      - /app/node_modules
+      - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
     ports:
       - "3006:3006"
+
+  web-app:
+    build:
+      context: ./web-app
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./web-app:/app
+      - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
+    environment:
+      - WATCHPACK_POLLING=true
+    ports:
+      - "8080:8080"

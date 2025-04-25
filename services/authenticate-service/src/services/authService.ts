@@ -5,7 +5,7 @@ const createUser = async (
 	email: string,
 	password: string
 ): Promise<IUser> => {
-	const user = new UserModel({ username, email, password });
+	const user = UserClient;
 	return await user.save();
 };
 
