@@ -10,7 +10,7 @@ RUN npm install
 COPY . .
 
 # Cài ts-node-dev nếu chưa có
-RUN npm install -g ts-node-dev
+RUN npm install ts-node-dev --save-dev
 
 # Dev mode: hot reload khi code thay đổi
 CMD ["npm", "run", "dev"]

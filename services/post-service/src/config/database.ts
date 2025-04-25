@@ -5,7 +5,7 @@ config();
 const connectDB = async (): Promise<void> => {
     try {
         await mongoose.connect(
-            process.env.MONGODB_URI || "mongodb://localhost:27017/postDB"
+            process.env.MONGO_URI || "mongodb://localhost:27017/postDB"
         );
         console.log("MongoDB Connected...");
     } catch (err) {

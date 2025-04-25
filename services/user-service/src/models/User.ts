@@ -33,7 +33,7 @@ const UserSchema = new Schema<IUser>(
 		accountState: {
 			type: String,
 			enum: ["EXPIRED", "BANNED", "RESTRICTED", "ACTIVE", "WAIT_FOR_ACTIVATION"],
-			default: "ACTIVE",
+			default: "WAIT_FOR_ACTIVATION",
 		},
 		coverPicture: { 
 			type: String 

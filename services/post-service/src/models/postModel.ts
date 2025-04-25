@@ -19,7 +19,7 @@ import { url } from "inspector";
     tagId: string;
  }
  const postSchema = new Schema({
-    postId: { type: String },
+    postId: { type: String, required: true },
     title: { type: String, required: true },
     description: { type: String, required: true },
     content: { type: String, required: true },
@@ -37,14 +37,6 @@ import { url } from "inspector";
     timestamps: true,
  }
 );
-
-postSchema.pre<IPost>("save", function (next) {
-   if (this.isNew || this.postId === undefined) {
-       this.postId = this._id+"";
-   }
-   next();
-});
-
 const PostModel = model<IPost>("Post", postSchema);
 
 export { PostModel, IPost };
