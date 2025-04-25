@@ -1,7 +1,7 @@
 import UserModel, { IUser } from "../models/User";
 
 const createUser = async (
-	username: string,
+	name: string,
 	email: string,
 	password: string
 ): Promise<IUser> => {

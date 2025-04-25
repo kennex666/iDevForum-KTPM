@@ -1,5 +1,5 @@
+import { Types } from 'mongoose';
 import UserModel, { IUser } from "../models/User";
-const bcrypt = require("bcrypt");
 
 const createUser = async (
 	name: string,
@@ -10,12 +10,12 @@ const createUser = async (
 	password: string,
 ): Promise<IUser> => {
 	const CheckExistUser = await UserModel.findOne({ email });
-	if (CheckExistUser) throw new Error("Email already exists");
+	if (CheckExistUser) throw new Error("Email already exists!");
 	try {
-		const passwordHash = await bcrypt.hash(password, 10);
+		const passwordHash = password; // Tạm bỏ hash vì lỗi trên docker
 		const user = new UserModel({ name, role, accountState, username, email, password: passwordHash });
 		return await user.save();
-	} catch (error:any) {
+	} catch (error: any) {
 		throw new Error(error.message);
 	}
 
@@ -26,16 +26,29 @@ const getUserByEmail = async (email: string): Promise<IUser | null> => {
 };
 
 
-const updateUser = async (id: string, data: any): Promise<IUser | null> => {
-	const user = await UserModel.findById(id);
-	if (!user) return null;
-
-	for (let key in data) {
-		if (data[key].trim() === "")
-			throw new Error(`${key} is empty`);
+const updateUser = async (id: string, updateData: Partial<IUser>): Promise<IUser | null> => {
+	if (!Types.ObjectId.isValid(id)) throw new Error("ID is not in valid format!");
+	if ('password' in updateData) {
+		delete updateData.password;
 	}
-	Object.assign(user, data); // cập nhập dữ liệu mới nếu có thay đổi
-	return await user.save();
+	const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+	const usernameRegex = /^[a-zA-Z0-9]{6,}$/;
+	const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
+	// Loại bỏ các thuộc tính rỗng trong updateData
+    Object.keys(updateData).forEach((key) => {
+        const value = updateData[key as keyof IUser];
+        if (value === null || value === undefined || value === "") {
+            delete updateData[key as keyof IUser];
+        }
+    });
+	if (updateData.email && !emailRegex.test(updateData.email)) throw new Error("Email is not in valid format!");
+	if (updateData.username && !usernameRegex.test(updateData.username)) throw new Error("Username is not in valid format!");
+	if (updateData.name && !nameRegex.test(updateData.name)) throw new Error("Name is not in valid format!");
+	if (updateData.role && ![0, 1].includes(updateData.role)) throw new Error("Role is not in valid format!");
+	if (updateData.accountState && !["EXPIRED", "BANNED", "RESTRICTED", "ACTIVE", "WAIT_FOR_ACTIVATION"].includes(updateData.accountState)) throw new Error("Account state is not in valid format!");
+	const userUpdate = await UserModel.findByIdAndUpdate(id, updateData, { new: true });
+	if (!userUpdate) throw new Error("User not found!");
+	return userUpdate;
 };
 
 const getAllUsers = async (): Promise<IUser[]> => {
@@ -43,12 +56,15 @@ const getAllUsers = async (): Promise<IUser[]> => {
 }
 
 const getUserById = async (id: string): Promise<IUser | null> => {
+	if (!Types.ObjectId.isValid(id)) throw new Error("ID is not in valid format!");
 	return await UserModel.findById(id);
 }
 
 const deleteUser = async (id: string): Promise<IUser | null> => {
+	if (!Types.ObjectId.isValid(id)) throw new Error("ID is not in valid format!");
+	// Check if user exists
 	const user = await UserModel.findById(id);
-	if (!user) return null;
+	if (!user) throw new Error("User not found!");
 	await UserModel.findByIdAndDelete(id);
 	return user;
 }
@@ -56,7 +72,7 @@ const deleteUser = async (id: string): Promise<IUser | null> => {
 const updatePassword = async (id: string, newPassword: string, oldPassword: string): Promise<IUser | null> => {
 	try {
 		const user = await UserModel.findById(id);
-		if (!user) return null;
+		if (!user) throw new Error("User not found!");
 		const isMatch = await bcrypt.compare(oldPassword, user.password);
 		if (!isMatch) throw new Error("Old password is incorrect");
 		const passwordHash = await bcrypt.hash(newPassword, 10);
@@ -68,15 +84,9 @@ const updatePassword = async (id: string, newPassword: string, oldPassword: stri
 }
 // name, email, username, role, accountState
 const searchUsers = async (filters: any): Promise<IUser[]> => {
+	// filters: { name, email, username, role, accountState }
 	try {
-		let query: any = {};
-		const { name, email, username, role, accountState } = filters;
-		if (name) query.name = { $regex: name, $options: "i" };
-		if (email) query.email = { $regex: email, $options: "i" };
-		if (username) query.username = { $regex: username, $options: "i" };
-		if (role !== undefined && !isNaN(role)) query.role = Number(role);
-		if (accountState) query.accountState = accountState;
-		return await UserModel.find(query);
+		return await UserModel.find(filters).select("-password -__v").sort({ createdAt: -1 });
 	} catch (error: any) {
 		throw new Error(error.message);
 	}

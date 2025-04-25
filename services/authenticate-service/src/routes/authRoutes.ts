@@ -1,12 +1,17 @@
 import express from "express";
 import { createUser, getUserByEmail } from "../services/authService";
+import { UserClient } from "../clients/user.client";
 
 const router = express.Router();
 
 router.post("/register", async (req, res) => {
 	try {
-		const { username, email, password } = req.body;
-		const user = await createUser(username, email, password);
+		const { name, email, password } = req.body;
+		const user = await UserClient.createUser({
+			name,
+			email,
+			password,
+		});
 		res.status(201).json(user);
 	} catch (error) {
 		res.status(500).json({ error: "Error creating user" });

@@ -10,7 +10,7 @@ RUN npm install
 COPY . .
 
 # Cài thêm dev tool nếu chưa có trong package.json
-RUN npm install ts-node-dev --save-dev
+RUN npm install -g ts-node-dev
 
 # Chạy app ở chế độ dev
 CMD ["npm", "run", "dev"]

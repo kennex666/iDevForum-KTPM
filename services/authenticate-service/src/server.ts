@@ -7,7 +7,7 @@ dotenv.config();
 const app = express();
 
 app.use(express.json()); // Middleware xử lý JSON
-app.use("/api/auth", authRoutes);
+app.use("/", authRoutes);
 
 // Kết nối DB và chạy server
 const PORT = process.env.PORT || 3005;
