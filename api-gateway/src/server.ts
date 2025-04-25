@@ -34,7 +34,14 @@ app.use(
 app.use(
 	"/api/post",
 	createProxyMiddleware({
-		target: "http://post-service:3002",
+		target: "http://post-service:3002/posts",
+		changeOrigin: true,
+	})
+);
+app.use(
+	"/api/topic",
+	createProxyMiddleware({
+		target: "http://post-service:3002/topics",
 		changeOrigin: true,
 	})
 );
