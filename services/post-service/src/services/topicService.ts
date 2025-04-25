@@ -15,7 +15,6 @@ const getTopicById = async (id: string): Promise<ITopic | null> => {
 }
 
 const createTopic = async (topicData: {
-    tagId: string;
     name: string;
     hashtag: string;
 }): Promise<ITopic> => {
