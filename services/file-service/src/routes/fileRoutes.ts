@@ -55,7 +55,7 @@ router.post('/image',authenticate, uploadImage.single('file'), (req: Request, re
         return;
     }
 
-    const userId = req.headers["user"] ? JSON.parse(req.headers["user"] as string)._id : null;
+    const userId = req.user?._id;
     
     // Prepare data object with file and additional fields from request body
     const data = {

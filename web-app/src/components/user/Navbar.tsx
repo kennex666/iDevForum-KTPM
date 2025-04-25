@@ -92,7 +92,7 @@ export default function Navbar() {
 									</span>
 								</a>
 								<a
-									href="/admin"
+									href="/dashboard"
 									className="block px-4 py-2 text-sm text-gray-700 flex items-center"
 								>
 									<FaLock />
