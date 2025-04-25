@@ -52,8 +52,7 @@ class CommentController {
   async createComment(req: Request, res: Response): Promise<void> {
     try {
       const { postId, content } = req.body;
-      const id = req.headers["user"] ? JSON.parse(req.headers["user"] as string)._id : null;
-      const userId = id;
+      const userId = req.user._id || null;
       const validationError = validateCommentInput({ postId, userId , content });
       if (validationError) {
         res.status(200).json(createErrorResponse(validationError));
@@ -152,7 +151,8 @@ class CommentController {
     try {
       const { id } = req.params;
       const { content } = req.body;
-
+      const userId = req.user._id || null;
+     
       // Validate ID format
       if (!validateId(id)) {
         res.status(200).json(createErrorResponse('ID không hợp lệ'));
@@ -165,7 +165,7 @@ class CommentController {
         return;
       }
 
-      const updatedComment = await commentService.updateComment(id, content);
+      const updatedComment = await commentService.updateComment(id, userId, content);
       if (!updatedComment) {
         res.status(200).json(createErrorResponse('Không tìm thấy bình luận', 404));
         return;
@@ -191,7 +191,9 @@ class CommentController {
         return;
       }
 
-      const isDeleted = await commentService.deleteComment(id);
+      const userId = req.user._id || null;
+
+      const isDeleted = await commentService.deleteComment(id, userId);
       if (!isDeleted) {
         res.status(200).json(createErrorResponse('Không tìm thấy bình luận', 404));
         return;

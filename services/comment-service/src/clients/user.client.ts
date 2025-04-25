@@ -8,7 +8,9 @@ export const userClient = {
   async getUserById(userId: string) {
 	try {
 		const response = await axios.get(`${USER_SERVICE_URL}/profile/${userId}`);
-	  return response.data;
+		if (!response.data)
+			return null;
+		response.data;
 	} catch (error) {
 	  console.error("Error fetching user by ID:", error);
 	  throw new Error("Failed to fetch user data");
@@ -20,6 +22,8 @@ export const postClient = {
   async getPostById(postId: string) {
 	try {
 	  const response = await axios.get(`${POST_SERVICE_URL}/${postId}`);
+	  if (!response.data)
+		return null;
 	  return response.data;
 	} catch (error) {
 	  console.error("Error fetching post by ID:", error);

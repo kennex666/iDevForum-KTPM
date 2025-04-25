@@ -170,24 +170,48 @@ class CommentService implements ICommentService {
   /**
    * Update a comment
    */
-  async updateComment(id: string, content: string): Promise<IComment | null> {
+  async updateComment(id: string, userId: string, content: string): Promise<IComment | null> {
     try {
-      return await CommentModel.findByIdAndUpdate(
-        id,
-        { content },
-        { new: true }
-      );
+        // Tìm bình luận theo ID
+        const comment = await CommentModel.findById(id);
+
+        if (!comment) {
+            throw new Error(`Comment with ID ${id} not found`);
+        }
+
+        // Kiểm tra xem userId có khớp với userId của bình luận không
+        if (comment.userId.toString() !== userId) {
+            throw new Error("You are not authorized to update this comment");
+        }
+
+        // Cập nhật nội dung bình luận
+        return await CommentModel.findByIdAndUpdate(
+            id,
+            { content },
+            { new: true }
+        );
     } catch (error) {
-      console.error('Error updating comment:', error);
-      throw error;
+        console.error('Error updating comment:', error);
+        throw error;
     }
-  }
+}
 
   /**
    * Delete a comment
    */
-  async deleteComment(id: string): Promise<boolean> {
+  async deleteComment(id: string, userId: string): Promise<boolean> {
     try {
+      const comment = await CommentModel.findById(id);
+
+      if (!comment) {
+        throw new Error(`Comment with ID ${id} not found`);
+      }
+
+      // Check if the userId matches the userId of the comment
+      if (comment.userId.toString() !== userId) {
+        throw new Error("You are not authorized to delete this comment");
+      }
+
       const result = await CommentModel.findByIdAndDelete(id);
       return result !== null;
     } catch (error) {

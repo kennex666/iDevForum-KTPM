@@ -22,12 +22,12 @@ export interface ICommentService {
   /**
    * Update a comment
    */
-  updateComment(id: string, content: string): Promise<IComment | null>;
+  updateComment(id: string, userId: string, content: string): Promise<IComment | null>;
 
   /**
    * Delete a comment
    */
-  deleteComment(id: string): Promise<boolean>;
+  deleteComment(id: string, userId: string): Promise<boolean>;
 
   /**
    * Search comments by query
