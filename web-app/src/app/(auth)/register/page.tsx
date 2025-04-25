@@ -4,9 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import axios from "axios";
+import { api, apiParser } from "@/constants/apiConst";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
 	const [showPassword, setShowPassword] = useState(false);
+	const router = useRouter();
 	const [form, setForm] = useState({
 		fullname: "",
 		email: "",
@@ -55,28 +59,44 @@ export default function RegisterPage() {
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setErrors({ fullname: "", email: "", password: "", global: "" });
+		try {
+			e.preventDefault();
+			setErrors({ fullname: "", email: "", password: "", global: "" });
 
-		if (!validate()) return;
+			if (!validate()) return;
 
-		setLoading(true);
+			setLoading(true);
 
-		// Giả lập gọi API
-		await new Promise((res) => setTimeout(res, 1000));
+			// Giả lập gọi API
+			const response = await axios.post(apiParser(api.apiPath.auth.register), {
+				email: form.email,
+				name: form.fullname,
+				password: form.password,
+			});
 
-		// Giả lập lỗi từ server nếu email là 'test@example.com'
-		if (form.email === "test@example.com") {
+			// Kiểm tra phản hồi từ API
+			const data = response.data;
+
+			// Giả lập lỗi từ server nếu email là 'test@example.com'
+			if (data.errorCode !== 200) {
+				setErrors((prev) => ({
+					...prev,
+					global: data.errorMessage,
+				}));
+				return;
+			}
+			
+			router.push("/login");
+
+			setLoading(false);
+		} catch (error) {
+			console.error("Đã xảy ra lỗi:", error);
+			setLoading(false);
 			setErrors((prev) => ({
 				...prev,
-				global: "Email đã tồn tại hoặc bị từ chối!",
+				global: "Đã xảy ra lỗi. Vui lòng thử lại sau.",
 			}));
-		} else {
-			alert("Đăng ký thành công!");
-			// redirect nếu cần, ví dụ: router.push("/login")
 		}
-
-		setLoading(false);
 	};
 
 	return (
