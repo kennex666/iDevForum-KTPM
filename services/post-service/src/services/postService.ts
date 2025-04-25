@@ -6,7 +6,6 @@ const getPosts = async (): Promise<IPost[]> => {
 }
 
 const createPost = async (postData: {
-    postId: string;
     title: string;
     description: string;
     content: string;
