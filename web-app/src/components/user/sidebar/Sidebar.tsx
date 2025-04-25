@@ -1,7 +1,9 @@
 import Footer from "@/components/Footer";
+import { EUserRole, guestUser } from "@/context/UserContext";
 import { SidebarProps } from "@/interfaces/Sidebar";
 
 const Sidebar = ({ currentUser }: SidebarProps) => {
+	const isLogin = currentUser && currentUser.role != EUserRole.GUEST;
 	return (
 		<div className="w-1/3 pl-4 space-y-12">
 			{/* Bookmarks */}
@@ -9,7 +11,7 @@ const Sidebar = ({ currentUser }: SidebarProps) => {
 				<div className="py-12">
 					<h3 className="font-semibold mb-5">Đã lưu gần đây</h3>
 					<div className="space-y-5">
-						{currentUser.bookMarks.map((bookmark, idx) => (
+						{currentUser.bookMarks ? currentUser.bookMarks.map((bookmark: any, idx: any) => (
 							<div key={idx} className="py-2">
 								<a
 									href={`/author/${bookmark.post.author.userId}`}
@@ -41,14 +43,23 @@ const Sidebar = ({ currentUser }: SidebarProps) => {
 									<p>{bookmark.post.topic.name}</p>
 								</div>
 							</div>
-						))}
+						)) : (
+							// Login to see bookmarks
+							isLogin ? (<p className="text-gray-500 mb-4">
+								Bạn chưa lưu nội dung nào
+							</p>) : 
+							
+							(<p className="text-gray-500 mb-4">
+								Vui lòng đăng nhập để xem danh sách đã lưu
+							</p>)
+						)}
 					</div>
-					<a
+					{currentUser.bookMarks && (<a
 						href="/bookmarks"
 						className="text-blue-500 text-sm hover:text-blue-400"
 					>
 						Xem danh sách đầy đủ
-					</a>
+					</a>)}
 				</div>
 			)}
 
