@@ -5,12 +5,12 @@ import fileRoutes from "./routes/fileRoutes";
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3003;
 
 app.use(express.json());
 console.log('Hello, world!'+ process.env.PORT);
 
-app.use('/api/files', fileRoutes);
+app.use('/', fileRoutes);
 
 connectDB().then(() => {
     app.listen(PORT, () => {

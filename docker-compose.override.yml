@@ -1,6 +1,10 @@
 version: '3.8'
 
 services:
+  mongodb:
+    volumes:
+      - /database:/data/db
+
   api-gateway:
     build:
       context: ./api-gateway

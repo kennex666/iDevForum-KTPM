@@ -1,5 +1,6 @@
 "use client";
 import { api, apiParser } from "@/constants/apiConst";
+import { Bookmark } from "@/interfaces/Sidebar";
 import { createContext, useContext, useEffect, useState } from "react";
 
 const UserContext = createContext(null);
@@ -12,36 +13,39 @@ export enum EUserRole {
 
 export interface IUser {
 	email: string;
-	name: string;
+	name?: string;
 	role: EUserRole;
-	accountState: string;
-	coverPicture: string;
-	description: string;
-	username: string;
-	title: string;
-	profilePicture: string;
-	bio: string;
-	createdAt: Date;
-	updatedAt: Date;
+	accountState?: string;
+	coverPicture?: string;
+	description?: string;
+	username?: string;
+	title?: string;
+	profilePicture?: string;
+	bio?: string;
+	createdAt?: Date;
+	updatedAt?: Date;
+	bookmarks?: Bookmark[];
 }
+
+export const guestUser = {
+	email: "no-login@localhost.com",
+	name: "Guest",
+	role: EUserRole.GUEST,
+	accountState: "ACTIVE",
+	coverPicture: "https://picsum.photos/1000/400",
+	description: "",
+	username: "no-login@" + Math.random().toString(36).substring(2, 7),
+	title: "",
+	profilePicture: "https://picsum.photos/400/400",
+	bio: "Anonymous user",
+	createdAt: new Date(),
+	updatedAt: new Date(),
+	bookmarks: [],
+};
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
-	const [user, setUser] = useState({
-		email: "no-login@localhost.com",
-		name: "Guest",
-		role: EUserRole.GUEST,
-		accountState: "ACTIVE",
-		coverPicture: "https://picsum.photos/1000/400",
-		description: "",
-		username: "no-login@" + Math.random().toString(36).substring(2, 7),
-		title: "",
-		profilePicture: "https://picsum.photos/400/400",
-		bio: "Anonymous user",
-		createdAt: new Date(),
-		updatedAt: new Date(),
-
-	} as any | null);
+	const [user, setUser] = useState(guestUser);
 
 	const [isLogin, setIsLogin] = useState(false);
 

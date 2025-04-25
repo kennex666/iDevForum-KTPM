@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import { Request, Response } from "express";
 import FileController from "../controllers/fileController";
+import { authenticate } from "../utils/authenticate";
 
 const router = express.Router();
 
@@ -47,25 +48,19 @@ const uploadImage = multer({
 });
 
 // Image upload route
-router.post('/image', uploadImage.single('file'), (req: Request, res: Response) => {
+router.post('/image', uploadImage.single('file'), authenticate, (req: Request, res: Response) => {
     const file = req.file;
     if (!file) {
         res.status(200).json(uploadErrorResponse('No file uploaded'));
         return;
     }
 
-    console.log('File:', file);
-    console.log('User ID:', req.body.userId);
-
-    if(req.body.userId === undefined || req.body.userId === null) {
-        res.status(200).json(uploadErrorResponse('Người dùng không hợp lệ'));
-        return;
-    }
+    const userId = req.user?._id;
     
     // Prepare data object with file and additional fields from request body
     const data = {
         file,
-        userId: req.body.userId,
+        userId: userId,
         fileName: file.originalname,
         fileNameOriginal: file.originalname,
         fileType: file.mimetype,

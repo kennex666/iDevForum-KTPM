@@ -33,6 +33,7 @@ app.use(
 );
 app.use(
 	"/api/post",
+	conditionalAuthenticate(["POST", "PUT", "DELETE"]),
 	createProxyMiddleware({
 		target: "http://post-service:3002/posts",
 		changeOrigin: true,
@@ -51,10 +52,17 @@ app.use(
 	createProxyMiddleware({
 		target: "http://comment-service:3001",
 		changeOrigin: true,
+		on: {proxyReq: (proxyReq, req) => {
+			if (req.user) {
+				proxyReq.setHeader("user", JSON.stringify(req.user));
+			}
+		}},
 	})
 );
+
 app.use(
 	"/api/file",
+	conditionalAuthenticate(["POST", "PUT", "DELETE"]),
 	createProxyMiddleware({
 		target: "http://file-service:3003",
 		changeOrigin: true,
