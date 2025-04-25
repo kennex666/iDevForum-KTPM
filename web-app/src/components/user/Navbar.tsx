@@ -89,7 +89,7 @@ export default function Navbar() {
 										>
 											<FaUser />
 											<span className="ps-3">
-												{user.name}
+												Trang cá nhân
 											</span>
 										</a>
 										{isLogin && (
