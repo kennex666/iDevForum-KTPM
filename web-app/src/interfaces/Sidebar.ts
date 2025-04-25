@@ -17,7 +17,5 @@ export interface Bookmark {
 }
 
 export interface SidebarProps {
-	currentUser?: {
-		bookMarks: Bookmark[];
-	};
+	currentUser?:  any
 }

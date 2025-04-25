@@ -1,10 +1,6 @@
-import Navbar from "@/components/user/Navbar";
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-	title: "iDev4rum",
-	description: "Diễn đàn lập trình viên IUH",
-};
+import Navbar from "@/components/user/Navbar";
 
 export default function RootLayout({
 	children,

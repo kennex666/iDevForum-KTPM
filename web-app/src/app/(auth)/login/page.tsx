@@ -3,11 +3,15 @@
 import Footer from "@/components/Footer";
 import { useState } from "react";
 import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-
+import axios from 'axios';
+import { api, apiParser } from "@/constants/apiConst";
+import { useRouter } from "next/navigation";
 export default function Home() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [error, setError] = useState("");
 	const [form, setForm] = useState({ username: "", password: "" });
+
+	const router = useRouter();
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setForm({ ...form, [e.target.id]: e.target.value });
@@ -15,16 +19,43 @@ export default function Home() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setError("");
+		try {
+			// Kiểm tra dữ liệu đầu vào
+			if (form.username === "") {
+				setError("Vui lòng nhập tên đăng nhập");
+				return;
+			}
+			if (form.password === "") {
+				setError("Vui lòng nhập mật khẩu");
+				return;
+			}
+			if (form.password.length < 6) {
+				setError("Mật khẩu phải có ít nhất 6 ký tự");
+				return;
+			}
+			
+			setError("");
 
-		// Giả lập gọi API
-		await new Promise((res) => setTimeout(res, 500)); // delay 500ms
+			// Giả lập gọi API
+			const response = await axios.post(apiParser(api.apiPath.auth.login), {
+				email: form.username,
+				password: form.password,
+			});
+			console.log(response.data);
 
-		if (form.username === "admin" && form.password === "123456") {
-			alert("Đăng nhập thành công!");
-			// router.push("/dashboard") nếu có
-		} else {
-			setError("Tên đăng nhập hoặc mật khẩu không đúng!");
+			// Kiểm tra phản hồi từ API
+			if (response.data.errorCode != 200){
+				setError(response.data.errorMessage);
+				return;
+			}
+
+			// Lưu thông tin người dùng vào cookies
+			document.cookie = `accessToken=${response.data.data.accessToken}; path=/`;
+
+			router.push("/home");
+		} catch (error) {
+			console.error("Đã xảy ra lỗi:", error);
+			setError("Đã xảy ra lỗi. Vui lòng thử lại sau.");
 		}
 	};
 

@@ -1,7 +1,19 @@
+import { guestUser } from "@/context/UserContext";
 import { Post } from "@/interfaces/Post";
-import { FaStar, FaThumbsUp, FaComment } from "react-icons/fa";
+import { FaStar, FaThumbsUp, FaComment, FaThumbsDown } from "react-icons/fa";
+import { formatDate } from '../../app/utils/datetimeformat';
 
 const PostItem = ({ post }: { post: Post }) => {
+	if (!post.author){
+		post.author = guestUser;
+		post.author.name = "<<Name>>"
+	}
+	if (!post.topic) {
+		post.topic = {
+			tagId: "unknown",
+			name: "<<Topic>>",
+		};
+	}
 	return (
 		<div className="px-6 py-8 flex space-x-4 flex-row items-center border-b border-gray-200">
 			<div className="w-4/6">
@@ -23,26 +35,30 @@ const PostItem = ({ post }: { post: Post }) => {
 
 				{/* Tiêu đề + mô tả */}
 				<a
-					href={`/posts/${post.url}`}
+					href={`/posts/${post.postId}`}
 					className="text-2xl font-bold hover:underline"
 				>
 					{post.title}
 				</a>
-				<p>{post.description}</p>
+				<p className="mt-2">{post.description}</p>
 
 				{/* Metadata */}
 				<div className="flex justify-between mt-4 text-gray-600 text-sm">
-					<div className="flex items-center gap-2">
-						<FaStar />
-						<span>{post.date}</span>
+					<div className="flex gap-1">
+						<FaStar className="w-4 h-4" />
+						<span>{formatDate(post.createdAt)}</span>
 					</div>
-					<div className="flex items-center gap-3">
-						<div className="flex flex-row gap-1">
-							<FaThumbsUp />
-							<span>{post.totalUpVote}</span>
+					<div className="flex gap-3">
+						<div className="flex gap-1">
+							<FaThumbsUp className="w-4 h-4" />
+							<span>{post.totalUpvote}</span>
 						</div>
-						<div className="flex flex-row gap-1">
-							<FaComment />
+						<div className="flex gap-1">
+							<FaThumbsDown className="w-4 h-4" />
+							<span>{post.totalDownvote}</span>
+						</div>
+						<div className="flex gap-1">
+							<FaComment className="w-4 h-4" />
 							<span>{post.totalComments}</span>
 						</div>
 					</div>
@@ -55,7 +71,7 @@ const PostItem = ({ post }: { post: Post }) => {
 				className="w-2/6 flex justify-center items-center"
 			>
 				<img
-					src="https://placehold.co/150x150"
+					src={post?.coverImage || "https://placehold.co/200x200"}
 					className="rounded-lg h-32 w-32 object-cover"
 					alt="Post preview"
 				/>

@@ -11,11 +11,14 @@ import {
 	FaLock,
 	FaSignOutAlt,
 } from "react-icons/fa";
+import { EUserRole, useUser } from "@/context/UserContext";
 
 export default function Navbar() {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const searchRef = useRef<HTMLInputElement>(null);
 	const router = useRouter();
+	const {user, isLogin} = useUser();
+	
 
 	const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === "Enter" && searchRef.current) {
@@ -64,7 +67,10 @@ export default function Navbar() {
 						className="rounded-full"
 					>
 						<img
-							src="https://placehold.co/32x32"
+							src={
+								user?.profilePicture ||
+								"https://placehold.co/50x50"
+							}
 							alt="User profile"
 							className="w-8 h-8 rounded-full"
 						/>
@@ -80,24 +86,30 @@ export default function Navbar() {
 									className="block px-4 py-2 text-sm text-gray-700 flex items-center"
 								>
 									<FaUser />
-									<span className="ps-3">Hồ sơ</span>
+									<span className="ps-3">{user.name}</span>
 								</a>
-								<a
-									href="/admin"
-									className="block px-4 py-2 text-sm text-gray-700 flex items-center"
-								>
-									<FaBookmark />
-									<span className="ps-3">
-										Bài viết đã lưu
-									</span>
-								</a>
-								<a
-									href="/dashboard"
-									className="block px-4 py-2 text-sm text-gray-700 flex items-center"
-								>
-									<FaLock />
-									<span className="ps-3">Trang quản trị</span>
-								</a>
+								{isLogin && (
+									<a
+										href="/bookmark"
+										className="block px-4 py-2 text-sm text-gray-700 flex items-center"
+									>
+										<FaBookmark />
+										<span className="ps-3">
+											Bài viết đã lưu
+										</span>
+									</a>
+								)}
+								{isLogin && user.role == EUserRole.ADMIN && (
+									<a
+										href="/admin"
+										className="block px-4 py-2 text-sm text-gray-700 flex items-center"
+									>
+										<FaLock />
+										<span className="ps-3">
+											Trang quản trị
+										</span>
+									</a>
+								)}
 								<a
 									href="/logout"
 									className="border-t block px-4 py-2 text-sm font-semibold mt-2 pt-4 text-red-500 flex items-center"
