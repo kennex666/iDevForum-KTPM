@@ -48,7 +48,7 @@ const uploadImage = multer({
 });
 
 // Image upload route
-router.post('/image',authenticate, uploadImage.single('file'), (req: Request, res: Response) => {
+router.post('/image', uploadImage.single('file'), authenticate, (req: Request, res: Response) => {
     const file = req.file;
     if (!file) {
         res.status(200).json(uploadErrorResponse('No file uploaded'));
