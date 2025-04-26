@@ -3,7 +3,7 @@ version: '3.8'
 services:
   mongodb:
     volumes:
-      - /database:/data/db
+      - ./database/mongodb:/data/db
 
   api-gateway:
     build:

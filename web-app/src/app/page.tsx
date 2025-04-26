@@ -10,11 +10,13 @@ export default function Home() {
 	const router = useRouter();
 
 	useEffect(() => {
-		if (user) {
-			router.replace("/home");
-		} else {
-			router.replace("/login");
-		}
+		setTimeout(() => {
+			if (user) {
+				router.replace("/home");
+			} else {
+				router.replace("/login");
+			}
+		}, 1500);
 	}, [user]);
 
 	return (
@@ -22,18 +24,12 @@ export default function Home() {
 			{/* Waiting for auth */}
 			<div className="flex flex-col items-center justify-center w-full">
 				<Image
-					src="/images/logo.png"
+					src="/assets/img/idev-loading.gif"
 					alt="Logo"
-					width={200}
-					height={200}
+					width={300}
+					height={300}
 					className="mb-4"
 				/>
-				<p className="text-lg text-gray-700">
-					Đang kiểm tra thông tin đăng nhập...
-				</p>
-				<p className="text-lg text-gray-700">
-					Vui lòng đợi trong giây lát...
-				</p>
 			</div>
 		</div>
 	);
