@@ -5,7 +5,9 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo "🔎 Pulling source code..."
-                git branch: 'production', url: 'https://github.com/Kennex666/iDevForum-KTPM.git'
+                git branch: 'production', url: 'https://github.com/Kennex666/iDevForum-KTPM.git',
+				credentialsId: 'token'  // RẤT QUAN TRỌNG!
+
             }
         }
 
