@@ -16,12 +16,12 @@ pipeline {
                 echo "🚀 Deploying app via docker-compose..."
                 
                 // Nếu container cũ đang chạy thì down trước
-                sh '''
+                bat '''
                 docker-compose down || echo "Nothing to stop"
                 '''
                 
                 // Up lại từ source code mới pull
-                sh '''
+                bat '''
                 docker-compose up -d --build
                 '''
             }
