@@ -11,11 +11,14 @@ import {
 	FaLock,
 	FaSignOutAlt,
 } from "react-icons/fa";
+import { EUserRole, useUser } from "@/context/UserContext";
 
 export default function Navbar() {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const searchRef = useRef<HTMLInputElement>(null);
 	const router = useRouter();
+	const {user, isLogin} = useUser();
+	
 
 	const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === "Enter" && searchRef.current) {
@@ -46,69 +49,105 @@ export default function Navbar() {
 
 			{/* Actions */}
 			<div className="flex items-center space-x-10">
-				<a
-					href="/write"
-					className="text-gray-500 focus:outline-none space-x-2 flex items-center"
-				>
-					<FaPen />
-					<span>Viết bài</span>
-				</a>
-				<button className="text-gray-500 focus:outline-none">
-					<FaBell />
-				</button>
-
 				{/* Profile Dropdown */}
-				<div className="relative">
-					<button
-						onClick={() => setIsMenuOpen(!isMenuOpen)}
-						className="rounded-full"
-					>
-						<img
-							src="https://placehold.co/32x32"
-							alt="User profile"
-							className="w-8 h-8 rounded-full"
-						/>
-					</button>
-					{isMenuOpen && (
-						<div
-							className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 animate-fadeIn"
-							role="menu"
+				{isLogin && (
+					<>
+						<a
+							href="/write"
+							className="text-gray-500 focus:outline-none space-x-2 flex items-center"
 						>
-							<div className="py-1 space-y-1">
-								<a
-									href="/profile"
-									className="block px-4 py-2 text-sm text-gray-700 flex items-center"
+							<FaPen />
+							<span>Viết bài</span>
+						</a>
+						<a  href="/notification" className="text-gray-500 focus:outline-none space-x-2 flex items-center">
+							<FaBell />
+							<span>Thông báo</span>
+						</a>
+						<div className="relative">
+							<button
+								onClick={() => setIsMenuOpen(!isMenuOpen)}
+								className="rounded-full"
+							>
+								<img
+									src={
+										user?.profilePicture ||
+										"https://placehold.co/50x50"
+									}
+									alt="User profile"
+									className="w-8 h-8 rounded-full"
+								/>
+							</button>
+							{isMenuOpen && (
+								<div
+									className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 animate-fadeIn"
+									role="menu"
 								>
-									<FaUser />
-									<span className="ps-3">Hồ sơ</span>
-								</a>
-								<a
-									href="/admin"
-									className="block px-4 py-2 text-sm text-gray-700 flex items-center"
-								>
-									<FaBookmark />
-									<span className="ps-3">
-										Bài viết đã lưu
-									</span>
-								</a>
-								<a
-									href="/admin"
-									className="block px-4 py-2 text-sm text-gray-700 flex items-center"
-								>
-									<FaLock />
-									<span className="ps-3">Trang quản trị</span>
-								</a>
-								<a
-									href="/logout"
-									className="border-t block px-4 py-2 text-sm font-semibold mt-2 pt-4 text-red-500 flex items-center"
-								>
-									<FaSignOutAlt />
-									<span className="ps-3">Đăng xuất</span>
-								</a>
-							</div>
+									<div className="py-1 space-y-1">
+										<a
+											href="/profile"
+											className="block px-4 py-2 text-sm text-gray-700 flex items-center"
+										>
+											<FaUser />
+											<span className="ps-3">
+												Trang cá nhân
+											</span>
+										</a>
+										{isLogin && (
+											<a
+												href="/bookmark"
+												className="block px-4 py-2 text-sm text-gray-700 flex items-center"
+											>
+												<FaBookmark />
+												<span className="ps-3">
+													Bài viết đã lưu
+												</span>
+											</a>
+										)}
+										{isLogin &&
+											user.role == EUserRole.ADMIN && (
+												<a
+													href="/admin"
+													className="block px-4 py-2 text-sm text-gray-700 flex items-center"
+												>
+													<FaLock />
+													<span className="ps-3">
+														Trang quản trị
+													</span>
+												</a>
+											)}
+										<a
+											href="/logout"
+											className="border-t block px-4 py-2 text-sm font-semibold mt-2 pt-4 text-red-500 flex items-center"
+										>
+											<FaSignOutAlt />
+											<span className="ps-3">
+												Đăng xuất
+											</span>
+										</a>
+									</div>
+								</div>
+							)}
 						</div>
-					)}
-				</div>
+					</>
+				)}
+				{/* Guest User */}
+				{!isLogin && (
+					<div className="flex gap-2">
+						<a
+							href="/login"
+							className="text-blue-500 focus:outline-none space-x-2 flex items-center hover:underline transition-all duration-300"
+						>
+							<span>Đăng nhập</span>
+						</a>
+						/
+						<a
+							href="/register"
+							className="text-blue-500 focus:outline-none space-x-2 flex items-center hover:underline transition-all duration-300"
+						>
+							<span>Đăng ký</span>
+						</a>
+					</div>
+				)}
 			</div>
 
 			<style jsx>{`

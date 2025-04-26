@@ -1,9 +1,4 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-	title: "iDev4rum",
-	description: "Diễn đàn lập trình viên IUH",
-};
+"use client";
 
 export default function RootLayout({
 	children,

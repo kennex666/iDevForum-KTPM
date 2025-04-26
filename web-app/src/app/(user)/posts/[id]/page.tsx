@@ -15,6 +15,11 @@ import {
 	FaShare,
 	FaPen,
 } from "react-icons/fa";
+import { api, apiParser } from "@/constants/apiConst";
+import Error from "@/components/Error";
+import Loading from "@/components/user/Loading";
+import { guestUser } from "@/context/UserContext";
+import { formatDate, getDateOnly, getReadingTime } from '../../../utils/datetimeformat';
 
 interface User {
 	userId: number;
@@ -37,30 +42,44 @@ interface Post {
 	topic: { name: string };
 	author: User;
 	comments: Comment[];
-	totalUpVote: number;
-	totalDownVote: number;
+	totalUpvote: number;
+	totalDownvote: number;
 	totalComments: number;
 	isOwner?: boolean;
 }
 
 export default function PostDetailPage() {
 	const { id } = useParams();
-	const [post, setPost] = useState<Post | null>(null);
+	const [post, setPost] = useState<any | null>(null);
 	const [isFollowing, setIsFollowing] = useState(false);
 	const [reaction, setReaction] = useState<string>("");
 	const [comments, setComments] = useState<Comment[]>([]);
 	const [comment, setComment] = useState("");
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		fetch(`/api/posts/${id}`)
+		fetch(apiParser(api.apiPath.post.getInfo.replace(":id", id)))
 			.then((res) => res.json())
 			.then((data) => {
-				const p = data.data.post;
-				p.content = DOMPurify.sanitize(p.content);
+				if (data.errorCode != 200) {
+					return;
+				}
+				const p = data.data;
+				if (!p.author) {
+					p.author = guestUser;
+					p.author.name = "<<Name>>";
+				}
+				if (!p.topic) {
+					p.topic = {
+						tagId: "unknown",
+						name: "<<Topic>>",
+					};
+				}
+				p.contentDOM = DOMPurify.sanitize(p.content);
 				setPost(p);
-				setReaction(data.data.reaction);
+				setReaction("");
 				setComments(p.comments || []);
-			});
+			}).finally(() => setIsLoading(false));
 	}, [id]);
 
 	const handleFollow = () => {
@@ -74,11 +93,42 @@ export default function PostDetailPage() {
 
 	const handleVote = (type: boolean) => {
 		if (!post) return;
+
+		
 		fetch(`/api/vote/${post.postId}?type=${type ? 1 : 0}`)
 			.then((res) => res.json())
 			.then((data) => {
-				if (data.errorCode === 200)
-					setReaction(type ? "upvote" : "downvote");
+				if (data.errorCode === 200){
+					if (reaction == "upvote" && type){
+						setReaction("");
+						setPost(
+							(prev: Post) => ({
+								...prev,
+								totalUpvote: prev.totalUpvote - 1,
+							})
+						)
+					}
+					if (reaction == "downvote" && !type){
+						setReaction("");
+						setPost(
+							(prev: Post) => ({
+								...prev,
+								totalDownvote: prev.totalDownvote - 1,
+							})
+						)
+					}
+
+					if (reaction == ""){
+						setPost(
+							(prev: Post) => ({
+								...prev,
+								totalUpvote: prev.totalUpvote + (type ? 1 : 0),
+								totalDownvote: prev.totalDownvote + (type ? 0 : 1),
+							})
+						);
+						setReaction(type ? "upvote" : "downvote");
+					}
+				}
 			});
 	};
 
@@ -96,7 +146,7 @@ export default function PostDetailPage() {
 			});
 	};
 
-	if (!post) return <p className="p-4">Đang tải bài viết...</p>;
+	if (!post ) return (!isLoading) ? <Error/> : <Loading/>;
 
 	return (
 		<div className="container mx-auto px-6 lg:w-6/12 w-full mt-12 pb-12">
@@ -123,7 +173,11 @@ export default function PostDetailPage() {
 						</button>
 					</div>
 					<p className="text-sm text-gray-500">
-						5 phút đọc · {post.date}
+						{getReadingTime(post.content) +
+							" phút đọc · " +
+							getDateOnly(post.createdAt) +
+							" · " +
+							post.topic.name}
 					</p>
 				</div>
 			</div>
@@ -139,7 +193,7 @@ export default function PostDetailPage() {
 								reaction === "upvote" ? "text-blue-500" : ""
 							}
 						/>
-						<span>{post.totalUpVote}</span>
+						<span>{post.totalUpvote}</span>
 					</button>
 					<button
 						onClick={() => handleVote(false)}
@@ -150,7 +204,7 @@ export default function PostDetailPage() {
 								reaction === "downvote" ? "text-blue-500" : ""
 							}
 						/>
-						<span>{post.totalDownVote}</span>
+						<span>{post.totalDownvote}</span>
 					</button>
 					<a
 						href="#comment-view"
@@ -194,7 +248,7 @@ export default function PostDetailPage() {
 				</div>
 			</div>
 
-			<MarkdownRenderer content={post.content} />
+			<MarkdownRenderer content={post.contentDOM} />
 
 			<div className="mt-8" id="comment-view">
 				<h3 className="text-2xl font-semibold mb-6">
