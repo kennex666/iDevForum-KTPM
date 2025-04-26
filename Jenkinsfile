@@ -16,14 +16,26 @@ pipeline {
                 echo "🚀 Deploying app via docker-compose..."
                 
                 // Nếu container cũ đang chạy thì down trước
-                bat '''
-                docker-compose down || echo "Nothing to stop"
-                '''
+
+				if (isUnix()) {
+					sh '''
+					docker-compose down || echo "Nothing to stop"
+					'''
+					
+					sh '''
+					docker-compose up -d --build
+					'''
+				} else {
+					bat '''
+					docker-compose down || echo "Nothing to stop"
+					'''
+					
+					bat '''
+					docker-compose up -d --build
+					'''
+				}
                 
                 // Up lại từ source code mới pull
-                bat '''
-                docker-compose up -d --build
-                '''
             }
         }
     }
