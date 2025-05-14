@@ -68,7 +68,6 @@ const getPostByIdController = async (req:Request, res:Response) => {
 const createPostController = async (req: Request, res:Response) => {
     try {
         const {
-            postId,
             title,
             description,
             content,
@@ -93,7 +92,6 @@ const createPostController = async (req: Request, res:Response) => {
         }
 
         const post = await createPost({
-            postId,
             title,
             description,
             content,
