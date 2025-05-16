@@ -1,8 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/database';
-import postRoute from './routes/postRoute';
-import topicRoute from './routes/topicRoute';
+import postreportRoute from './routes/postreportRoute';
 
 dotenv.config();
 const app = express();
@@ -16,14 +15,13 @@ app.use(express.json());
 app.get("/ping", (req, res) => {
 	res.json({
 		errorCode: 200,
-		errorMessage: "Pong",
+		errorMessage: "Pong pong",
 		data: null,
 	});
 });
 
-app.use('/topics', topicRoute);
-app.use('/posts', postRoute);
-const PORT = process.env.PORT || 3002;
+app.use('/postreports', postreportRoute);
+const PORT = process.env.PORT || 3007;
 
 connectDB().then(() => {
 	app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
