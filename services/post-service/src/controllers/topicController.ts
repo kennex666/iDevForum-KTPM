@@ -66,8 +66,8 @@ const getTopicByIdController = async (req: Request, res: Response) => {
 
 const createTopicController = async (req: Request, res: Response) => {
     try {
-        const { tagId, name, hashtag } = req.body;
-        const topic = await createTopic({ tagId, name, hashtag});
+        const { name, hashtag } = req.body;
+        const topic = await createTopic({ name, hashtag});
         res.status(200).json({
             errorCode: 200,
             errorMessage: "Tạo chủ đề thành công",
