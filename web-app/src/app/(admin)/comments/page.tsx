@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState,useEffect } from 'react';
-import Sidebar from '@/components/admin/Sidebar';
-import Navbar from '@/components/admin/Navbar';
 import Table from '@/components/admin/CommentTable';
+import { api, apiParser } from '@/constants/apiConst';
+import axios from 'axios';   
 
 const ManageUser = () => {
     const [allItems, setAllItems] = useState([]);
@@ -14,15 +14,15 @@ const ManageUser = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://localhost:3001');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const result = await response.json();
+                const response = await axios.get(apiParser(api.apiPath.comment), {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                const result = response.data;
                 if (result.errorCode === 200) {
                     setItems(result.data);
                     setAllItems(result.data);
-                    console.log(result.data);
                 } else {
                     console.error('Error fetching data:', result.errorMessage);
                 }
@@ -53,7 +53,7 @@ const ManageUser = () => {
             const createdDate = new Date(item.createdAt);
             const diffTime = now.getTime() - createdDate.getTime();
             const diffDays = diffTime / (1000 * 60 * 60 * 24); 
-            return diffDays <= days;
+            return diffDays <= days; // Chỉ lấy các bình luận trong khoảng thời gian đã chỉ định
         });
     
         setItems(filteredItems);
@@ -61,17 +61,23 @@ const ManageUser = () => {
     };
 
     const handleDeleteComment = async (commentId: string) => {
+		const token = document.cookie
+				.split("; ")
+				.find((row) => row.startsWith("accessToken="))
+				?.split("=")[1];
+		if (!token) return;
         try {
-            const response = await fetch(`http://localhost:3001/${commentId}`, {
+            const response = await axios(`${apiParser(api.apiPath.comment)}/${commentId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODBiYzAwM2M2ODliZTQyOTMwMDRlMjEiLCJuYW1lIjoiTmd1eWVuIFRoYW5oIEx1YW4iLCJyb2xlIjowLCJlbWFpbCI6Im5ndGhsdWFuLm9yZ0BnbWFpbC5jb20iLCJpYXQiOjE3NDU2MDA1ODcsImV4cCI6MTc0NjIwNTM4N30.lydykLwH-pGBe0JQUU8m0dxRmSfeAPEa7YiGiOErtPU',
+                    'Authorization': 'Bearer ' + token,
                 },
             });
-            const result = await response.json();
+            console.log(response);
+            const result = response.data;
             if (result.errorCode === 200) {
-                const updatedItems = allItems.filter(item => item._id !== commentId);
+                const updatedItems = allItems.filter((item) => item._id !== commentId);
                 setAllItems(updatedItems);
                 setItems(updatedItems);
             } else {

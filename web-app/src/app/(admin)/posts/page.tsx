@@ -7,6 +7,7 @@ import Navbar from '@/components/admin/Navbar';
 import PostsTable from '@/components/admin/PotsTable';
 import PostReportTable from '@/components/admin/PostReportTable';
 import TopicTable from '@/components/admin/TopicTable';
+import { api, apiParser } from '@/constants/apiConst';
 
 interface Post {
     _id: string;
@@ -35,14 +36,18 @@ const ManagePosts = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://localhost:3002');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const result = await response.json();
+                const response = await axios(
+                    `${apiParser(api.apiPath.post.getAll)}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+                const result = response.data;
                 if (result.errorCode === 200) {
                     setPosts(result.data);
-                    console.log(result.data);
                 } else {
                     console.error('Error fetching data:', result.errorMessage);
                 }

@@ -24,7 +24,7 @@ export const postClient = {
 	  const response = await axios.get(`${POST_SERVICE_URL}/posts/${postId}`);
 	  if (!response.data)
 		return null;
-	  return response;
+	  return response.data;
 	} catch (error) {
 	  console.error("Error fetching post by ID:", error);
 	  throw new Error("Failed to fetch post data");

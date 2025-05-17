@@ -1,4 +1,6 @@
+import { api, apiParser } from '@/constants/apiConst';
 import React, { useState } from 'react';
+import axios from 'axios';
 
 interface Post {
     _id: string;
@@ -32,13 +34,27 @@ enum PostStatus {
 const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
     const [selectedStatus, setSelectedStatus] = useState<{ [key: string]: string }>({});
 
-    const handleStatusChange = (postId: string, newStatus: string) => {
-        setSelectedStatus(prev => ({
+    const handleStatusChange = async (postId: string, newStatus: string) => {
+        setSelectedStatus((prev: { [key: string]: string }) => ({
             ...prev,
             [postId]: newStatus
         }));
         // Here you can add API call to update the status
         console.log(`Updating post ${postId} status to ${newStatus}`);
+        
+        const updatedPosts = await axios(
+            `${apiParser(api.apiPath.post.updateStatus)}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                data: {
+                    postId,
+                    status: newStatus,
+                },
+            }
+        );
     };
 
     const getStatusColor = (status: string) => {

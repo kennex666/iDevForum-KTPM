@@ -24,6 +24,8 @@ const CommentTable: React.FC<CommentTableProps> = ({ items, handleDeleteComment 
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const handleDelete = async (id: string) => {
+        const confirmDelete = window.confirm('Bạn có chắc chắn muốn xóa bình luận này?');
+        if (!confirmDelete) return;
         try {
             setDeletingId(id);
             await handleDeleteComment(id);
@@ -48,7 +50,7 @@ const CommentTable: React.FC<CommentTableProps> = ({ items, handleDeleteComment 
                 </thead>
                 <tbody>
                     {items.map((item) => (
-                        <tr key={item.id} className="align-middle">
+                        <tr key={item.commentId} className="align-middle">
                             <td className="px-4">
                                 <div className="d-flex align-items-center">
                                     <img
@@ -68,12 +70,12 @@ const CommentTable: React.FC<CommentTableProps> = ({ items, handleDeleteComment 
                             </td>
                             <td className="px-4">
                                 <a 
-                                    href={item.post?.url || '#'} 
+                                    href={item.post?.post.url || '#'} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     className="text-decoration-none"
                                 >
-                                    <span className="text-primary">{item.post?.title || 'Không có tiêu đề'}</span>
+                                    <span className="text-primary">{item.post?.post.title || 'Không có tiêu đề'}</span>
                                 </a>
                             </td>
                             <td className="px-4 text-muted">
@@ -82,7 +84,7 @@ const CommentTable: React.FC<CommentTableProps> = ({ items, handleDeleteComment 
                             <td className="px-4">
                                 <button
                                     className={`btn btn-sm ${deletingId === item.id ? 'btn-secondary' : 'btn-danger'}`}
-                                    onClick={() => handleDelete(item.id)}
+                                    onClick={() => handleDelete(item.commentId)}
                                     disabled={deletingId === item.id}
                                 >
                                     {deletingId === item.id ? (
