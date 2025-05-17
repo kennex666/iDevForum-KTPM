@@ -25,19 +25,15 @@ class CommentService implements ICommentService {
       // Use Promise.all to resolve all async operations in parallel
       const comments = await Promise.all(
         items.map(async (item: any) => {
-          console.log(item.userId, item.postId);
+          console.log("322121", item.userId, item.postId);
           try {
-            const user = await userClient.getUserById(item.userId);
-            
-            const post = await postClient.getPostById(item.postId);
+            const user = await userClient.getUserById(item.userId.toString()).catch(() => null);
+            const post = await postClient.getPostById(item.postId.toString()).catch(() => null);
           
             return {
-              id: item._id,
-              content: item.content,
-              post: post,
-              user: user ,
-              createdAt: item.createdAt,
-              updatedAt: item.updatedAt,
+              ...item.toObject(),
+              user: user?.data || null,
+              post: post?.data || 1,
             };
           } catch (error) {
             console.error(`Error fetching related data for comment ID ${item._id}:`, error);
@@ -110,11 +106,13 @@ class CommentService implements ICommentService {
       const comments = await Promise.all(
         items.map(async (item: any) => {
           try {
+            const post = await postClient.getPostById(item.postId);
             const user = await userClient.getUserById(item.userId);
             return {
               id: item._id,
               content: item.content,
               postId: item.postId,
+              post: post,
               user: user,
               createdAt: item.createdAt,
               updatedAt: item.updatedAt,

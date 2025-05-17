@@ -21,11 +21,6 @@ router.get('/', commentController.getAllComments);
 router.post('/save', authenticate, commentController.createComment);
 
 /**
- * Get comment by ID
- */
-router.get('/:id', commentController.getCommentById);
-
-/**
  * Get comments by post ID
  */
 router.get('/post/:postId', commentController.getCommentsByPostId);
@@ -34,6 +29,11 @@ router.get('/post/:postId', commentController.getCommentsByPostId);
  * Get comments by user ID
  * */
 router.get('/user/:userId', commentController.getCommentsByUserId);
+
+/**
+ * Get comment by ID
+ */
+router.get('/:id', commentController.getCommentById);
 
 /**
  * Update comment
