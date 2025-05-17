@@ -1,12 +1,11 @@
 import { PostModel, IPost } from "../models/postModel";
 import { PostStatus } from "../models/postStatus";
-
+import { UserClient } from '../clients/users';
 const getPosts = async (): Promise<IPost[]> => {
     return await PostModel.find();
 }
 
 const createPost = async (postData: {
-    postId: string;
     title: string;
     description: string;
     content: string;
@@ -34,15 +33,25 @@ const createPost = async (postData: {
 };
 
 
-const getPostById = async (id: string): Promise<IPost | null> => {
+const getPostById = async (id: string): Promise<{ post: IPost | null; user: any | null }> => {
     try {
-        const post= await PostModel.findById(id);
-        return post;
+        const post = await PostModel.findById(id);
+
+        if (!post) {
+            return { post: null, user: null }; // Trả về null nếu không tìm thấy bài viết
+        }
+
+        const user = await UserClient.getUserById(post.userId.toString()).catch(() => null);
+
+        return {
+            post: post.toObject(), // Chuyển đổi bài viết thành đối tượng thuần túy
+            user: user?.data || null // Trả về thông tin người dùng hoặc null nếu không tìm thấy
+        };
     } catch (error) {
         console.error("Error while fetching post:", error);
         throw new Error("Không thể tìm thấy bài đăng. Vui lòng thử lại sau.");
     }
-}
+};
 
 const updatePost = async (id:String,title: string,description: string,content: string,url: string): Promise<IPost | null> => {
    try {
