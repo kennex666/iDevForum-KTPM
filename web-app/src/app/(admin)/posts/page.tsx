@@ -1,108 +1,93 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import Sidebar from '@/components/admin/Sidebar';
 import Navbar from '@/components/admin/Navbar';
-import Table from '@/components/admin/Table';
+import PostsTable from '@/components/admin/PotsTable';
+import PostReportTable from '@/components/admin/PostReportTable';
+import TopicTable from '@/components/admin/TopicTable';
 
-const ManageUser = () => {
-    const employees = [
-        {
-            name: 'Airi Satou',
-            position: 'Accountant',
-            office: 'Tokyo',
-            age: 33,
-            startDate: '2008/11/28',
-            salary: '$162,700',
-            avatar: 'assets/img/avatars/avatar1.jpeg',
-        },
-        {
-            name: 'Angelica Ramos',
-            position: 'Chief Executive Officer(CEO)',
-            office: 'London',
-            age: 47,
-            startDate: '2009/10/09',
-            salary: '$1,200,000',
-            avatar: 'assets/img/avatars/avatar2.jpeg',
-        },
-        {
-            name: 'Ashton Cox',
-            position: 'Junior Technical Author',
-            office: 'San Francisco',
-            age: 66,
-            startDate: '2009/01/12',
-            salary: '$86,000',
-            avatar: 'assets/img/avatars/avatar3.jpeg',
-        },
-        {
-            name: 'Bradley Greer',
-            position: 'Software Engineer',
-            office: 'London',
-            age: 41,
-            startDate: '2012/10/13',
-            salary: '$132,000',
-            avatar: 'assets/img/avatars/avatar4.jpeg',
-        },
-        {
-            name: 'Brenden Wagner',
-            position: 'Software Engineer',
-            office: 'San Francisco',
-            age: 28,
-            startDate: '2011/06/07',
-            salary: '$206,850',
-            avatar: 'assets/img/avatars/avatar5.jpeg',
-        },
-        {
-            name: 'Brielle Williamson',
-            position: 'Integration Specialist',
-            office: 'New York',
-            age: 61,
-            startDate: '2012/12/02',
-            salary: '$372,000',
-            avatar: 'assets/img/avatars/avatar1.jpeg',
-        },
-        {
-            name: 'Bruno Nash',
-            position: 'Software Engineer',
-            office: 'London',
-            age: 38,
-            startDate: '2011/05/03',
-            salary: '$163,500',
-            avatar: 'assets/img/avatars/avatar2.jpeg',
-        },
-        {
-            name: 'Caesar Vance',
-            position: 'Pre-Sales Support',
-            office: 'New York',
-            age: 21,
-            startDate: '2011/12/12',
-            salary: '$106,450',
-            avatar: 'assets/img/avatars/avatar3.jpeg',
-        },
-        {
-            name: 'Cara Stevens',
-            position: 'Sales Assistant',
-            office: 'New York',
-            age: 46,
-            startDate: '2011/12/06',
-            salary: '$145,600',
-            avatar: 'assets/img/avatars/avatar4.jpeg',
-        },
-        {
-            name: 'Cedric Kelly',
-            position: 'Senior JavaScript Developer',
-            office: 'Edinburgh',
-            age: 22,
-            startDate: '2012/03/29',
-            salary: '$433,060',
-            avatar: 'assets/img/avatars/avatar5.jpeg',
-        },
-    ];
+interface Post {
+    _id: string;
+    postId: string;
+    title: string;
+    description: string;
+    content: string;
+    url: string;
+    status: string;
+    totalComments: number;
+    totalUpvote: number;
+    totalDownvote: number;
+    totalShare: number;
+    totalView: number;
+    userId: string;
+    tagId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+const ManagePosts = () => {
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<'posts' | 'reports' | 'topics'>('posts');
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch('http://localhost:3002');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const result = await response.json();
+                if (result.errorCode === 200) {
+                    setPosts(result.data);
+                    console.log(result.data);
+                } else {
+                    console.error('Error fetching data:', result.errorMessage);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+        fetchData();
+    }, []);
+
     return (
         <div id="wrapper">
             <div id="content-wrapper" className="d-flex flex-column">
                 <div id="content">
                     <div className="container-fluid">
-                        <h3 className="text-dark mb-4">Team</h3>
-                        <Table employees={employees} />
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <h3 className="text-dark">Posts Management</h3>
+                            <div className="btn-group">
+                                <button
+                                    className={`btn ${activeTab === 'posts' ? 'btn-primary' : 'btn-outline-primary'}`}
+                                    onClick={() => setActiveTab('posts')}
+                                >
+                                    <i className="fas fa-file-alt me-2"></i>
+                                    All Posts
+                                </button>
+                                <button
+                                    className={`btn px-4 ${activeTab === 'reports' ? 'btn-danger' : 'btn-outline-danger'}`}
+                                    onClick={() => setActiveTab('reports')}
+                                >
+                                    <i className="fas fa-flag me-2"></i>
+                                    Reported Posts
+                                </button>
+                                <button
+                                    className={`btn ${activeTab === 'topics' ? 'btn-success' : 'btn-outline-success'}`}
+                                    onClick={() => setActiveTab('topics')}
+                                >
+                                    <i className="fas fa-tags me-2"></i>
+                                    Topics
+                                </button>
+                            </div>
+                        </div>
+
+                        {activeTab === 'posts' && <PostsTable posts={posts} />}
+                        {activeTab === 'reports' && <PostReportTable />}
+                        {activeTab === 'topics' && <TopicTable />}
                     </div>
                 </div>
                 <footer className="bg-white sticky-footer">
@@ -117,4 +102,4 @@ const ManageUser = () => {
     );
 };
 
-export default ManageUser;
+export default ManagePosts;

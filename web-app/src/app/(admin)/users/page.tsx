@@ -1,108 +1,91 @@
+'use client';
 import React from 'react';
-import Sidebar from '@/components/admin/Sidebar';
-import Navbar from '@/components/admin/Navbar';
-import Table from '@/components/admin/Table';
+import UserTable from '@/components/admin/UserTable';
 
-const ManageUser = () => {
-    const employees = [
+const ManageUser: React.FC = () => {
+    // Mock data following the IUser interface
+    const users = [
         {
-            name: 'Airi Satou',
-            position: 'Accountant',
-            office: 'Tokyo',
-            age: 33,
-            startDate: '2008/11/28',
-            salary: '$162,700',
-            avatar: 'assets/img/avatars/avatar1.jpeg',
+            _id: '1',
+            name: 'John Doe',
+            role: 1,
+            accountState: 'ACTIVE',
+            coverPicture: '/images/covers/cover1.jpg',
+            description: 'Senior Developer with 5+ years of experience',
+            username: 'johndoe',
+            email: 'john.doe@example.com',
+            title: 'Senior Developer',
+            password: '', // Not displayed in UI
+            profilePicture: 'https://picsum.photos/200',
+            bio: 'Passionate about web development and new technologies',
+            createdAt: new Date('2023-01-01'),
+            updatedAt: new Date('2024-01-15')
         },
         {
-            name: 'Angelica Ramos',
-            position: 'Chief Executive Officer(CEO)',
-            office: 'London',
-            age: 47,
-            startDate: '2009/10/09',
-            salary: '$1,200,000',
-            avatar: 'assets/img/avatars/avatar2.jpeg',
+            _id: '2',
+            name: 'Jane Smith',
+            role: 0,
+            accountState: 'ACTIVE',
+            coverPicture: '/images/covers/cover2.jpg',
+            description: 'UI/UX Designer',
+            username: 'janesmith',
+            email: 'jane.smith@example.com',
+            title: 'UI/UX Designer',
+            password: '', // Not displayed in UI
+            profilePicture: 'https://picsum.photos/200',
+            bio: 'Creating beautiful and intuitive user interfaces',
+            createdAt: new Date('2023-02-15'),
+            updatedAt: new Date('2024-01-20')
         },
         {
-            name: 'Ashton Cox',
-            position: 'Junior Technical Author',
-            office: 'San Francisco',
-            age: 66,
-            startDate: '2009/01/12',
-            salary: '$86,000',
-            avatar: 'assets/img/avatars/avatar3.jpeg',
+            _id: '3',
+            name: 'Mike Johnson',
+            role: 0,
+            accountState: 'BANNED',
+            coverPicture: '/images/covers/cover3.jpg',
+            description: 'Content Creator',
+            username: 'mikejohnson',
+            email: 'mike.johnson@example.com',
+            title: 'Content Specialist',
+            password: '', // Not displayed in UI
+            profilePicture: 'https://picsum.photos/200',
+            bio: 'Sharing knowledge through engaging content',
+            createdAt: new Date('2023-03-20'),
+            updatedAt: new Date('2024-01-10')
         },
         {
-            name: 'Bradley Greer',
-            position: 'Software Engineer',
-            office: 'London',
-            age: 41,
-            startDate: '2012/10/13',
-            salary: '$132,000',
-            avatar: 'assets/img/avatars/avatar4.jpeg',
-        },
-        {
-            name: 'Brenden Wagner',
-            position: 'Software Engineer',
-            office: 'San Francisco',
-            age: 28,
-            startDate: '2011/06/07',
-            salary: '$206,850',
-            avatar: 'assets/img/avatars/avatar5.jpeg',
-        },
-        {
-            name: 'Brielle Williamson',
-            position: 'Integration Specialist',
-            office: 'New York',
-            age: 61,
-            startDate: '2012/12/02',
-            salary: '$372,000',
-            avatar: 'assets/img/avatars/avatar1.jpeg',
-        },
-        {
-            name: 'Bruno Nash',
-            position: 'Software Engineer',
-            office: 'London',
-            age: 38,
-            startDate: '2011/05/03',
-            salary: '$163,500',
-            avatar: 'assets/img/avatars/avatar2.jpeg',
-        },
-        {
-            name: 'Caesar Vance',
-            position: 'Pre-Sales Support',
-            office: 'New York',
-            age: 21,
-            startDate: '2011/12/12',
-            salary: '$106,450',
-            avatar: 'assets/img/avatars/avatar3.jpeg',
-        },
-        {
-            name: 'Cara Stevens',
-            position: 'Sales Assistant',
-            office: 'New York',
-            age: 46,
-            startDate: '2011/12/06',
-            salary: '$145,600',
-            avatar: 'assets/img/avatars/avatar4.jpeg',
-        },
-        {
-            name: 'Cedric Kelly',
-            position: 'Senior JavaScript Developer',
-            office: 'Edinburgh',
-            age: 22,
-            startDate: '2012/03/29',
-            salary: '$433,060',
-            avatar: 'assets/img/avatars/avatar5.jpeg',
-        },
+            _id: '4',
+            name: 'Sarah Wilson',
+            role: 0,
+            accountState: 'WAIT_FOR_ACTIVATION',
+            coverPicture: '/images/covers/cover4.jpg',
+            description: 'New member',
+            username: 'sarahwilson',
+            email: 'sarah.wilson@example.com',
+            title: 'Frontend Developer',
+            password: '', // Not displayed in UI
+            profilePicture: 'https://picsum.photos/200',
+            bio: 'Learning and growing in web development',
+            createdAt: new Date('2024-01-01'),
+            updatedAt: new Date('2024-01-01')
+        }
     ];
+
     return (
         <div id="wrapper">
             <div id="content-wrapper" className="d-flex flex-column">
                 <div id="content">
                     <div className="container-fluid">
-                        <h3 className="text-dark mb-4">Team</h3>
-                        <Table employees={employees} />
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <h3 className="text-dark mb-0">User Management</h3>
+                            <nav aria-label="breadcrumb">
+                                <ol className="breadcrumb">
+                                    <li className="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                                    <li className="breadcrumb-item active" aria-current="page">Users</li>
+                                </ol>
+                            </nav>
+                        </div>
+                        <UserTable users={users} />
                     </div>
                 </div>
                 <footer className="bg-white sticky-footer">

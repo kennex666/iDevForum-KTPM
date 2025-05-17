@@ -10,7 +10,7 @@ export default function Footer() {
 					href="https://dtbao.io.vn/?s=idev4rum-microservice"
 					className="text-blue-500"
 				>
-					Duong Thai Bao
+					 iDev4rum 2025
 				</a>
 			</p>
 			<p className="text-red-500 mt-2">
