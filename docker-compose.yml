@@ -36,6 +36,8 @@ services:
       - comment-service
       - post-service
       - user-service
+      - postreport-service
+      - bookmark-service
     networks:
       - app-network
 
@@ -110,7 +112,29 @@ services:
       - mongodb
     networks:
       - app-network
-
+   
+   # Post report Service
+  postreport-service:
+    build: ./services/postreport-service
+    ports:
+      - "3007:3007"
+    environment:
+      MONGO_URI: mongodb://admin:secret@mongodb:27017/postreportdb?authSource=admin
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+  # bookmark Service
+  bookmark-service:
+    build: ./services/bookmark-service
+    ports:
+      - "3008:3008"
+    environment:
+      MONGO_URI: mongodb://admin:secret@mongodb:27017/bookmarkdb?authSource=admin
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
   # Web UI
   web-app:
     build: ./web-app
