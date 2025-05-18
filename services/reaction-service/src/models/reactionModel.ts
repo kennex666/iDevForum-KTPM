@@ -23,7 +23,8 @@ const reactionSchema = new Schema({
     },
     reactionType: {
         type: String,
-        required: true
+        required: true,
+        enum: ['like', 'love', 'laugh', 'sad', 'angry', 'dislike']
     },
 }, {
     timestamps: true,

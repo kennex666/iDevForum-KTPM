@@ -73,9 +73,11 @@ const updatePassword = async (id: string, newPassword: string, oldPassword: stri
 	try {
 		const user = await UserModel.findById(id);
 		if (!user) throw new Error("User not found!");
-		const isMatch = await bcrypt.compare(oldPassword, user.password);
+		// const isMatch = await bcrypt.compare(oldPassword, user.password);
+		const isMatch = oldPassword === user.password; // Tạm bỏ hash vì lỗi trên docker
 		if (!isMatch) throw new Error("Old password is incorrect");
-		const passwordHash = await bcrypt.hash(newPassword, 10);
+		// const passwordHash = await bcrypt.hash(newPassword, 10);
+		const passwordHash = newPassword; // Tạm bỏ hash vì lỗi trên docker
 		user.password = passwordHash;
 		return await user.save();
 	} catch (error: any) {

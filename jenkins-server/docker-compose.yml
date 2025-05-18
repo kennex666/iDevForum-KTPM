@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  jenkins:
+    build: .
+    container_name: jenkins
+    ports:
+      - "8081:8080" # Map ra 8081 vì trùng với 8080 của web-ui
+      - "50000:50000" # agent của jenkins
+    volumes:
+      - jenkins_home:/var/jenkins_home #dùng để docker lưu job Jenkins
+      - /var/run/docker.sock:/var/run/docker.sock # Mount docker socket để docker build container
+    restart: unless-stopped
+
+volumes:
+  jenkins_home:

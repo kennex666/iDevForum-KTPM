@@ -2,6 +2,40 @@ import { error } from 'console';
 import * as reactionService from '../services/reactionServices';
 import e from 'express';
 
+
+const getAllReactions = async (req: any, res: any) => {
+    
+    try {
+        const reactions = await reactionService.getReaction();
+        if (!reactions || reactions.length === 0) {
+            return res.status(200).json({
+                errorCode: 404,
+                errorMessage: "No reactions found",
+                data: null
+            });
+        }
+        return res.status(200).json({
+            errorCode: 200,
+            errorMessage: "Get all reactions successfully",
+            data: reactions
+        });
+    } catch (error: any) {
+        if (error instanceof Error) {
+            return res.status(200).json({
+                errorCode: 400,
+                errorMessage: error.message,
+                data: null
+            });
+        } else {
+            return res.status(200).json({
+                errorCode: 500,
+                errorMessage: "Internal Server Error",
+                data: null
+            });
+        }
+    }
+}
+
 const createReaction = async (req: any, res: any) => {
     const { userId, targetId, targetType, reactionType } = req.body;
     try {
@@ -120,7 +154,7 @@ const deleteReaction = async (req: any, res: any) => {
 }
 const getReactionsByTargetId = async (req: any, res: any) => {
     const targetId = req.params.id;
-    const targetType = req.body.targetType;
+    // const targetType = req.body.targetType;
     try {
         if (!targetId || targetId.trim() === "") {
             return res.status(200).json({
@@ -129,14 +163,7 @@ const getReactionsByTargetId = async (req: any, res: any) => {
                 data: null
             });
         }
-        if (!targetType || targetType.trim() === "") {
-            return res.status(200).json({
-                errorCode: 400,
-                errorMessage: "targetType is required",
-                data: null
-            });
-        }
-        const reactions = await reactionService.getReactionsByTargetId(targetId, targetType);
+        const reactions = await reactionService.getReactionsByTargetId(targetId);
         if (!reactions) {
             return res.status(200).json({
                 errorCode: 404,
@@ -218,9 +245,51 @@ const updateReaction = async (req: any, res: any) => {
         }
     }
 }
+
+const getReactionById = async (req: any, res: any) => {
+    const reactionId = req.params.id;
+    try {
+        if (!reactionId || reactionId.trim() === "") {
+            return res.status(200).json({
+                errorCode: 400,
+                errorMessage: "reactionId is required",
+                data: null
+            });
+        }
+        const reaction = await reactionService.getReactionById(reactionId);
+        if (!reaction) {
+            return res.status(200).json({
+                errorCode: 404,
+                errorMessage: "Reaction not found",
+                data: null
+            });
+        }
+        return res.status(200).json({
+            errorCode: 200,
+            errorMessage: "Get reaction successfully",
+            data: reaction
+        });
+    } catch (error: any) {
+        if (error instanceof Error) {
+            return res.status(200).json({
+                errorCode: 400,
+                errorMessage: error.message,
+                data: null
+            });
+        } else {
+            return res.status(200).json({
+                errorCode: 500,
+                errorMessage: "Internal Server Error",
+                data: null
+            });
+        }
+    }
+}
 export {
+    getAllReactions,
     createReaction,
     deleteReaction,
     getReactionsByTargetId,
-    updateReaction
+    updateReaction,
+    getReactionById
 };

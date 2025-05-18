@@ -46,12 +46,6 @@ const Sidebar = () => {
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <Link className={`nav-link ${isActive('/topics')}`} href="/topics">
-                            <i className="fas fa-comments"></i>
-                            <span>Manage Topics</span>
-                        </Link>
-                    </li>
-                    <li className="nav-item">
                         <a className="nav-link" href="/home">
                             <i className="fas fa-window-maximize"></i>
                             <span>Back to home</span>
