@@ -21,6 +21,15 @@ export const apiDevelopment = {
 			getInfo: "/post/:id",
 			updateStatus: "/post/admin",
 		},
+		postReport: {
+			//http://localhost:3000/api/postreport/
+			getAll: "/postreport",
+			getInfo: "/postreport/:id",
+			create: "/postreport/save",
+			update: "/postreport/:id",
+			delete: "/postreport/:id",
+			search: "/postreport/search",
+		},
 		comment: "/comment",
 		like: "/like",
 	},
