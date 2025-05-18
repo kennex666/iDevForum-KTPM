@@ -75,7 +75,24 @@ services:
       - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
     ports:
       - "3006:3006"
-
+  postreport-service:
+    build:
+      context: ./services/postreport-service
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./services/postreport-service/src:/app/src
+      - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
+    ports:
+      - "3007:3007"
+  bookmark-service:
+    build:
+      context: ./services/bookmark-service
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./services/bookmark-service/src:/app/src
+      - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
+    ports:
+      - "3008:3008"
   web-app:
     build:
       context: ./web-app

@@ -76,6 +76,21 @@ app.use(
 	})
 );
 
+app.use(
+	"/api/postreport",
+	createProxyMiddleware({
+		target: "http://postreport-service:3007/postreports",
+		changeOrigin: true,
+	})
+);
+app.use(
+	"/api/bookmark",
+	createProxyMiddleware({
+		target: "http://bookmark-service:3008/bookmarks",
+		changeOrigin: true,
+	})
+);
+
 // Health check
 app.get("/", (_req, res) => {
 	res.send("API Gateway is running...");
