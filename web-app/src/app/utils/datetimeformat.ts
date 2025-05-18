@@ -27,7 +27,7 @@ export const getDateOnly = (dateString: string) => {
 
 export const getReadingTime = (content: string): number => {
 	const wordsPerMinute = 200;
-	const text = content.trim();
+	const text = content ? content.trim() : "";
 	const wordCount = text.split(/\s+/).length;
 
 	const minutes = Math.ceil(wordCount / wordsPerMinute);
