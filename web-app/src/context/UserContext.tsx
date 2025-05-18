@@ -68,6 +68,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 				const data = await res.json();
 				if (data?.data) {
 					setUser(data.data);
+					console.log("User data:", data.data);
 					setIsLogin(true);
 				}
 			} catch (err) {
