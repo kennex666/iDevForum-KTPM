@@ -57,11 +57,11 @@ class BookMarkController {
 
     async createBookMark(req: Request, res: Response) {
         try {
-            const {userId,postId} = req.body;
+            const userId = req.user._id;
+            const {postId} = req.body;
             const report = await BookMarkService.createBookmark({
                 userId,
                 postId
-                
             });
             res.status(200).json({
                 errorCode: 200,

@@ -1,5 +1,6 @@
 import express from 'express';
 import bookmarkController from '../controllers/bookmarkController';
+import { authenticate } from '../utils/authenticate';
 
 const bookmarkRoute = express.Router();
 
@@ -10,7 +11,7 @@ bookmarkRoute.get('/', bookmarkController.getAllBookMark);
 bookmarkRoute.get('/:id', bookmarkController.getBookMarkById);
 
 // Tạo báo cáo mới
-bookmarkRoute.post('/save', bookmarkController.createBookMark);
+bookmarkRoute.post('/save', authenticate, bookmarkController.createBookMark);
 
 // Cập nhật báo cáo
 bookmarkRoute.put('/:id', bookmarkController.updateBookMark);

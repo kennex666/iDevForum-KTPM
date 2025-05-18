@@ -1,5 +1,6 @@
 import express from 'express';
 import postreportController from '../controllers/postreportController';
+import { authenticate } from '../utils/authenticate';
 
 const postrepostRoute = express.Router();
 
@@ -10,7 +11,7 @@ postrepostRoute.get('/', postreportController.getPostAllReport);
 postrepostRoute.get('/:id', postreportController.getPostReportById);
 
 // Tạo báo cáo mới
-postrepostRoute.post('/save', postreportController.createPostReport);
+postrepostRoute.post('/save',authenticate ,postreportController.createPostReport);
 
 // Cập nhật báo cáo
 postrepostRoute.put('/:id', postreportController.updatePostReport);

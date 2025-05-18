@@ -58,13 +58,14 @@ class PostReportController {
 
     async createPostReport(req: Request, res: Response) {
         try {
-            const { reason, postId, reporterId, inspectorId } = req.body;
+            const { reason, postId, inspectorId } = req.body;
             const state = PostReportState.PROCCESSING;
+            const userId = req.user._id;
             const report = await postReportService.createPostReport({
                 reason,
                 state,
                 postId,
-                reporterId,
+                reporterId: userId,
                 inspectorId
             });
             res.status(200).json({
