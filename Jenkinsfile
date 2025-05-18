@@ -15,16 +15,16 @@ pipeline {
 			steps {
 				script {
 					if (isUnix()) {
-						echo "🚀 Deploying app via docker-compose..."
+						echo "🚀 Deploying app via docker-compose on Ubuntu..."
 						sh '''
-							docker-compose down || echo "Nothing to stop"
-							docker-compose up -d --build
+							docker compose down || echo "Nothing to stop"
+							docker compose up -d --build
 						'''
 					} else {
-						echo "🚀 Deploying app via docker-compose..."
+						echo "🚀 Deploying app via docker-compose on Windows..."
 						bat '''
-							docker-compose down || echo "Nothing to stop"
-							docker-compose up -d --build
+							docker compose down || echo "Nothing to stop"
+							docker compose up -d --build
 						'''
 					}
 				}
