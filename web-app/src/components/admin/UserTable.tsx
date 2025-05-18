@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+
+import axios from 'axios';
+
+import { api, apiParser } from "@/constants/apiConst";
+
+import { useUser } from "@/context/UserContext";
 
 interface IUser {
     _id: string;
@@ -22,6 +28,9 @@ interface UserTableProps {
 }
 
 const UserTable: React.FC<UserTableProps> = ({ users }) => {
+    const { user, isLogin } = useUser()
+    const [userList, setUserList] = useState<IUser[]>([]);
+
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
@@ -35,6 +44,20 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
         bio: '',
         description: ''
     });
+
+    // const regexPatterns = {
+    //     name: /^[\p{L}\s\d.-]{1,50}$/u,
+    //     username: /^[a-zA-Z0-9_-]{6,30}$/,
+    //     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    //     title: /^[\p{L}\s\d.,-]{0,100}$/u,
+    //     bio: /^[\p{L}\s\d.,!?@#$%^&*()_+-]{0,500}$/u,
+    //     description: /^[\p{L}\s\d.,!?@#$%^&*()_+-]{0,1000}$/u,
+    // };
+
+
+    useEffect(() => {
+        setUserList(users);
+    }, [users]);
 
     const handleOpenModal = (user?: IUser) => {
         if (user) {
@@ -74,11 +97,13 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
     };
 
     const handleSave = () => {
-        // Here you would typically make an API call to save/update the user
-        console.log('Saving user:', {
-            ...(selectedUser || {}),
-            ...formData
-        });
+        if (isEditing) {
+            console.log('Updating user:', formData);
+            handleEditUser(selectedUser!._id);
+        } else {
+            handlerAddNewUser();
+        }
+
         handleCloseModal();
     };
 
@@ -98,10 +123,101 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
     };
 
     const getRoleBadge = (role: number) => {
-        return role === 1 ? 
-            <span className="badge bg-primary">Admin</span> : 
+        return role === 1 ?
+            <span className="badge bg-primary">Admin</span> :
             <span className="badge bg-secondary">User</span>;
     };
+
+
+    const handlerAddNewUser = async () => {
+        const url = apiParser(api.apiPath.user.createByAdmin);
+        const token = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("accessToken="))
+            ?.split("=")[1];
+        if (!token) return;
+        try {
+            const response = await axios.post(url, {
+                ...formData,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (response.data.errorCode !== 200) {
+                console.error("Error creating user:", response.data.errorMessage);
+                return;
+            }
+            console.log("User created successfully:", response.data);
+            setUserList((prevUsers) => [...prevUsers, response.data.data]);
+        } catch (error) {
+            console.error("Error creating user:", error);
+        }
+    }
+
+    const handleDeleteUser = async (userId: string) => {
+        if (!userId) return;
+        if (userId === user._id) {
+            alert("You cannot delete yourself!");
+            return;
+        }
+        const confirmed = window.confirm("Bạn có chắc muốn xóa người dùng này? Hành động này không thể hoàn tác.");
+        if (!confirmed) return;
+
+        const url = apiParser(api.apiPath.user.delete.replace(':id', userId));
+        const token = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("accessToken="))
+            ?.split("=")[1];
+        if (!token) return;
+        try {
+            const response = await axios.delete(url, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (response.data.errorCode !== 200) {
+                console.error("Error deleting user:", response.data.errorMessage);
+                return;
+            }
+            setUserList((prevUsers) => prevUsers.filter((user) => user._id !== userId));
+
+        } catch (error) {
+            console.error("Error deleting user:", error);
+        }
+    }
+
+    const handleEditUser = async (userId: string) => {
+        if (!userId) return;
+        const url = apiParser(api.apiPath.user.update.replace(':id', userId));
+        const token = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("accessToken="))
+            ?.split("=")[1];
+        if (!token) return;
+        console.log("Form data to update:", formData);
+        try {
+            const response = await axios.put(url, {
+                updateData: {
+                    ...formData,
+                }
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (response.data.errorCode !== 200) {
+                console.error("Error updating user:", response.data.errorMessage);
+                return;
+            }
+            setUserList((prevUsers) => prevUsers.map((user) => user._id === userId ? response.data.data : user));
+        }
+        catch (error) {
+            console.error("Error updating user:", error);
+        }
+    }
+
+
 
     return (
         <div className="card shadow">
@@ -123,7 +239,7 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {users.map((user) => (
+                            {userList.map((user) => (
                                 <tr key={user._id} className="align-middle">
                                     <td className="px-4 py-3">
                                         <div className="d-flex align-items-center">
@@ -155,7 +271,7 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                                     </td>
                                     <td className="px-4 py-3">
                                         <div className="d-flex gap-2">
-                                            <button 
+                                            <button
                                                 className="btn btn-sm btn-info d-flex align-items-center shadow-sm"
                                                 onClick={() => handleOpenModal(user)}
                                                 title="Edit user"
@@ -163,9 +279,10 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                                                 <i className="fas fa-edit me-2"></i>
                                                 Edit
                                             </button>
-                                            <button 
+                                            <button
                                                 className="btn btn-sm btn-danger d-flex align-items-center shadow-sm"
                                                 title="Delete user"
+                                                onClick={() => handleDeleteUser(user._id)}
                                             >
                                                 <i className="fas fa-trash me-2"></i>
                                                 Delete
@@ -179,7 +296,7 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                 </div>
 
                 <div className="mt-4 d-flex justify-content-end">
-                    <button 
+                    <button
                         className="btn btn-primary d-flex align-items-center shadow-sm"
                         onClick={() => handleOpenModal()}
                         title="Add new user"
@@ -197,9 +314,9 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                         <div className="modal-content">
                             <div className="modal-header bg-primary text-white">
                                 <h5 className="modal-title">{isEditing ? 'Edit User' : 'Add New User'}</h5>
-                                <button 
-                                    type="button" 
-                                    className="btn-close btn-close-white" 
+                                <button
+                                    type="button"
+                                    className="btn-close btn-close-white"
                                     onClick={handleCloseModal}
                                     aria-label="Close"
                                 ></button>
@@ -212,7 +329,7 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                                             type="text"
                                             className="form-control"
                                             value={formData.name}
-                                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             placeholder="Enter full name"
                                             minLength={1}
                                             required
@@ -224,7 +341,7 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                                             type="text"
                                             className="form-control"
                                             value={formData.username}
-                                            onChange={(e) => setFormData({...formData, username: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                                             placeholder="Enter username"
                                             minLength={6}
                                             required
@@ -236,17 +353,17 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                                             type="email"
                                             className="form-control"
                                             value={formData.email}
-                                            onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                             placeholder="Enter email"
                                             required
                                         />
                                     </div>
                                     <div className="col-md-3">
                                         <label className="form-label">Role</label>
-                                        <select 
+                                        <select
                                             className="form-select"
                                             value={formData.role}
-                                            onChange={(e) => setFormData({...formData, role: Number(e.target.value)})}
+                                            onChange={(e) => setFormData({ ...formData, role: Number(e.target.value) })}
                                         >
                                             <option value={0}>User</option>
                                             <option value={1}>Admin</option>
@@ -254,10 +371,10 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                                     </div>
                                     <div className="col-md-3">
                                         <label className="form-label">Account State</label>
-                                        <select 
+                                        <select
                                             className="form-select"
                                             value={formData.accountState}
-                                            onChange={(e) => setFormData({...formData, accountState: e.target.value as any})}
+                                            onChange={(e) => setFormData({ ...formData, accountState: e.target.value as any })}
                                         >
                                             <option value="ACTIVE">Active</option>
                                             <option value="BANNED">Banned</option>
@@ -272,7 +389,7 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                                             type="text"
                                             className="form-control"
                                             value={formData.title}
-                                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                             placeholder="Enter title (optional)"
                                         />
                                     </div>
@@ -282,7 +399,7 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                                             className="form-control"
                                             rows={3}
                                             value={formData.bio}
-                                            onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                                             placeholder="Enter bio (optional)"
                                         ></textarea>
                                     </div>
@@ -292,22 +409,22 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                                             className="form-control"
                                             rows={3}
                                             value={formData.description}
-                                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                             placeholder="Enter description (optional)"
                                         ></textarea>
                                     </div>
                                 </form>
                             </div>
                             <div className="modal-footer">
-                                <button 
-                                    type="button" 
-                                    className="btn btn-secondary" 
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
                                     onClick={handleCloseModal}
                                 >
                                     Cancel
                                 </button>
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     className="btn btn-primary d-flex align-items-center"
                                     onClick={handleSave}
                                     disabled={!formData.name || !formData.username || !formData.email}

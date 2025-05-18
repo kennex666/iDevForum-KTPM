@@ -15,11 +15,13 @@ router.get("/search", UserController.searchUsersHandler);
 
 router.post("/search-email", UserController.getUserByEmailHandler);
 
-router.put("/profile", UserController.updateUserHandler);
+router.put("/profile/:id", UserController.updateUserHandler);
 
-router.delete("/profile", UserController.deleteUserHandler);
+router.delete("/profile/:id", UserController.deleteUserHandler);
 
 router.put("/updatepassword/:id", UserController.updatePasswordHandler);
+
+router.post("/createUserByAdmin", UserController.createUserByAdminHandler);
 
 
 

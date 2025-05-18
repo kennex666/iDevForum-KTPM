@@ -15,13 +15,20 @@ export const apiDevelopment = {
 			refresh: "/auth/refresh",
 			queryMe: "/auth/me",
 		},
-		user: "/user",
+		user: {
+			getAll: "/user/getall",
+			update: "/user/profile/:id",
+			delete: "/user/profile/:id",
+			createByAdmin: "/user/createUserByAdmin",
+		},
 		post: {
 			getAll: "/post",
 			getInfo: "/post/:id",
 		},
 		comment: "/comment",
 		like: "/like",
+
+		topic:"/topic",
 	},
 };
 

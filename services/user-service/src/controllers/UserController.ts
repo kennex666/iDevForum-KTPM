@@ -1,9 +1,11 @@
 
+import { console } from "inspector";
 import {
   createUser, getUserByEmail,
   updateUser, getAllUsers,
   getUserById, deleteUser,
-  updatePassword, searchUsers
+  updatePassword, searchUsers,
+  createUserByAdmin,
 } from "../services/userService";
 
 const registerUser = async (req: any, res: any) => {
@@ -192,9 +194,8 @@ const updateUserHandler = async (req: any, res: any) => {
       errorMessage: "User ID is required",
       data: null
     });
-    const updateData = req.body;
+    const {updateData} = req.body;
     console.log("updateData", updateData);
-
     const user = await updateUser(id, updateData);
 
     res.status(200).json({
@@ -221,6 +222,7 @@ const deleteUserHandler = async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const user = await deleteUser(id);
+
     if (!user) return res.status(200).json({
       errorCode: 404,
       errorMessage: "User not found",
@@ -299,6 +301,53 @@ const updatePasswordHandler = async (req: any, res: any) => {
   }
 }
 
+const createUserByAdminHandler = async (req: any, res: any) => {
+  try {
+    const { name, role, accountState, username, email, password, title, bio, description } = req.body;
+    if (!name)
+      return res.status(200).json({
+        errorCode: 400,
+        errorMessage: "Name is required",
+        data: null
+      });
+    if (!username || username.trim() === "")
+      return res.status(200).json({
+        errorCode: 400,
+        errorMessage: "Username is required",
+        data: null
+      });
+    if (!email || email.trim() === "")
+      return res.status(200).json({
+        errorCode: 400,
+        errorMessage: "Email is required",
+        data: null
+      });
+    const newPass = password ||'123456'; // măc định là 123456
+    const user = await createUserByAdmin(name, role, accountState, username, email, newPass, title, bio, description);
+    return res.status(200).json({
+      errorCode: 200,
+      errorMessage: "User created successfully",
+      data: user
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      return res.status(200).json({
+        errorCode: 400,
+        errorMessage: error.message,
+        data: null
+      });
+    }
+    else {
+      return res.status(200).json({
+        errorCode: 500,
+        errorMessage: "Internal server error",
+        data: null
+      });
+    }
+  }
+}
+
+
 
 export {
   registerUser,
@@ -308,6 +357,7 @@ export {
   searchUsersHandler,
   updateUserHandler,
   deleteUserHandler,
-  updatePasswordHandler
+  updatePasswordHandler,
+  createUserByAdminHandler
 };
 
