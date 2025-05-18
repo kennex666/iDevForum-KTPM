@@ -35,7 +35,14 @@ export const apiDevelopment = {
 	},
 };
 
-export const apiProduction = apiDevelopment;
+export const apiProduction = {
+	...apiDevelopment,
+	domain: {
+		client: "localhost:3000",
+		server: "idev4rum.pj.io.vn/api-gateway",
+	},
+	protocol: "https",
+};
 
 
 export const api = process.env.NODE_ENV == "development" ? apiDevelopment : apiProduction;

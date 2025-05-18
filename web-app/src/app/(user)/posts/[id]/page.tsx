@@ -50,7 +50,7 @@ interface Post {
 
 export default function PostDetailPage() {
 	const { id } = useParams();
-	const [post, setPost] = useState<any | null>(null);
+	const [data, setData] = useState<any | null>(null);
 	const [isFollowing, setIsFollowing] = useState(false);
 	const [reaction, setReaction] = useState<string>("");
 	const [comments, setComments] = useState<Comment[]>([]);
@@ -75,16 +75,16 @@ export default function PostDetailPage() {
 						name: "<<Topic>>",
 					};
 				}
-				p.contentDOM = DOMPurify.sanitize(p.content);
-				setPost(p);
+				p.post.contentDOM = DOMPurify.sanitize(p.post.content);
+				setData(p);
 				setReaction("");
 				setComments(p.comments || []);
 			}).finally(() => setIsLoading(false));
 	}, [id]);
 
 	const handleFollow = () => {
-		if (!post) return;
-		fetch(`/api/users/following?id=${post.author.userId}`)
+		if (!data) return;
+		fetch(`/api/users/following?id=${data.author.userId}`)
 			.then((res) => res.json())
 			.then((data) => {
 				if (data.errorCode === 200) setIsFollowing(!isFollowing);
@@ -92,40 +92,34 @@ export default function PostDetailPage() {
 	};
 
 	const handleVote = (type: boolean) => {
-		if (!post) return;
+		if (!data) return;
 
 		
-		fetch(`/api/vote/${post.postId}?type=${type ? 1 : 0}`)
+		fetch(`/api/vote/${data.postId}?type=${type ? 1 : 0}`)
 			.then((res) => res.json())
 			.then((data) => {
-				if (data.errorCode === 200){
-					if (reaction == "upvote" && type){
+				if (data.errorCode === 200) {
+					if (reaction == "upvote" && type) {
 						setReaction("");
-						setPost(
-							(prev: Post) => ({
-								...prev,
-								totalUpvote: prev.totalUpvote - 1,
-							})
-						)
+						setData((prev: any) => ({
+							...prev,
+							totalUpvote: prev.totalUpvote - 1,
+						}));
 					}
-					if (reaction == "downvote" && !type){
+					if (reaction == "downvote" && !type) {
 						setReaction("");
-						setPost(
-							(prev: Post) => ({
-								...prev,
-								totalDownvote: prev.totalDownvote - 1,
-							})
-						)
+						setData((prev: Post) => ({
+							...prev,
+							totalDownvote: prev.totalDownvote - 1,
+						}));
 					}
 
-					if (reaction == ""){
-						setPost(
-							(prev: Post) => ({
-								...prev,
-								totalUpvote: prev.totalUpvote + (type ? 1 : 0),
-								totalDownvote: prev.totalDownvote + (type ? 0 : 1),
-							})
-						);
+					if (reaction == "") {
+						setData((prev: Post) => ({
+							...prev,
+							totalUpvote: prev.totalUpvote + (type ? 1 : 0),
+							totalDownvote: prev.totalDownvote + (type ? 0 : 1),
+						}));
 						setReaction(type ? "upvote" : "downvote");
 					}
 				}
@@ -133,11 +127,11 @@ export default function PostDetailPage() {
 	};
 
 	const handleComment = () => {
-		if (!comment.trim() || !post) return;
+		if (!comment.trim() || !data) return;
 		fetch(`/api/comments/create`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ content: comment, idPost: post.postId }),
+			body: JSON.stringify({ content: comment, idPost: data.post.postId }),
 		})
 			.then((res) => res.json())
 			.then((data) => {
@@ -146,23 +140,23 @@ export default function PostDetailPage() {
 			});
 	};
 
-	if (!post ) return (!isLoading) ? <Error/> : <Loading/>;
+	if (!data) return !isLoading ? <Error /> : <Loading />;
 
 	return (
 		<div className="container mx-auto px-6 lg:w-6/12 w-full mt-12 pb-12">
-			<h1 className="text-3xl font-semibold mb-2">{post.title}</h1>
-			<p className="text text-gray-700 mb-4">{post.description}</p>
+			<h1 className="text-3xl font-semibold mb-2">{data.post.title}</h1>
+			<p className="text text-gray-700 mb-4">{data.post.description}</p>
 
 			<div className="flex items-center gap-3 mb-6">
 				<img
-					src={post.author.profilePicture}
+					src={data.author.profilePicture}
 					alt="avatar"
 					className="w-10 h-10 rounded-full"
 				/>
 				<div>
 					<div className="flex items-center gap-2">
 						<p className="text-sm font-semibold">
-							{post.author.name}
+							{data.author.name}
 						</p>
 						<span className="text-gray-500">·</span>
 						<button
@@ -173,11 +167,11 @@ export default function PostDetailPage() {
 						</button>
 					</div>
 					<p className="text-sm text-gray-500">
-						{getReadingTime(post.content) +
+						{getReadingTime(data.post.content) +
 							" phút đọc · " +
-							getDateOnly(post.createdAt) +
+							getDateOnly(data.post.createdAt) +
 							" · " +
-							post.topic.name}
+							data.topic.name}
 					</p>
 				</div>
 			</div>
@@ -193,7 +187,7 @@ export default function PostDetailPage() {
 								reaction === "upvote" ? "text-blue-500" : ""
 							}
 						/>
-						<span>{post.totalUpvote}</span>
+						<span>{data.post.totalUpvote}</span>
 					</button>
 					<button
 						onClick={() => handleVote(false)}
@@ -204,14 +198,14 @@ export default function PostDetailPage() {
 								reaction === "downvote" ? "text-blue-500" : ""
 							}
 						/>
-						<span>{post.totalDownvote}</span>
+						<span>{data.post.totalDownvote}</span>
 					</button>
 					<a
 						href="#comment-view"
 						className="flex flex-row gap-2 items-center text-gray-500 focus:outline-none"
 					>
 						<FaComment />
-						<span>{post.totalComments}</span>
+						<span>{data.post.totalComments}</span>
 					</a>
 				</div>
 				<div className="flex flex-row gap-6">
@@ -235,10 +229,10 @@ export default function PostDetailPage() {
 					>
 						<FaShare />
 					</button>
-					{post.isOwner && (
+					{data.post.isOwner && (
 						<button
 							onClick={() =>
-								(location.href = `/write?id=${post.postId}`)
+								(location.href = `/write?id=${data.post.postId}`)
 							}
 							className="text-gray-500 focus:outline-none"
 						>
@@ -248,7 +242,7 @@ export default function PostDetailPage() {
 				</div>
 			</div>
 
-			<MarkdownRenderer content={post.contentDOM} />
+			<MarkdownRenderer content={data.post.contentDOM} />
 
 			<div className="mt-8" id="comment-view">
 				<h3 className="text-2xl font-semibold mb-6">
