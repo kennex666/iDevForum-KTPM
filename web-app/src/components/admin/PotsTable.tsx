@@ -26,13 +26,33 @@ interface PostsTableProps {
 }
 
 enum PostStatus {
-    PUBLISHED = 'PUBLISHED',
-    DELETED = 'DELETED',
-    SUPERSEDED = 'SUPERSEDED',
+    PUBLISHED = 'PUBLISHED', // Trang thai dang duoc hien thi
+    DELETED = 'DELETED', // Trang thai da bi xoa
+    SUSPENDED = 'SUSPENDED', // Trang thai da bi tam ngung
 }
 
 const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
     const [selectedStatus, setSelectedStatus] = useState<{ [key: string]: string }>({});
+    const [showModal, setShowModal] = useState(false);
+    // formData là 1 post
+    const [formData, setFormData] = useState<Post>({
+        _id: '',
+        postId: '',
+        title: '',
+        description: '',
+        content: '',
+        url: '',
+        status: PostStatus.PUBLISHED,
+        totalComments: 0,
+        totalUpvote: 0,
+        totalDownvote: 0,
+        totalShare: 0,
+        totalView: 0,
+        userId: '',
+        tagId: '',
+        createdAt: '',
+        updatedAt: ''
+    });
 
     const handleStatusChange = async (postId: string, newStatus: string) => {
         setSelectedStatus((prev: { [key: string]: string }) => ({
@@ -40,21 +60,22 @@ const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
             [postId]: newStatus
         }));
         // Here you can add API call to update the status
-        console.log(`Updating post ${postId} status to ${newStatus}`);
-        
-        const updatedPosts = await axios(
-            `${apiParser(api.apiPath.post.updateStatus)}`,
-            {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                data: {
-                    postId,
-                    status: newStatus,
-                },
+        console.log(`Updating post ${postId} status to ${newStatus}`); 
+        const token = document.cookie
+                .split("; ")
+                .find((row) => row.startsWith("accessToken="))
+                ?.split("=")[1];
+        if (!token) return;
+        const response = await axios(`http://localhost:3002/posts/admin/${postId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
+            },
+            data: {
+                status: newStatus,
             }
-        );
+        });
     };
 
     const getStatusColor = (status: string) => {
@@ -69,6 +90,52 @@ const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
                 return 'secondary';
         }
     };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setFormData({
+            _id: '',
+            postId: '',
+            title: '',
+            description: '',
+            content: '',
+            url: '',
+            status: PostStatus.PUBLISHED,
+            totalComments: 0,
+            totalUpvote: 0,
+            totalDownvote: 0,
+            totalShare: 0,
+            totalView: 0,
+            userId: '',
+            tagId: '',
+            createdAt: '',
+            updatedAt: ''
+        });
+    }
+
+    const handleSave = async () => {
+        // Here you can add API call to save the form data
+        console.log('Saving form data:', formData);
+        
+        const response = await axios(
+            `${apiParser(api.apiPath.user.update)}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                data: formData,
+            }
+        );
+        
+        if (response.data.errorCode === 200) {
+            console.log('User updated successfully');
+        } else {
+            console.error('Error updating user:', response.data.errorMessage);
+        }
+        
+        setShowModal(false);
+    }
 
     return (
         <div className="card shadow">
@@ -124,16 +191,31 @@ const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
                                             <button 
                                                 className="btn btn-sm btn-info d-flex align-items-center shadow-sm"
                                                 title="Edit post"
+                                                onClick={() => {
+                                                    setFormData({
+                                                        _id: post._id,
+                                                        postId: post.postId,
+                                                        title: post.title,
+                                                        description: post.description,
+                                                        content: post.content,
+                                                        url: post.url,
+                                                        status: post.status,
+                                                        totalComments: post.totalComments,
+                                                        totalUpvote: post.totalUpvote,
+                                                        totalDownvote: post.totalDownvote,
+                                                        totalShare: post.totalShare,
+                                                        totalView: post.totalView,
+                                                        userId: post.userId,
+                                                        tagId: post.tagId,
+                                                        createdAt: post.createdAt,
+                                                        updatedAt: post.updatedAt
+                                                    });
+                                                    console.log('Selected post data:', formData);
+                                                    setShowModal(true);
+                                                }}
                                             >
                                                 <i className="fas fa-edit me-2"></i>
                                                 Edit
-                                            </button>
-                                            <button 
-                                                className="btn btn-sm btn-danger d-flex align-items-center shadow-sm"
-                                                title="Delete post"
-                                            >
-                                                <i className="fas fa-trash me-2"></i>
-                                                Delete
                                             </button>
                                         </div>
                                     </td>
@@ -163,6 +245,209 @@ const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
                     </button>
                 </div>
             </div>
+
+            {/* Modal for editing post */}
+            {showModal && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header bg-primary text-white">
+                                <h5 className="modal-title">Edit Post</h5>
+                                <button 
+                                    type="button" 
+                                    className="btn-close btn-close-white" 
+                                    onClick={handleCloseModal}
+                                    aria-label="Close"
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                <form className="row g-3">
+                                    <div className="col-md-12">
+                                        <label className="form-label">Title</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={formData.title}
+                                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                            placeholder="Enter title"
+                                            minLength={1}
+                                            required
+                                            style={{ backgroundColor: '#fff' }}
+                                        />
+                                    </div>
+                                    <div className="col-md-12">
+                                        <label className="form-label">Description</label>
+                                        <textarea
+                                            className="form-control"
+                                            rows={3}
+                                            value={formData.description}
+                                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                            placeholder="Enter description"
+                                            style={{ backgroundColor: '#fff' }}
+                                        ></textarea>
+                                    </div>
+                                    <div className="col-md-12">
+                                        <label className="form-label">Content</label>
+                                        <textarea
+                                            className="form-control"
+                                            rows={5}
+                                            value={formData.content}
+                                            onChange={(e) => setFormData({...formData, content: e.target.value})}
+                                            placeholder="Enter content"
+                                            style={{ backgroundColor: '#fff' }}
+                                        ></textarea>
+                                    </div>
+                                    <div className="col-md-12">
+                                        <label className="form-label">URL</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={formData.url}
+                                            onChange={(e) => setFormData({...formData, url: e.target.value})}
+                                            placeholder="Enter URL"
+                                            style={{ backgroundColor: '#fff' }}
+                                        />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label">Status</label>
+                                        <select
+                                            className="form-select"
+                                            value={formData.status}
+                                            onChange={(e) => setFormData({...formData, status: e.target.value as PostStatus})}
+                                            style={{ backgroundColor: '#fff' }}
+                                        >
+                                            {Object.values(PostStatus).map((status) => (
+                                                <option key={status} value={status}>
+                                                    {status}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    {/* Read-only fields */}
+                                    <div className="col-md-6">
+                                        <label className="form-label">Post ID</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={formData.postId}
+                                            readOnly
+                                            style={{ backgroundColor: '#e9ecef', color: '#6c757d', cursor: 'not-allowed' }}
+                                        />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label">User ID</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={formData.userId}
+                                            readOnly
+                                            style={{ backgroundColor: '#e9ecef', color: '#6c757d', cursor: 'not-allowed' }}
+                                        />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label">Tag ID</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={formData.tagId}
+                                            readOnly
+                                            style={{ backgroundColor: '#e9ecef', color: '#6c757d', cursor: 'not-allowed' }}
+                                        />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label">Created At</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={formData.createdAt}
+                                            readOnly
+                                            style={{ backgroundColor: '#e9ecef', color: '#6c757d', cursor: 'not-allowed' }}
+                                        />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label">Updated At</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={formData.updatedAt}
+                                            readOnly
+                                            style={{ backgroundColor: '#e9ecef', color: '#6c757d', cursor: 'not-allowed' }}
+                                        />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label">Views</label>
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            value={formData.totalView}
+                                            readOnly
+                                            style={{ backgroundColor: '#e9ecef', color: '#6c757d', cursor: 'not-allowed' }}
+                                        />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label">Comments</label>
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            value={formData.totalComments}
+                                            readOnly
+                                            style={{ backgroundColor: '#e9ecef', color: '#6c757d', cursor: 'not-allowed' }}
+                                        />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label">Upvotes</label>
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            value={formData.totalUpvote}
+                                            readOnly
+                                            style={{ backgroundColor: '#e9ecef', color: '#6c757d', cursor: 'not-allowed' }}
+                                        />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label">Downvotes</label>
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            value={formData.totalDownvote}
+                                            readOnly
+                                            style={{ backgroundColor: '#e9ecef', color: '#6c757d', cursor: 'not-allowed' }}
+                                        />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label">Shares</label>
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            value={formData.totalShare}
+                                            readOnly
+                                            style={{ backgroundColor: '#e9ecef', color: '#6c757d', cursor: 'not-allowed' }}
+                                        />
+                                    </div>
+                                </form>
+                            </div>
+                            <div className="modal-footer">
+                                <button 
+                                    type="button" 
+                                    className="btn btn-secondary" 
+                                    onClick={handleCloseModal}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="button" 
+                                    className="btn btn-primary d-flex align-items-center"
+                                    onClick={handleSave}
+                                    disabled={!formData.title}
+                                >
+                                    <i className="fas fa-save me-2"></i>
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

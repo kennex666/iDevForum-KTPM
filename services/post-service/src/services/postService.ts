@@ -53,6 +53,33 @@ const getPostById = async (id: string): Promise<{ post: IPost | null; user: any 
     }
 };
 
+const updatePostByAdmin = async (
+    id: string,
+    title: string,
+    description: string,
+    content: string,
+    url: string,
+    status: PostStatus,
+): Promise<IPost | null> => {
+    try {
+        const post = await PostModel.findByIdAndUpdate(
+            id,
+            {
+                title,
+                description,
+                content,
+                url,
+                status
+            },
+            { new: true }
+        );
+        return post;
+    } catch (error) {
+        console.error("Error while updating post:", error);
+        throw new Error("Không thể cập nhật bài đăng. Vui lòng thử lại sau.");
+    }
+}
+
 const updatePost = async (id:String,title: string,description: string,content: string,url: string): Promise<IPost | null> => {
    try {
     return await PostModel.findByIdAndUpdate(id, {title,description,content,url}, { new: true });  // new: true returns the updated document
@@ -82,4 +109,4 @@ const searchPost = async (query: any): Promise<IPost[]> => {
         throw new Error("Không thể tìm kiếm bài đăng. Vui lòng thử lại sau.");
     }
 };
-export { createPost, getPosts, getPostById, updatePost, deletePost , searchPost};
+export { createPost, getPosts, getPostById, updatePost, deletePost , searchPost, updatePostByAdmin};

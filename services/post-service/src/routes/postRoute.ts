@@ -1,5 +1,5 @@
 import express from 'express';
-import { createPostController, deletePostController, getPostByIdController, getPostController, searchPostController, updatePostController } from '../controllers/postController';
+import { createPostController, deletePostController, updatePostByAdminController, getPostByIdController, getPostController, searchPostController, updatePostController } from '../controllers/postController';
 import { authenticate } from '../utils/authenticate';
 
 const postRoute = express.Router();
@@ -12,6 +12,9 @@ postRoute.post('/save',authenticate ,createPostController);
 
 // Lấy bài viết theo ID
 postRoute.get('/:id', getPostByIdController);
+
+// Cap nhat bai viet cua quan tri vien
+postRoute.put('/admin/:id', authenticate, updatePostByAdminController);
 
 // Cập nhật bài viết
 postRoute.put('/:id', updatePostController);
