@@ -96,6 +96,7 @@ const PostReportTable: React.FC = () => {
                     report.postreportId === reportId ? { ...report, state: newStatus } : report
                 )
             );
+            console.log(`Report ${reportId} status updated to ${newStatus}`);
         } catch (error) {
             console.error('Error updating report status:', error);
         }
@@ -212,6 +213,7 @@ const PostReportTable: React.FC = () => {
                                             <button 
                                                 className="btn btn-sm btn-info d-flex align-items-center"
                                                 title="View post details"
+                                                onClick={() => window.location.href = `/posts/${report.postId}`}
                                             >
                                                 <i className="fas fa-eye me-2"></i>
                                                 View

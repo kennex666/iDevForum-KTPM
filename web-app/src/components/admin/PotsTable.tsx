@@ -1,6 +1,7 @@
 import { api, apiParser } from '@/constants/apiConst';
 import React, { useState } from 'react';
 import axios from 'axios';
+import Toast from '../Toast';
 
 interface Post {
     _id: string;
@@ -34,6 +35,8 @@ enum PostStatus {
 const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
     const [selectedStatus, setSelectedStatus] = useState<{ [key: string]: string }>({});
     const [showModal, setShowModal] = useState(false);
+    const [temp, setTemp] = useState(posts);
+    const [message, setMessage] = useState('');
     // formData là 1 post
     const [formData, setFormData] = useState<Post>({
         _id: '',
@@ -66,7 +69,7 @@ const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
                 .find((row) => row.startsWith("accessToken="))
                 ?.split("=")[1];
         if (!token) return;
-        const response = await axios(`http://localhost:3002/posts/admin/${postId}`, {
+        const response = await axios(`${apiParser(api.apiPath.post.updateStatus)}/${postId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -76,6 +79,10 @@ const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
                 status: newStatus,
             }
         });
+        setMessage('Post updated successfully!');
+        setTimeout(() => {
+            setMessage('');
+        }, 3000);
     };
 
     const getStatusColor = (status: string) => {
@@ -117,23 +124,40 @@ const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
         // Here you can add API call to save the form data
         console.log('Saving form data:', formData);
         
-        const response = await axios(
-            `${apiParser(api.apiPath.user.update)}`,
-            {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                data: formData,
+         const token = document.cookie
+                .split("; ")
+                .find((row) => row.startsWith("accessToken="))
+                ?.split("=")[1];
+        if (!token) return;
+        const response = await axios(`${apiParser(api.apiPath.post.updateStatus)}/${formData._id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
+            },
+            data: {
+                ...formData,
+            }
+        });
+        const p  = temp.map((post: any) => {
+            if (post._id == formData._id) {
+                return {
+                    ...post,
+                    title: formData.title,
+                    description: formData.description,
+                    content: formData.content,
+                    url: formData.url,
+                    status: formData.status,
+                };
+            }
+            return post;
             }
         );
-        
-        if (response.data.errorCode === 200) {
-            console.log('User updated successfully');
-        } else {
-            console.error('Error updating user:', response.data.errorMessage);
-        }
-        
+        setMessage('Post updated successfully!');
+        setTimeout(() => {
+            setMessage('');
+        }, 3000);
+        setTemp(p);
         setShowModal(false);
     }
 
@@ -157,19 +181,19 @@ const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {posts.map((post: any, index) => (
+                            {posts.map((temp: any, index: number) => (
                                 <tr key={index} className="align-middle border-bottom">
                                     <td className="px-4 py-3">
-                                        <a href={post.url} target="_blank" rel="noopener noreferrer" className="text-decoration-none">
-                                            <span className="fw-bold text-primary">{post.title}</span>
+                                        <a href={temp.url} target="_blank" rel="noopener noreferrer" className="text-decoration-none">
+                                            <span className="fw-bold text-primary">{temp.title}</span>
                                         </a>
                                     </td>
-                                    <td className="px-4 py-3 text-muted">{post.description}</td>
+                                    <td className="px-4 py-3 text-muted">{temp.description}</td>
                                     <td className="px-4 py-3">
                                         <select
-                                            className={`form-select form-select-sm bg-${getStatusColor(selectedStatus[post._id] || post.status)} text-white`}
-                                            value={selectedStatus[post._id] || post.status}
-                                            onChange={(e) => handleStatusChange(post._id, e.target.value)}
+                                            className={`form-select form-select-sm bg-${getStatusColor(selectedStatus[temp._id] || temp.status)} text-white`}
+                                            value={selectedStatus[temp._id] || temp.status}
+                                            onChange={(e) => handleStatusChange(temp._id, e.target.value)}
                                             style={{ minWidth: '120px' }}
                                         >
                                             {Object.values(PostStatus).map((status) => (
@@ -180,12 +204,12 @@ const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
                                         </select>
                                     </td>
                                     <td className="px-4 py-3">
-                                        <span className="badge bg-info rounded-pill">{post.totalView}</span>
+                                        <span className="badge bg-info rounded-pill">{temp.totalView}</span>
                                     </td>
                                     <td className="px-4 py-3">
-                                        <span className="badge bg-primary rounded-pill">{post.totalComments}</span>
+                                        <span className="badge bg-primary rounded-pill">{temp.totalComments}</span>
                                     </td>
-                                    <td className="px-4 py-3 text-muted">{post.createdAt}</td>
+                                    <td className="px-4 py-3 text-muted">{temp.createdAt}</td>
                                     <td className="px-4 py-3">
                                         <div className="d-flex gap-2">
                                             <button 
@@ -193,22 +217,22 @@ const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
                                                 title="Edit post"
                                                 onClick={() => {
                                                     setFormData({
-                                                        _id: post._id,
-                                                        postId: post.postId,
-                                                        title: post.title,
-                                                        description: post.description,
-                                                        content: post.content,
-                                                        url: post.url,
-                                                        status: post.status,
-                                                        totalComments: post.totalComments,
-                                                        totalUpvote: post.totalUpvote,
-                                                        totalDownvote: post.totalDownvote,
-                                                        totalShare: post.totalShare,
-                                                        totalView: post.totalView,
-                                                        userId: post.userId,
-                                                        tagId: post.tagId,
-                                                        createdAt: post.createdAt,
-                                                        updatedAt: post.updatedAt
+                                                        _id: temp._id,
+                                                        postId: temp.postId,
+                                                        title: temp.title,
+                                                        description: temp.description,
+                                                        content: temp.content,
+                                                        url: temp.url,
+                                                        status: temp.status,
+                                                        totalComments: temp.totalComments,
+                                                        totalUpvote: temp.totalUpvote,
+                                                        totalDownvote: temp.totalDownvote,
+                                                        totalShare: temp.totalShare,
+                                                        totalView: temp.totalView,
+                                                        userId: temp.userId,
+                                                        tagId: temp.tagId,
+                                                        createdAt: temp.createdAt,
+                                                        updatedAt: temp.updatedAt
                                                     });
                                                     console.log('Selected post data:', formData);
                                                     setShowModal(true);
@@ -234,15 +258,6 @@ const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
                             </tr>
                         </tfoot>
                     </table>
-                </div>
-                <div className="mt-4 d-flex justify-content-end">
-                    <button 
-                        className="btn btn-primary d-flex align-items-center shadow-sm"
-                        title="Add new post"
-                    >
-                        <i className="fas fa-plus me-2"></i>
-                        Add New Post
-                    </button>
                 </div>
             </div>
 
@@ -448,6 +463,8 @@ const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
                     </div>
                 </div>
             )}
+
+            <Toast message={message} />
         </div>
     );
 };
