@@ -77,6 +77,16 @@ app.use(
 		changeOrigin: true,
 	})
 );
+
+app.use(
+  '/uploads',
+  createProxyMiddleware({
+    target: 'http://file-service:3003',
+    changeOrigin: true,
+    pathRewrite: { '^/uploads': '/uploads' }
+  })
+);
+
 app.use(
 	"/api/reaction",
 	createProxyMiddleware({
