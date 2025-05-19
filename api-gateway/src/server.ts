@@ -88,26 +88,10 @@ app.use(
 );
 
 app.use(
-	"/api/reaction",
-	createProxyMiddleware({
-		target: "http://reaction-service:3004",
-		changeOrigin: true,
-	})
-);
-
-app.use(
 	"/api/postreport",
 	conditionalAuthenticate(["GET","POST", "PUT", "DELETE"]),
 	createProxyMiddleware({
 		target: "http://postreport-service:3007/postreports",
-		changeOrigin: true,
-	})
-);
-app.use(
-	"/api/bookmark",
-	conditionalAuthenticate(["GET","POST", "PUT", "DELETE"]),
-	createProxyMiddleware({
-		target: "http://bookmark-service:3008/bookmarks",
 		changeOrigin: true,
 	})
 );

@@ -1,5 +1,5 @@
 import express from 'express';
-import { createPostController, deletePostController, updatePostByAdminController, getPostByIdController, getPostController, searchPostController, updatePostController } from '../controllers/postController';
+import { createPostController, deletePostController, updatePostByAdminController, getPostByIdController, getPostController, searchPostController, updatePostController, acctionBookmarkController } from '../controllers/postController';
 import { authenticate } from '../utils/authenticate';
 
 const postRoute = express.Router();
@@ -24,5 +24,8 @@ postRoute.delete('/:id', deletePostController);
 
 // Tim kiem theo nhieu dieu kien theo người dung, bai viet, noi dung, thoi gian
 postRoute.post('/search', searchPostController);
+
+// click bookmark
+postRoute.post('/actionBookmark', authenticate, acctionBookmarkController);
 
 export default postRoute;
