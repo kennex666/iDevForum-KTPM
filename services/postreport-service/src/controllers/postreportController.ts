@@ -101,6 +101,14 @@ class PostReportController {
     }
 
     async updatePostReport(req: Request, res: Response) { 
+        const user = req.user;
+        if(user.role !== 1) {
+            return res.status(403).json({
+                errorCode: 403,
+                errorMessage: "Bạn không có quyền truy cập vào tài nguyên này.",
+                data: null,
+            });
+        }
         try {
             const { id } = req.params;
             const { state } = req.body;

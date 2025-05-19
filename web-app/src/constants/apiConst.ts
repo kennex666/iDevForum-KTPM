@@ -26,7 +26,7 @@ export const apiDevelopment = {
 			getAll: "/postreport",
 			getInfo: "/postreport/:id",
 			create: "/postreport/save",
-			update: "/postreport/:id",
+			update: "/postreport",
 			delete: "/postreport/:id",
 			search: "/postreport/search",
 		},

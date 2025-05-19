@@ -1,6 +1,7 @@
 import { api, apiParser } from '@/constants/apiConst';
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
+import Toast from '../Toast';
 
 export enum PostReportState {
     PROCCESSING = 'PROCESSING',
@@ -40,6 +41,7 @@ interface IPostReport {
 const PostReportTable: React.FC = () => {
     const [reports, setReports] = useState<IPostReport[]>([]);
     const [loading, setLoading] = useState(true);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     useEffect(() => {
         // Simulated data - replace with actual API call
@@ -85,6 +87,28 @@ const PostReportTable: React.FC = () => {
                     report.postreportId === reportId ? { ...report, state: newStatus } : report
                 )
             );
+
+            const token = document.cookie
+                .split("; ")
+                .find((row) => row.startsWith("accessToken="))
+                ?.split("=")[1];
+            if (!token) return;
+            const response = await axios(
+                `${apiParser(api.apiPath.postReport.update)}/${reportId}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    data: { state: newStatus }
+                }
+            )
+            
+            setToast({
+                message: `Report ${reportId} status updated to ${newStatus}`,
+                type: 'success'
+            });
             console.log(`Report ${reportId} status updated to ${newStatus}`);
         } catch (error) {
             console.error('Error updating report status:', error);
@@ -207,13 +231,6 @@ const PostReportTable: React.FC = () => {
                                                 <i className="fas fa-eye me-2"></i>
                                                 View
                                             </button>
-                                            <button 
-                                                className="btn btn-sm btn-danger d-flex align-items-center"
-                                                title="Delete report"
-                                            >
-                                                <i className="fas fa-trash me-2"></i>
-                                                Delete
-                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -222,6 +239,11 @@ const PostReportTable: React.FC = () => {
                     </table>
                 </div>
             </div>
+            
+            <Toast 
+                message={toast?.message || ''}
+                type={toast?.type || 'success'}
+            ></Toast>
         </div>
     );
 };
