@@ -16,6 +16,9 @@ export const apiDevelopment = {
 			queryMe: "/auth/me",
 		},
 		user: "/user",
+		userAction: {
+			"follow": "/user/action/follow/:id",
+		},
 		post: {
 			getAll: "/post",
 			getInfo: "/post/:id",
@@ -31,7 +34,7 @@ export const apiDevelopment = {
 		},
 		topic: "/topic",
 		comment: "/comment",
-		like: "/like",
+		like: "/like",  
 	},
 };
 

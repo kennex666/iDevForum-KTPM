@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 import connectDB from './config/database';
 import postRoute from './routes/postRoute';
 import topicRoute from './routes/topicRoute';
-import { cp } from 'fs';
 import cors from 'cors';
 
 dotenv.config();

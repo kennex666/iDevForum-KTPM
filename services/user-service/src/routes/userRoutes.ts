@@ -21,6 +21,4 @@ router.delete("/profile", UserController.deleteUserHandler);
 
 router.put("/updatepassword/:id", UserController.updatePasswordHandler);
 
-
-
 export default router;

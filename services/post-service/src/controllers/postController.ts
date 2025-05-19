@@ -1,6 +1,7 @@
-import { get } from 'http';
 import { createPost, getPosts, getPostById, updatePost, deletePost, searchPost, updatePostByAdmin } from '../services/postService';
 import { Request, Response } from 'express';
+import { toSlugWithTimestamp } from '../utils/string';
+import { PostStatus } from '../models/postStatus';
 
 
 const getPostController = async (req: Request, res: Response) => {
@@ -71,13 +72,6 @@ const createPostController = async (req: Request, res: Response) => {
             title,
             description,
             content,
-            url,
-            status,
-            totalComments,
-            totalUpvote,
-            totalDownvote,
-            totalShare,
-            totalView,
             tagId
         } = req.body;
 
@@ -93,26 +87,35 @@ const createPostController = async (req: Request, res: Response) => {
             });
         }
 
-        const post = await createPost({
-            title,
-            description,
-            content,
-            url,
-            status,
-            totalComments,
-            totalUpvote,
-            totalDownvote,
-            totalShare,
-            totalView,
-            userId: userId,
-            tagId
-        });
+        try {
+            const post = await createPost({
+                title,
+                description,
+                content,
+                url: toSlugWithTimestamp(title), // Tạo slug từ tiêu đề
+                status: PostStatus.PENDING,
+                totalComments: 0,
+                totalUpvote: 0,
+                totalDownvote: 0,
+                totalShare: 0,
+                totalView: 0,
+                userId: userId,
+                tagId,
+            });
 
-        return res.status(200).json({
-            errorCode: 200,
-            errorMessage: "Tạo bài viết thành công",
-            data: post,
-        });
+            return res.status(200).json({
+                errorCode: 200,
+                errorMessage: "Tạo bài viết thành công",
+                data: post,
+            });
+        } catch (err){
+            console.error("Error while creating post:", err);
+            return res.status(200).json({
+                errorCode: 400,
+                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
+            });
+        }
 
     } catch (err) {
         console.error("Error while creating post:", err);
