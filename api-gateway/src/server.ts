@@ -20,7 +20,7 @@ app.use(cors({
 // Giới hạn 5 request/phút cho mỗi IP đến comment-service
 const commentLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 5,
+  max: 150,
   message: { error: "Bạn đã vượt quá 5 lần gọi API cho phép trong 1 phút!" }
 });
 
