@@ -65,6 +65,15 @@ const getTopicByIdController = async (req: Request, res: Response) => {
 }
 
 const createTopicController = async (req: Request, res: Response) => {
+    const user = req.user;
+    if(user.role !== 1){
+        res.status(200).json({
+            errorCode: 403,
+            errorMessage: "Bạn không có quyền tạo chủ đề",
+            data: null,
+        });
+        return;
+    }
     try {
         const { name, hashtag } = req.body;
         const topic = await createTopic({ name, hashtag});
@@ -128,6 +137,15 @@ const updateTopicController = async (req: Request, res: Response) => {
 }
 
 const deleteTopicController = async (req: Request, res: Response) => {
+    const user = req.user;
+    if(user.role !== 1){
+        res.status(200).json({
+            errorCode: 403,
+            errorMessage: "Bạn không có quyền xóa chủ đề",
+            data: null,
+        });
+        return;
+    }
     try {
         const { id } = req.params;
         const result = await deleteTopic(id);

@@ -5,6 +5,8 @@ interface IComment extends Document {
     postId: string;
     userId: string;
     content: string;
+    isCheck: { type: Boolean, default: false }, 
+    isBad: { type: Boolean, default: false },
     createdAt: Date;
     updatedAt: Date;
 }
@@ -19,7 +21,9 @@ const commentSchema = new Schema({
         minlength: [1, "Comment phải có ít nhất 1 ký tự"],
         maxlength: [500, "Comment không được vượt quá 500 ký tự"],
         trim: true
-    }
+    },
+    isCheck: { type: Boolean, default: false },
+    isBad: { type: Boolean, default: false },
 },
     { timestamps: true }
 );

@@ -1,5 +1,5 @@
 import { get } from 'http';
-import { createPost, getPosts, getPostById, updatePost, deletePost, searchPost } from '../services/postService';
+import { createPost, getPosts, getPostById, updatePost, deletePost, searchPost, updatePostByAdmin } from '../services/postService';
 import { Request, Response } from 'express';
 
 
@@ -133,6 +133,52 @@ const createPostController = async (req: Request, res: Response) => {
     }
 };
 
+const updatePostByAdminController = async (req:Request, res:Response) => {
+    const {
+        title,
+        description,
+        content,
+        url,
+        status,
+    } = req.body;
+
+    const user = req.user;
+    if (user.role !== 1) {
+        return res.status(200).json({
+            errorCode: 403,
+            errorMessage: "Bạn không có quyền thực hiện hành động này",
+            data: null,
+        });
+    }
+
+    const { id } = req.params;
+
+    try {
+        const post = await updatePostByAdmin(id, title, description, content, url, status);
+        res.status(200).json({
+            errorCode: 200,
+            errorMessage: "Cập nhật bài viết thành công",
+            data: post,
+        }
+        );
+    } catch (err) {
+        console.error("Error while updating post:", err);
+        if (err instanceof Error) {
+            res.status(200).json({
+                errorCode: 400,
+                message: err.message,
+                data: null,
+            });
+        } else {
+            res.status(200).json({
+                errorCode: 400,
+                message: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
+            });
+        }
+    }
+}
+
 const updatePostController = async (req:Request, res:Response) => {
     const {
         title,
@@ -252,4 +298,4 @@ const searchPostController = async (req:Request, res:Response) => {
     }
 }
 
-export {getPostController, getPostByIdController, createPostController, updatePostController, deletePostController, searchPostController};
+export {getPostController, getPostByIdController,updatePostByAdminController, createPostController, updatePostController, deletePostController, searchPostController};

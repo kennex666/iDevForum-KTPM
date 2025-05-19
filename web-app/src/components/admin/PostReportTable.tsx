@@ -1,4 +1,7 @@
+import { api, apiParser } from '@/constants/apiConst';
+import axios from 'axios';
 import React, { useState, useEffect } from 'react';
+import Toast from '../Toast';
 
 export enum PostReportState {
     PROCCESSING = 'PROCESSING',
@@ -38,46 +41,34 @@ interface IPostReport {
 const PostReportTable: React.FC = () => {
     const [reports, setReports] = useState<IPostReport[]>([]);
     const [loading, setLoading] = useState(true);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     useEffect(() => {
         // Simulated data - replace with actual API call
         const fetchReports = async () => {
             try {
                 // Replace with actual API call
-                const mockData: IPostReport[] = [
+                const token = document.cookie
+                    .split("; ")
+                    .find((row) => row.startsWith("accessToken="))
+                    ?.split("=")[1];
+                if (!token) return;
+                const response = await axios(
+                    `${apiParser(api.apiPath.postReport.getAll)}`,
                     {
-                        postreportId: '1',
-                        state: PostReportState.PROCCESSING,
-                        reason: 'Inappropriate content',
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
-                        postId: 'post1',
-                        reporterId: 'user1',
-                        inspectorId: 'user2',
-                        post: {
-                            _id: 'post1',
-                            title: 'Sample Post 1',
-                            content: 'Sample content'
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
                         },
-                        reporter: {
-                            _id: 'user1',
-                            name: 'John Doe',
-                            email: 'john@example.com',
-                            profilePicture: 'https://picsum.photos/200',
-                            role: 0,
-                            accountState: 'ACTIVE'
-                        },
-                        inspector: {
-                            _id: 'user2',
-                            name: 'Admin User',
-                            email: 'admin@example.com',
-                            profilePicture: 'https://picsum.photos/200',
-                            role: 1,
-                            accountState: 'ACTIVE'
-                        }
-                    },
-                ];
-                setReports(mockData);
+                    }
+                )
+                if (response.status !== 200) {
+                    console.error('Error fetching reports:', response.statusText);
+                    return;
+                }
+                const result = response.data;
+                setReports(result.data);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching reports:', error);
@@ -96,6 +87,29 @@ const PostReportTable: React.FC = () => {
                     report.postreportId === reportId ? { ...report, state: newStatus } : report
                 )
             );
+
+            const token = document.cookie
+                .split("; ")
+                .find((row) => row.startsWith("accessToken="))
+                ?.split("=")[1];
+            if (!token) return;
+            const response = await axios(
+                `${apiParser(api.apiPath.postReport.update)}/${reportId}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    data: { state: newStatus }
+                }
+            )
+            
+            setToast({
+                message: `Report ${reportId} status updated to ${newStatus}`,
+                type: 'success'
+            });
+            console.log(`Report ${reportId} status updated to ${newStatus}`);
         } catch (error) {
             console.error('Error updating report status:', error);
         }
@@ -212,16 +226,10 @@ const PostReportTable: React.FC = () => {
                                             <button 
                                                 className="btn btn-sm btn-info d-flex align-items-center"
                                                 title="View post details"
+                                                onClick={() => window.location.href = `/posts/${report.postId}`}
                                             >
                                                 <i className="fas fa-eye me-2"></i>
                                                 View
-                                            </button>
-                                            <button 
-                                                className="btn btn-sm btn-danger d-flex align-items-center"
-                                                title="Delete report"
-                                            >
-                                                <i className="fas fa-trash me-2"></i>
-                                                Delete
                                             </button>
                                         </div>
                                     </td>
@@ -231,6 +239,11 @@ const PostReportTable: React.FC = () => {
                     </table>
                 </div>
             </div>
+            
+            <Toast 
+                message={toast?.message || ''}
+                type={toast?.type || 'success'}
+            ></Toast>
         </div>
     );
 };

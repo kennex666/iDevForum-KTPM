@@ -19,7 +19,17 @@ export const apiDevelopment = {
 		post: {
 			getAll: "/post",
 			getInfo: "/post/:id",
+			updateStatus: "/post/admin",
 		},
+		postReport: {
+			getAll: "/postreport",
+			getInfo: "/postreport/:id",
+			create: "/postreport/save",
+			update: "/postreport",
+			delete: "/postreport/:id",
+			search: "/postreport/search",
+		},
+		topic: "/topic",
 		comment: "/comment",
 		like: "/like",
 	},

@@ -163,13 +163,6 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                                                 <i className="fas fa-edit me-2"></i>
                                                 Edit
                                             </button>
-                                            <button 
-                                                className="btn btn-sm btn-danger d-flex align-items-center shadow-sm"
-                                                title="Delete user"
-                                            >
-                                                <i className="fas fa-trash me-2"></i>
-                                                Delete
-                                            </button>
                                         </div>
                                     </td>
                                 </tr>
