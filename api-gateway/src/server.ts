@@ -3,6 +3,7 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 import cors from 'cors';
 import { authenticate } from "./middlewares/authenticate";
 import conditionalAuthenticate from "./middlewares/conditionalAuthenticate";
+import rateLimit from "express-rate-limit";
 
 const app = express();
 const PORT = 3000;
@@ -15,6 +16,13 @@ app.use(cors({
 	methods: ['GET', 'POST', 'PUT', 'DELETE'],
 	credentials: true
 }));
+
+// Giới hạn 5 request/phút cho mỗi IP đến comment-service
+const commentLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+  message: { error: "Bạn đã vượt quá 5 lần gọi API cho phép trong 1 phút!" }
+});
 
 // Proxy config
 app.use(
@@ -48,6 +56,7 @@ app.use(
 );
 app.use(
 	"/api/comment",
+	commentLimiter, // Đặt trước proxy
 	conditionalAuthenticate(["POST", "PUT", "DELETE"]),
 	createProxyMiddleware({
 		target: "http://comment-service:3001",
