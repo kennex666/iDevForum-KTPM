@@ -200,7 +200,7 @@ const deletePostController = async (req:Request, res:Response) => {
 
 const searchPostController = async (req:Request, res:Response) => {
     try {
-        const { postId, userId, content, createdAt, title, description } = req.body;
+        const { postId, userId, content, createdAt, title, description,tagId } = req.body;
         const query: any = {};
 
         console.log("Search parameters:", req.body);
@@ -221,6 +221,9 @@ const searchPostController = async (req:Request, res:Response) => {
         }
         if (description) {
             orConditions.push({ description: { $regex: description, $options: 'i' } });
+        }
+        if (tagId) {
+            orConditions.push({ tagId: { $regex: tagId, $options: 'i' } });
         }
         if (orConditions.length > 0) {
             query.$or = orConditions;
