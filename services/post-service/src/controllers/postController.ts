@@ -139,6 +139,10 @@ const updatePostController = async (req:Request, res:Response) => {
         description,
         content,
         url,
+        totalComments,
+        totalUpvote,
+        totalDownvote,
+       
     } = req.body;
     const { id } = req.params;
     if (!content || content.trim().length === 0) {
@@ -151,7 +155,7 @@ const updatePostController = async (req:Request, res:Response) => {
     }
 
     try {
-        const post = await updatePost(id,title,description,content,url);
+        const post = await updatePost(id,title,description,content,url,totalComments ,totalUpvote, totalDownvote);
         res.status(200).json({
             errorCode: 200,
             errorMessage: "Cập nhật bài viết thành công",
@@ -196,7 +200,7 @@ const deletePostController = async (req:Request, res:Response) => {
 
 const searchPostController = async (req:Request, res:Response) => {
     try {
-        const { postId, userId, content, createdAt } = req.body;
+        const { postId, userId, content, createdAt, title, description } = req.body;
         const query: any = {};
 
         console.log("Search parameters:", req.body);
@@ -207,8 +211,19 @@ const searchPostController = async (req:Request, res:Response) => {
         if (userId) {
             query.userId = { $regex: userId, $options: 'i' }; // Tìm kiếm userId chứa giá trị
         }
+        // Tìm kiếm theo title, content, description (OR)
+        const orConditions = [];
+        if (title) {
+            orConditions.push({ title: { $regex: title, $options: 'i' } });
+        }
         if (content) {
-            query.content = { $regex: content, $options: 'i' }; // Tìm kiếm nội dung chứa giá trị
+            orConditions.push({ content: { $regex: content, $options: 'i' } });
+        }
+        if (description) {
+            orConditions.push({ description: { $regex: description, $options: 'i' } });
+        }
+        if (orConditions.length > 0) {
+            query.$or = orConditions;
         }
         if (createdAt) {
             const parsedDate = new Date(createdAt as string);

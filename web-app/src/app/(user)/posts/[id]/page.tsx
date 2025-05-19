@@ -91,39 +91,72 @@ export default function PostDetailPage() {
 			});
 	};
 
-	const handleVote = (type: boolean) => {
+	const handleVote = async (type: boolean) => {
 		if (!data) return;
 
-		
-		fetch(`/api/vote/${data.postId}?type=${type ? 1 : 0}`)
-			.then((res) => res.json())
-			.then((data) => {
-				if (data.errorCode === 200) {
-					if (reaction == "upvote" && type) {
-						setReaction("");
-						setData((prev: any) => ({
-							...prev,
-							totalUpvote: prev.totalUpvote - 1,
-						}));
-					}
-					if (reaction == "downvote" && !type) {
-						setReaction("");
-						setData((prev: Post) => ({
-							...prev,
-							totalDownvote: prev.totalDownvote - 1,
-						}));
-					}
+		let newUpvote = data.post.totalUpvote;
+		let newDownvote = data.post.totalDownvote;
+		let newReaction = reaction;
 
-					if (reaction == "") {
-						setData((prev: Post) => ({
-							...prev,
-							totalUpvote: prev.totalUpvote + (type ? 1 : 0),
-							totalDownvote: prev.totalDownvote + (type ? 0 : 1),
-						}));
-						setReaction(type ? "upvote" : "downvote");
-					}
-				}
+		// Xử lý logic tăng/giảm vote và trạng thái reaction
+		if (reaction === "upvote" && type) {
+			newUpvote -= 1;
+			newReaction = "";
+		} else if (reaction === "downvote" && !type) {
+			newDownvote -= 1;
+			newReaction = "";
+		} else if (reaction === "") {
+			if (type) {
+				newUpvote += 1;
+				newReaction = "upvote";
+			} else {
+				newDownvote += 1;
+				newReaction = "downvote";
+			}
+		} else {
+			// Nếu đã vote 1 loại và bấm loại còn lại, chuyển đổi vote
+			if (reaction === "upvote" && !type) {
+				newUpvote -= 1;
+				newDownvote += 1;
+				newReaction = "downvote";
+			} else if (reaction === "downvote" && type) {
+				newDownvote -= 1;
+				newUpvote += 1;
+				newReaction = "upvote";
+			}
+		}
+
+		const updatedPost = {
+			title: data.post.title,
+			description: data.post.description,
+			content: data.post.content,
+			url: data.post.url,
+			totalComments: data.post.totalComments,
+			totalUpvote: newUpvote,
+			totalDownvote: newDownvote,
+		};
+
+		try {
+			const res = await fetch(`http://localhost:3000/api/post/${data.post.postId}`, {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(updatedPost),
 			});
+			const result = await res.json();
+			if (result.errorCode === 200) {
+				setData((prev: any) => ({
+					...prev,
+					post: {
+						...prev.post,
+						totalUpvote: newUpvote,
+						totalDownvote: newDownvote,
+					},
+				}));
+				setReaction(newReaction);
+			}
+		} catch (err) {
+			console.error("Vote failed:", err);
+		}
 	};
 
 	const handleComment = () => {
@@ -260,11 +293,10 @@ export default function PostDetailPage() {
 						<button
 							disabled={!comment.trim()}
 							onClick={handleComment}
-							className={`px-6 py-1 rounded-full text-white focus:outline-none ${
-								comment.trim()
+							className={`px-6 py-1 rounded-full text-white focus:outline-none ${comment.trim()
 									? "bg-blue-500 hover:bg-blue-400"
 									: "bg-gray-500"
-							}`}
+								}`}
 						>
 							Gửi
 						</button>
