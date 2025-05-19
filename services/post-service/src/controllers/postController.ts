@@ -6,12 +6,13 @@ import { PostStatus } from '../models/postStatus';
 
 const getPostController = async (req: Request, res: Response) => {
     try {
-        const post = await getPosts();
+        const result = await getPosts({limit: 10, offset: 0});
         res.status(200).json({
-            errorCode: 200,
-            errorMessage: "Lấy danh sách bài đăng thành công",
-            data: post,
-        });
+			errorCode: 200,
+			errorMessage: "Lấy danh sách bài đăng thành công",
+			data: result.data,
+            total: result.total,
+		});
     } catch (err) {
         console.error("Error while getting posts:", err);
         if (err instanceof Error) {

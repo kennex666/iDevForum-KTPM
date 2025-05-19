@@ -20,7 +20,7 @@ const PostItem = ({ post }: { post: Post }) => {
 				{/* Tác giả + chủ đề */}
 				<div className="flex items-center space-x-2 mb-3">
 					<img
-						src={post.author.profilePicture}
+						src={post.author.profilePicture || "https://placehold.co/40x40"}
 						className="w-6 h-6 rounded-full"
 						alt={`${post.author.name} avatar`}
 					/>
