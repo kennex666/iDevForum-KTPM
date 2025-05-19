@@ -41,7 +41,7 @@ app.use(
 );
 app.use(
 	"/api/post",
-	//conditionalAuthenticate(["POST", "PUT", "DELETE"]),
+	conditionalAuthenticate(["POST", "PUT", "DELETE"]),
 	createProxyMiddleware({
 		target: "http://post-service:3002/posts",
 		changeOrigin: true,

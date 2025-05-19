@@ -20,6 +20,8 @@ import Error from "@/components/Error";
 import Loading from "@/components/user/Loading";
 import { guestUser } from "@/context/UserContext";
 import { formatDate, getDateOnly, getReadingTime } from '../../../utils/datetimeformat';
+import { getAccessToken } from "@/app/utils/cookiesParse";
+import Toast from "@/components/Toast";
 
 interface User {
 	userId: number;
@@ -40,7 +42,7 @@ interface Post {
 	content: string;
 	date: string;
 	topic: { name: string };
-	author: User;
+	user: User;
 	comments: Comment[];
 	totalUpvote: number;
 	totalDownvote: number;
@@ -56,6 +58,7 @@ export default function PostDetailPage() {
 	const [comments, setComments] = useState<Comment[]>([]);
 	const [comment, setComment] = useState("");
 	const [isLoading, setIsLoading] = useState(true);
+	const [showToast, setShowToast] = useState("");
 
 	useEffect(() => {
 		fetch(apiParser(api.apiPath.post.getInfo.replace(":id", id)))
@@ -65,9 +68,9 @@ export default function PostDetailPage() {
 					return;
 				}
 				const p = data.data;
-				if (!p.author) {
-					p.author = guestUser;
-					p.author.name = "<<Name>>";
+				if (!p.user) {
+					p.user = guestUser;
+					p.user.name = "<<Name>>";
 				}
 				if (!p.topic) {
 					p.topic = {
@@ -84,10 +87,30 @@ export default function PostDetailPage() {
 
 	const handleFollow = () => {
 		if (!data) return;
-		fetch(`/api/users/following?id=${data.author.userId}`)
+		fetch(
+			`${apiParser(
+				api.apiPath.userAction.follow.replace(":id", data.user.userId)
+			)}`,
+			{
+				// header jwt in cookies
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${getAccessToken()}`,
+				},
+			}
+		)
 			.then((res) => res.json())
 			.then((data) => {
-				if (data.errorCode === 200) setIsFollowing(!isFollowing);
+				if (data.errorCode === 200) {
+					setIsFollowing(data.action == "follow");
+				} else {
+					setShowToast("Có lỗi xảy ra, vui lòng thử lại sau");
+					setTimeout(() => {
+						setShowToast("");
+					}
+					, 4000);
+				}
 			});
 	};
 
@@ -144,19 +167,25 @@ export default function PostDetailPage() {
 
 	return (
 		<div className="container mx-auto px-6 lg:w-6/12 w-full mt-12 pb-12">
+			{showToast && (
+				<Toast
+					message={showToast}
+					type="error"
+				/>
+			)}
 			<h1 className="text-3xl font-semibold mb-2">{data.post.title}</h1>
 			<p className="text text-gray-700 mb-4">{data.post.description}</p>
 
 			<div className="flex items-center gap-3 mb-6">
 				<img
-					src={data.author.profilePicture}
+					src={data.user.profilePicture}
 					alt="avatar"
 					className="w-10 h-10 rounded-full"
 				/>
 				<div>
 					<div className="flex items-center gap-2">
 						<p className="text-sm font-semibold">
-							{data.author.name}
+							{data.user.name}
 						</p>
 						<span className="text-gray-500">·</span>
 						<button
