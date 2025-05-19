@@ -2,7 +2,7 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 
 const model = new ChatGoogleGenerativeAI({
   model: "models/gemini-1.5-flash",
-  apiKey: 'AIzaSyBxjhQEWCXKJEIMUKAFo5AngEyi6usFXM0',
+  apiKey: 'AIzaSyBxjhQEWCXKJEIMUKAFo5AngEyi6usFXM0', // API test key not for production
   maxOutputTokens: 2048
 });
 
