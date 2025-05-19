@@ -47,6 +47,19 @@ class CommentController {
   }
 
   /**
+   * Get all comments bad
+   */
+  async getAllCommentsBad(req: Request, res: Response): Promise<void> {
+    try {
+      const comments = await commentService.getAllCommentsBad();
+      res.status(200).json(createSuccessResponse(comments, 'Lấy danh sách bình luận xấu thành công'));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Lỗi không xác định';
+      res.status(200).json(createErrorResponse(message));
+    }
+  }
+
+  /**
    * Create new comment
    */
   async createComment(req: Request, res: Response): Promise<void> {

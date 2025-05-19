@@ -15,6 +15,12 @@ router.get('/search', commentController.searchComments);
  */
 router.get('/', commentController.getAllComments);
 
+
+/**
+ * Get all comments bad
+ */
+router.get('/bad', commentController.getAllCommentsBad);
+
 /**
  * Create new comment
  */

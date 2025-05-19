@@ -8,9 +8,36 @@ import axios from 'axios';
 const ManageUser = () => {
     const [allItems, setAllItems] = useState([]);
     const [items, setItems] = useState([]);
+    const [commentNegative, setCommentNegative] = useState([]);
     const [showFilter, setShowFilter] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-
+    const fetchDataNegative = async () => {
+        const token = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("accessToken="))
+            ?.split("=")[1];
+        if (!token) return;
+        try {
+            const response = await axios(
+                apiParser(api.apiPath.comment) + '/bad',
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token,
+                    }
+                }
+            )
+            const result = response.data;
+            if (result.errorCode === 200) {
+                setCommentNegative(result.data);
+            } else {
+                console.error('Error fetching data:', result.errorMessage);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -30,6 +57,9 @@ const ManageUser = () => {
                 console.error('Error fetching data:', error);
             }
         };
+
+
+        fetchDataNegative();
         fetchData();
     }, []);
 
@@ -38,12 +68,8 @@ const ManageUser = () => {
     };
 
     const handleViewNegative = () => {
-        // Giả lập bình luận tiêu cực bằng cách lọc các bình luận có từ khóa tiêu cực
-        const negativeComments = allItems.filter(item => 
-            item.content.toLowerCase().includes('c*t') ||
-            item.content.toLowerCase().includes('xàm')
-        );
-        setItems(negativeComments);
+        fetchDataNegative();
+        setItems(commentNegative);
     };
 
     const handleFilterByDate = (days: number) => {
@@ -80,6 +106,7 @@ const ManageUser = () => {
                 const updatedItems = allItems.filter((item) => item._id !== commentId);
                 setAllItems(updatedItems);
                 setItems(updatedItems);
+                setCommentNegative((prev) => prev.filter((item) => item._id !== commentId));
             } else {
                 console.error('Error deleting comment:', result.errorMessage);
             }

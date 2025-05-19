@@ -1,6 +1,7 @@
 import { CommentModel, IComment } from "../models/commentModel";
 import { ICommentService, CreateCommentDTO } from '../interfaces/commentService.interface';
 import { postClient, userClient } from "../clients/user.client";
+import {generateResponse} from "../utils/modelAI";
 /**
  * Custom error class for comment service
  */
@@ -47,6 +48,60 @@ class CommentService implements ICommentService {
     } catch (error) {
       console.error('Error getting all comments:', error);
       throw new Error('Failed to fetch comments');
+    }
+  }
+
+  /**
+   * Get all comments bad
+   */
+  async getAllCommentsBad(): Promise<any[]> {
+    try {
+      // Lấy các comment chưa được kiểm tra hoặc chưa có trường isCheck
+      const uncheckedComments = await CommentModel.find({ $or: [{ isCheck: false }, { isCheck: { $exists: false } }] });
+      if (uncheckedComments.length === 0) return [];
+
+      // Tạo prompt cho AI
+      const prompt = uncheckedComments.map((item: any) => `ID: ${item._id}, Nội dung: ${item.content}`).join('\n');
+      const response = await generateResponse(prompt);
+
+      // Lấy danh sách ID comment bị đánh dấu là bad từ AI
+      const ids = (response || "")
+        .split('\n')
+        .map((id: string) => id.trim())
+        .filter((id: string) => id.length > 0);
+
+      // Đánh dấu các comment là bad
+      for (const id of ids) {
+        const updated = await CommentModel.findOneAndUpdate(
+          { commentId: id },  
+          { isCheck: true, isBad: true },
+          { new: true, runValidators: true }
+        );
+      }
+      const badComments = await CommentModel.find({ isBad: true });
+      // Lấy thông tin user và post cho từng comment
+      const comments = await Promise.all(
+        badComments.map(async (item: any) => {
+          try {
+            const user = await userClient.getUserById(item.userId.toString()).catch(() => null);
+            const post = await postClient.getPostById(item.postId.toString()).catch(() => null);
+            return {
+              ...item.toObject(),
+              user: user?.data || null,
+              post: post?.data || null,
+            };
+          } catch (error) {
+            console.error(`Error fetching related data for comment ID ${item._id}:`, error);
+            return null;
+          }
+        })
+      );
+
+      // Trả về danh sách comment bad đã có thông tin user và post
+      return comments.filter((comment: any) => comment !== null);
+    } catch (error) {
+      console.error('Error getting all bad comments:', error);
+      throw new Error('Failed to fetch bad comments');
     }
   }
 
