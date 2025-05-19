@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import Toast from '../Toast';
 
 interface Comment {
     id: string;
@@ -22,7 +23,7 @@ interface CommentTableProps {
 
 const CommentTable: React.FC<CommentTableProps> = ({ items, handleDeleteComment }) => {
     const [deletingId, setDeletingId] = useState<string | null>(null);
-
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const handleDelete = async (id: string) => {
         const confirmDelete = window.confirm('Bạn có chắc chắn muốn xóa bình luận này?');
         if (!confirmDelete) return;
@@ -33,6 +34,10 @@ const CommentTable: React.FC<CommentTableProps> = ({ items, handleDeleteComment 
             console.error('Error deleting comment:', error);
         } finally {
             setDeletingId(null);
+            setToast({
+                message: `Xóa bình luận ${id} thành công!`,
+                type: 'success',
+            });
         }
     };
 
@@ -113,6 +118,11 @@ const CommentTable: React.FC<CommentTableProps> = ({ items, handleDeleteComment 
                     </tr>
                 </tfoot>
             </table>
+
+            <Toast
+                message={toast?.message || ''}
+                type={toast?.type || 'success'}
+            />
         </div>
     );
 };

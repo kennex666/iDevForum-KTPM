@@ -22,7 +22,6 @@ export const apiDevelopment = {
 			updateStatus: "/post/admin",
 		},
 		postReport: {
-			//http://localhost:3000/api/postreport/
 			getAll: "/postreport",
 			getInfo: "/postreport/:id",
 			create: "/postreport/save",
@@ -30,6 +29,7 @@ export const apiDevelopment = {
 			delete: "/postreport/:id",
 			search: "/postreport/search",
 		},
+		topic: "/topic",
 		comment: "/comment",
 		like: "/like",
 	},
