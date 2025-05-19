@@ -1,4 +1,5 @@
-import { createPost, getPosts, getPostById, updatePost, deletePost, searchPost, updatePostByAdmin } from '../services/postService';
+import { get } from 'http';
+import { createPost, getPosts, getPostById, updatePost,actionBookmark, deletePost, searchPost, updatePostByAdmin } from '../services/postService';
 import { Request, Response } from 'express';
 import { toSlugWithTimestamp } from '../utils/string';
 import { PostStatus } from '../models/postStatus';
@@ -302,4 +303,40 @@ const searchPostController = async (req:Request, res:Response) => {
     }
 }
 
-export {getPostController, getPostByIdController,updatePostByAdminController, createPostController, updatePostController, deletePostController, searchPostController};
+const acctionBookmarkController = async (req:Request, res:Response) => {
+    const userId = req.user._id;
+    const { postId } = req.body;
+
+    if (!userId || !postId) {
+        return res.status(200).json({
+            errorCode: 400,
+            message: "Vui lòng nhập đầy đủ thông tin",
+            data: null,
+        });
+    }
+    try {
+        const acctionBookmark = await actionBookmark(userId, postId);
+        res.status(200).json({
+            errorCode: 200,
+            errorMessage: "Thao tác bookmark thành công",
+            data: acctionBookmark,
+        });
+    } catch (err) {
+        console.error("Error while processing request:", err);
+        if (err instanceof Error) {
+            res.status(200).json({
+                errorCode: 400,
+                message: err.message,
+                data: null,
+            });
+        } else {
+            res.status(200).json({
+                errorCode: 400,
+                message: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
+            });
+        } 
+    }
+}
+
+export {getPostController,acctionBookmarkController, getPostByIdController,updatePostByAdminController, createPostController, updatePostController, deletePostController, searchPostController};
