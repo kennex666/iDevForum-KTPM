@@ -303,6 +303,19 @@ const updatePasswordHandler = async (req: any, res: any) => {
 
 const createUserByAdminHandler = async (req: any, res: any) => {
   try {
+    const userToken = req.user;
+    console.log("userToken", userToken);
+    if (!userToken) return res.status(200).json({
+      errorCode: 400,
+      errorMessage: "Admin token is required",
+      data: null
+    });
+    if (userToken.role !== 1) return res.status(200).json({
+      errorCode: 403,
+      errorMessage: "You are not authorized to create user",
+      data: null
+    });
+
     const { name, role, accountState, username, email, password, title, bio, description } = req.body;
     if (!name)
       return res.status(200).json({

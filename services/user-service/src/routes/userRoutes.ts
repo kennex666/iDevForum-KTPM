@@ -1,6 +1,7 @@
 import express from "express";
 
 import * as UserController from "../controllers/UserController";
+import { authenticate } from "../middleware/authenticate";
 
 const router = express.Router();
 
@@ -21,7 +22,7 @@ router.delete("/profile/:id", UserController.deleteUserHandler);
 
 router.put("/updatepassword/:id", UserController.updatePasswordHandler);
 
-router.post("/createUserByAdmin", UserController.createUserByAdminHandler);
+router.post("/createUserByAdmin",authenticate ,UserController.createUserByAdminHandler);
 
 
 
