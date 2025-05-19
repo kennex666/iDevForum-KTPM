@@ -77,9 +77,11 @@ const Dashboard = () => {
     users: [],
     posts: [],
     topics: [],
+    postsReport: [],
     filteredUsers: [],
     filteredPosts: [],
     filteredTopics: [],
+    filteredPostsReport: [],
   });
 
 
@@ -130,6 +132,7 @@ const Dashboard = () => {
         return;
       }
       const data = response.data.data;
+      console.log("Posts data:", data);
       setData((prevData) => ({
         ...prevData,
         posts: data,
@@ -156,6 +159,7 @@ const Dashboard = () => {
         return;
       }
       const data = response.data.data;
+      
       setData((prevData) => ({
         ...prevData,
         topics: data,
@@ -166,12 +170,40 @@ const Dashboard = () => {
     }
   }
 
+  const fetchPostsReportData = async () => {
+    try {
+      const token = getAccessToken();
+      if (!token) return;
+      
+      const url = apiParser(api.apiPath.postReport.getAll);
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.data.errorCode !== 200) {
+        console.error("Error fetching posts report:", response.data.errorMessage);
+        return;
+      }
+      const data = response.data.data;
+      
+      setData((prevData) => ({
+        ...prevData,
+        postsReport: data,
+        filteredPostsReport: data.filter((report: any) => report.state === "PROCESSING"),
+      }));
+    } catch (error) {
+      console.error("Error fetching post report data:", error);
+    }
+  }
+
 
 
   useEffect(() => {
     fetchUserData();
     fetchPostData();
     fetchTopicsData();
+    fetchPostsReportData();
   }, []);
 
 
@@ -200,25 +232,35 @@ const Dashboard = () => {
       setTimeFilter("custom");
       setShowDateModal(false);
 
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+
       const newUsersData = data.users.filter((user: any) => {
-        const userDate = new Date(user.createdAt).toDateString();
-        console.log("User date:", userDate);
-        return userDate >= new Date(startDate).toDateString() && userDate <= new Date(endDate).toDateString();
+        const userDate = new Date(user.createdAt)
+        return userDate >= start && userDate <= end;
       });
       const newPostsData = data.posts.filter((post: any) => {
-        const postDate = new Date(post.createdAt).toDateString();
-        return postDate >= new Date(startDate).toDateString() && postDate <= new Date(endDate).toDateString();
+        const postDate = new Date(post.createdAt)
+        return postDate >= start && postDate <= end;
+      });
+      const newTopicsData = data.topics.filter((topic: any) => {
+        const topicDate = new Date(topic.createdAt);
+        return topicDate >= start && topicDate <= end;
+
+      });
+      const newPostsReportData = data.postsReport.filter((report: any) => {
+        const reportDate = new Date(report.createdAt)
+        return reportDate >= start && reportDate <= end;
       });
 
       setData((prevData) => ({
         ...prevData,
         filteredUsers: newUsersData,
         filteredPosts: newPostsData,
+        filteredTopics: newTopicsData,
+        filteredPostsReport: newPostsReportData,
       }));
-
-
-      console.log("Filtered users data:", newUsersData);
-      console.log("Filtering data from", startDate, "to", endDate);
     } else {
       console.log("Filtering data with preset filter:", timeFilter);
 
@@ -227,6 +269,8 @@ const Dashboard = () => {
         ...prevData,
         filteredUsers: filtered.filteredUsers,
         filteredPosts: filtered.filteredPosts,
+        filteredTopics: filtered.filteredTopics,
+        filteredPostsReport: filtered.filteredPostsReport,
       }));
       setShowDateModal(false);
 
@@ -262,10 +306,9 @@ const Dashboard = () => {
         start.setMonth(start.getMonth() - 6); // 6 tháng gần nhất
         break;
     }
-    // return data.users.filter((user: any) => {
-    //   const userDate = new Date(user.createdAt);
-    //   return userDate >= start && userDate <= now;
-    // });
+    start.setHours(0, 0, 0, 0);
+    now.setHours(23, 59, 59, 999);
+
     const filteredUsers = data.users.filter((user: any) => {
       const userDate = new Date(user.createdAt);
       return userDate >= start && userDate <= now;
@@ -274,21 +317,66 @@ const Dashboard = () => {
       const postDate = new Date(post.createdAt);
       return postDate >= start && postDate <= now;
     });
+    const filteredTopics = data.topics.filter((topic: any) => {
+      const topicDate = new Date(topic.createdAt);
+      return topicDate >= start && topicDate <= now;
+    });
+    const filteredPostsReport = data.postsReport.filter((report: any) => {
+      const reportDate = new Date(report.createdAt);
+      return reportDate >= start && reportDate <= now;
+    });
     return {
       filteredUsers,
       filteredPosts,
+      filteredTopics,
+      filteredPostsReport,
     }
   }
 
 
   const handleRefresh = () => {
     fetchUserData();
+    fetchPostData();
+    fetchPostsReportData();
+    fetchTopicsData();
     setTimeFilter("default");
     setStartDate("");
     setEndDate("");
     setIsCustomDate(false);
     setShowDateModal(false);
   }
+
+
+
+
+  // Hàm tính toán postCount và progress cho mỗi topic
+  const getTopicPostCounts = (topics: any[], posts: any[]) => {
+    if (!topics.length || !posts.length) {
+      return topics.map((topic) => ({
+        ...topic,
+        postCount: 0,
+        progress: 0,
+      }));
+    }
+
+    // const maxPosts = Math.max(...topics.map((topic) => {
+    //   const count = posts.filter((post) => post.tagId === topic.tagId).length;
+    //   return count;
+    // }), 1); 
+    const maxPosts = posts.length;
+    console.log("Max posts:", maxPosts);
+
+    return topics.map((topic) => {
+      const postCount = posts.filter((post) => post.tagId === topic.tagId).length;
+      const progress = Math.min((postCount / maxPosts) * 100, 100);
+      return {
+        ...topic,
+        postCount,
+        progress: Number.isNaN(progress) ? 0 : Math.round(progress),
+      };
+    });
+  };
+
 
 
   const mockLineChartData = {
@@ -328,6 +416,102 @@ const Dashboard = () => {
     ],
   };
 
+  // const getDoughnutChartData = (posts: any[]) => {
+  //   const commentCategories = posts.reduce(
+  //     (acc: { [key: string]: number }, post) => {
+  //       let category = "Others";
+  //       const comments = post.totalComments || 0;
+
+  //       if (comments < 10) {
+  //         category = "Ít bình luận (< 10)";
+  //       } else if (comments >= 10 && comments <= 50) {
+  //         category = "Trung bình (10-50)";
+  //       } else {
+  //         category = "Nhiều bình luận (> 50)";
+  //       }
+
+  //       acc[category] = (acc[category] || 0) + 1;
+  //       return acc;
+  //     },
+  //     {}
+  //   );
+  //   const labels = Object.keys(commentCategories);
+  //   const data = Object.values(commentCategories);
+
+  //   if (labels.length === 0) {
+  //     return {
+  //       labels: ["No Data"],
+  //       datasets: [
+  //         {
+  //           data: [1],
+  //           backgroundColor: ["#d3d3d3"],
+  //           hoverBackgroundColor: ["#a9a9a9"],
+  //           hoverBorderColor: "rgba(234, 236, 244, 1)",
+  //           borderWidth: 2,
+  //         },
+  //       ],
+  //     };
+  //   }
+  //   const colors = ["#4e73df", "#1cc88a", "#36b9cc", "#f6c23e"];
+  //   const hoverColors = ["#2e59d9", "#17a673", "#2c9faf", "#f4b619"];
+
+  //   return {
+  //     labels,
+  //     datasets: [
+  //       {
+  //         data,
+  //         backgroundColor: colors.slice(0, labels.length),
+  //         hoverBackgroundColor: hoverColors.slice(0, labels.length),
+  //         hoverBorderColor: "rgba(234, 236, 244, 1)",
+  //         borderWidth: 2,
+  //       },
+  //     ],
+  //   };
+  // };
+
+  const getDoughnutChartData = (posts: any[],reports: any[]) => {
+    const totalComments = posts.reduce((sum, post) => sum + (post.totalComments || 0), 0);
+    const totalViews = posts.reduce((sum, post) => sum + (post.totalView || 0), 0);
+    const totalShares = posts.reduce((sum, post) => sum + (post.totalShare || 0), 0);
+    const totalReports = reports.length;
+
+    const totalSum = totalComments + totalViews + totalShares+ totalReports;
+
+    if (totalSum === 0) {
+      return {
+        labels: ["No Data"],
+        datasets: [
+          {
+            data: [1],
+            backgroundColor: ["#d3d3d3"],
+            hoverBackgroundColor: ["#a9a9a9"],
+            hoverBorderColor: "rgba(234, 236, 244, 1)",
+            borderWidth: 2,
+          },
+        ],
+      };
+    }
+
+    const data = [
+      totalComments,
+      totalViews,
+      totalShares,
+      totalReports
+    ].map(value => (value / totalSum) * 100);
+
+    return {
+     labels: ["Total Comments", "Total Views", "Total Shares", "Total Reports"],
+      datasets: [
+        {
+          data,
+          backgroundColor: ["#4e73df", "#1cc88a", "#36b9cc", "#f6c23e"],
+          hoverBackgroundColor: ["#2e59d9", "#17a673", "#2c9faf"],
+          hoverBorderColor: "rgba(234, 236, 244, 1)",
+          borderWidth: 2,
+        },
+      ],
+    };
+  };
 
 
   const getLineChartData = (): ChartData => {
@@ -336,12 +520,11 @@ const Dashboard = () => {
     const postCounts: number[] = [];
     const now = new Date();
     const start = new Date(now);
-    // start.setMonth(now.getMonth() - 6);
+    
     start.setMonth(now.getMonth() - 5);
     start.setDate(1);
     for (let i = 0; i < 6; i++) {
       const monthStart = new Date(start.getFullYear(), start.getMonth() + i, 1);
-      // const monthEnd = new Date(start.getFullYear(), start.getMonth() + i + 1, 0);
       const monthEnd = i === 5 ? now : new Date(start.getFullYear(), start.getMonth() + i + 1, 0);
       labels.push(monthStart.toLocaleString('default', { month: 'long' }));
       userCounts.push(
@@ -390,6 +573,18 @@ const Dashboard = () => {
           formatDate(post.createdAt) || "N/A",
           post.title || "N/A",
         ]),
+        ...data.filteredTopics.map((topic) => [
+          "Topic",
+          topic._id || "N/A",
+          formatDate(topic.createdAt) || "N/A",
+          topic.name || "N/A",
+        ]),
+        ...data.filteredPostsReport.map((report) => [
+          "Report",
+          report._id || "N/A",
+          formatDate(report.createdAt) || "N/A",
+          report.reason || "N/A",
+        ]),
       ];
 
       const csvContent = "\uFEFF" +
@@ -414,6 +609,68 @@ const Dashboard = () => {
     }
   };
 
+  const getRelativeTime = (date: Date) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays} days ago`;
+  };
+
+
+
+  const getRecentActivities = () => {
+    const activities: any[] = [];
+
+    // new user
+    data.filteredUsers.forEach((user: any) => {
+      activities.push({
+        type: "user",
+        message: `New user registered: ${user.username || "Unknown User"}`,
+        icon: "fas fa-user-plus text-primary",
+        createdAt: new Date(user.createdAt),
+      });
+    });
+
+    // new post
+    const topicMap = data.filteredTopics.reduce((acc: { [key: string]: string }, topic: any) => {
+      acc[topic._id] = topic.name || "Unknown Topic";
+      return acc;
+    }, {});
+
+    data.filteredPosts.forEach((post: any) => {
+      const topicName = topicMap[post.tagId] || "Unknown Topic";
+      activities.push({
+        type: "post",
+        message: `New post in ${topicName}: "${post.title || "Untitled Post"}"`,
+        icon: "fas fa-comment text-success",
+        createdAt: new Date(post.createdAt),
+      });
+    });
+
+    // new comment
+    data.filteredPosts.forEach((post: any) => {
+      if (post.totalComments > 0) {
+        activities.push({
+          type: "comment",
+          message: `New comment on "${post.title || "Untitled Post"}"`,
+          icon: "fas fa-reply text-info",
+          createdAt: new Date(post.updatedAt || post.createdAt), // Dùng updatedAt nếu có
+        });
+      }
+    });
+
+    // Sắp xếp theo thời gian 
+    activities.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+    // Giới hạn tối đa 5 hoạt động
+    return activities.slice(0, 5);
+  };
 
 
 
@@ -575,10 +832,10 @@ const Dashboard = () => {
               <div className="col-md-6 col-xl-3">
                 <Card
                   title="Pending Reports"
-                  value="12"
+                  value={data.filteredPostsReport.length}
                   icon="fas fa-flag"
                   color="warning"
-                  className="h-100 shadow-sm hover-shadow transition-all"
+                // className="h-100 shadow-sm hover-shadow transition-all"
                 />
               </div>
             </div>
@@ -625,7 +882,8 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="card-body p-4">
-                  <Chart type="doughnut" data={mockDoughnutChartData} />
+                  {/* <Chart type="doughnut" data={mockDoughnutChartData} /> */}
+                  <Chart type="doughnut" data={getDoughnutChartData(data.filteredPosts, data.filteredPostsReport)} />
                 </div>
               </div>
             </div>
@@ -655,41 +913,73 @@ const Dashboard = () => {
                     </div>
                     <ProgressBar progress={85} label="Web Development" className="mb-3" />
                   </div>
-                  <div className="mb-4">
+                  {
+
+                    // data.filteredTopics.map((topic: any) => {
+                    //   const postCount = data.filteredPosts.filter((post: any) => post.tagId === topic.tagId).length;
+                    //   const progress = Math.min((postCount / 100) * 100, 100);
+                    //   return (
+                    //     <div key={topic._id} className="mb-4">
+                    //       <div className="d-flex justify-content-between align-items-center mb-1">
+                    //         <span className="text-dark fw-medium">{topic.name}</span>
+                    //         <span className="text-muted small">{progress}%</span>
+                    //       </div>
+                    //       <ProgressBar progress={progress} label={topic.name} className="mb-3" />
+                    //     </div>
+                    //   );
+                    // })
+                    data.filteredTopics.length > 0 ? (
+                      getTopicPostCounts(data.filteredTopics, data.filteredPosts)
+                        .sort((a, b) => b.postCount - a.postCount) // Sắp xếp theo postCount giảm dần
+                        .slice(0, 6) // Giới hạn 6 topic
+                        .map((topic, index) => (
+                          <div key={topic._id || index} className="mb-4">
+                            <div className="d-flex justify-content-between align-items-center mb-1">
+                              <span className="text-dark fw-medium">{topic.name || "No name Topic"}</span>
+                              <span className="text-muted small">{topic.progress}%</span>
+                            </div>
+                            <ProgressBar progress={topic.progress} label={topic.name || "Unknown Topic"} className="mb-3" />
+                          </div>
+                        ))
+                    ) : (
+                      <p className="text-muted">No topics available</p>
+                    )
+                  }
+                  {/* <div className="mb-4">
                     <div className="d-flex justify-content-between align-items-center mb-1">
                       <span className="text-dark fw-medium">Mobile Development</span>
                       <span className="text-muted small">70%</span>
                     </div>
                     <ProgressBar progress={70} label="Mobile Development" className="mb-3" />
-                  </div>
-                  <div className="mb-4">
+                  </div> */}
+                  {/* <div className="mb-4">
                     <div className="d-flex justify-content-between align-items-center mb-1">
                       <span className="text-dark fw-medium">Data Science & AI</span>
                       <span className="text-muted small">60%</span>
                     </div>
                     <ProgressBar progress={60} label="Data Science & AI" className="mb-3" />
-                  </div>
-                  <div className="mb-4">
+                  </div> */}
+                  {/* <div className="mb-4">
                     <div className="d-flex justify-content-between align-items-center mb-1">
                       <span className="text-dark fw-medium">DevOps & Cloud</span>
                       <span className="text-muted small">45%</span>
                     </div>
                     <ProgressBar progress={45} label="DevOps & Cloud" />
-                  </div>
-                  <div className="mb-4">
+                  </div> */}
+                  {/* <div className="mb-4">
                     <div className="d-flex justify-content-between align-items-center mb-1">
                       <span className="text-dark fw-medium">UI/UX Design</span>
                       <span className="text-muted small">55%</span>
                     </div>
                     <ProgressBar progress={55} label="UI/UX Design" />
-                  </div>
-                  <div>
+                  </div> */}
+                  {/* <div>
                     <div className="d-flex justify-content-between align-items-center mb-1">
                       <span className="text-dark fw-medium">Cybersecurity</span>
                       <span className="text-muted small">40%</span>
                     </div>
                     <ProgressBar progress={40} label="Cybersecurity" />
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>
@@ -710,7 +1000,27 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="card-body p-4">
-                  <div className="activity-item d-flex align-items-center mb-3 pb-3 border-bottom">
+                  {getRecentActivities().length > 0 ? (
+                    getRecentActivities().map((activity, index) => (
+                      <div
+                        key={index}
+                        className={`activity-item d-flex align-items-center mb-3 ${index < getRecentActivities().length - 1 ? "pb-3 border-bottom" : ""
+                          }`}
+                      >
+                        <div className={`activity-icon bg-opacity-10 rounded-circle p-2 me-3 ${activity.icon.split("text-")[1]}-bg`}>
+                          <i className={activity.icon}></i>
+                        </div>
+                        <div>
+                          <small className="text-muted">{getRelativeTime(activity.createdAt)}</small>
+                          <p className="mb-0">{activity.message}</p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-muted">No recent activities available</p>
+                  )}
+
+                  {/* <div className="activity-item d-flex align-items-center mb-3 pb-3 border-bottom">
                     <div className="activity-icon bg-primary bg-opacity-10 rounded-circle p-2 me-3">
                       <i className="fas fa-user-plus text-primary"></i>
                     </div>
@@ -736,7 +1046,7 @@ const Dashboard = () => {
                       <small className="text-muted">1 hour ago</small>
                       <p className="mb-0">New comment on "Getting Started with Python"</p>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

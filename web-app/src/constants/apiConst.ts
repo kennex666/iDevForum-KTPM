@@ -25,6 +25,9 @@ export const apiDevelopment = {
 			getAll: "/post",
 			getInfo: "/post/:id",
 		},
+		postReport: {
+			getAll: "/postreport",
+		},
 		comment: "/comment",
 		like: "/like",
 
