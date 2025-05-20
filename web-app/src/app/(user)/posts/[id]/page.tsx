@@ -59,41 +59,50 @@ export default function PostDetailPage() {
 	const [comment, setComment] = useState("");
 	const [isLoading, setIsLoading] = useState(true);
 	const [showToast, setShowToast] = useState("");
-	const { user } = useUser();
+	const { user, isUserReady } = useUser();
 
 	useEffect(() => {
-		fetch(apiParser(api.apiPath.post.getInfo.replace(":id", id)))
-			.then((res) => res.json())
-			.then((data) => {
-				if (data.errorCode != 200) {
-					return;
-				}
-				const p = data.data;
-				if (!p.user) {
-					p.user = guestUser;
-					p.user.name = "<<Name>>";
-				}
-				if (!p.topic) {
-					p.topic = {
-						tagId: "unknown",
-						name: "<<Topic>>",
-					};
-				}
-				p.post.isOwner = p.post.userId == user._id;
-				if (!p.post.isOwner && p.post.status != "PUBLISHED" && user.role != EUserRole.ADMIN) {
-					setShowToast("Bài viết không tồn tại hoặc đã bị xóa");
-					setTimeout(() => {
-						setShowToast("");
-						window.history.back();
-					}, 4000);
-					return;
-				}
-				p.post.contentDOM = DOMPurify.sanitize(p.post.content);
-				setData(p);
-				setReaction("");
-				setComments(p.comments || []);
-			}).finally(() => setIsLoading(false));
-	}, [id]);
+		if (id && isUserReady)
+			fetch(apiParser(api.apiPath.post.getInfo.replace(":id", id)))
+				.then((res) => res.json())
+				.then((data) => {
+					if (data.errorCode != 200) {
+						return;
+					}
+					const p = data.data;
+					if (!p.user) {
+						p.user = guestUser;
+						p.user.name = "<<Name>>";
+					}
+					if (!p.topic) {
+						p.topic = {
+							tagId: "unknown",
+							name: "<<Topic>>",
+						};
+					}
+					console.log(user._id)
+					p.post.isOwner = p.post.userId == user?._id;
+					if (
+						!p.post.isOwner &&
+						p.post.status != "PUBLISHED" &&
+						user.role != EUserRole.ADMIN
+					) {
+						setShowToast("Bài viết không tồn tại hoặc đã bị xóa");
+						setTimeout(() => {
+							setShowToast("");
+							window.history.back();
+						}, 4000);
+						setData(null);
+						setIsLoading(false);
+						return;
+					}
+					p.post.contentDOM = DOMPurify.sanitize(p.post.content);
+					setData(p);
+					setReaction("");
+					setComments(p.comments || []);
+				})
+				.finally(() => setIsLoading(false));
+	}, [id, isUserReady, user?._id]);
 
 	const handleFollow = () => {
 		if (!data) return;
