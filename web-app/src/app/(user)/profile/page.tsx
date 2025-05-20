@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { FaRegEnvelope } from "react-icons/fa";
 import DOMPurify from 'dompurify';
 import { api, apiParser } from "@/constants/apiConst";
+import axios from "axios";
 
 
 export default function MyProfileHome() {
@@ -52,34 +53,57 @@ export default function MyProfileHome() {
 	// ] as Post[]; // fetch từ API hoặc mock
 
 	const [posts, setPosts] = useState<Post[]>([]);
+		const [total, setTotal] = useState(0);
+		const [currentPage, setCurrentPage] = useState(0);
 
-	useEffect(() => {
 		const fetchPosts = async () => {
 			const params: Record<string, any> = {};
+
 			params.sort = -1;
-			fetch(`${apiParser(api.apiPath.post.getAuthor)}${user._id}`)
-				.then((res) => res.json())
-				.then((data) => {
-					if (data.errorCode === 200) {
-						setPosts(data.data);
-					} else {
-						console.error(
-							"Error fetching posts:",
-							data.errorMessage
-						);
-					}
-				})
-				.catch((error) => {
-					console.error("Error fetching posts:", error);
-				});
+
+			const res = await axios.get(
+				`${apiParser(api.apiPath.post.getAuthor)}${user._id}?offset=${
+					currentPage * 10
+				}`,
+				{
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${user.accessToken}`,
+					},
+					params,
+				}
+			);
+
+			const data = await res.data;
+			if (data?.data) {
+				setPosts(data.data);
+				setTotal(data.total);
+			} else {
+				console.error("Error fetching posts:", data);
+			}
 		};
 
-		fetchPosts();
-	}, [user]);
+		useEffect(() => {
+			fetchPosts();
+		}, [user, currentPage]);
+
+		const action = {
+			prev: () => {
+				if (currentPage > 0) {
+					setCurrentPage(currentPage - 1);
+				}
+			},
+			next: () => {
+				if (currentPage < Math.floor(total / 10)) {
+					setCurrentPage(currentPage + 1);
+				}
+			},
+		};
+
 
     const [animationKey, setAnimationKey] = useState(0); // Key để reset animation
 
-    const handleTabClick = (tabName) => {
+    const handleTabClick = (tabName: any) => {
             setActive(tabName);
             setAnimationKey((prev) => prev + 1); // Tăng key để React render lại animation
     };
@@ -123,7 +147,7 @@ export default function MyProfileHome() {
 						))}
 					</div>
 					<div key={animationKey} className="animate-fade-in-up">
-						{active === "home" && <PostList posts={posts} />}
+						{active === "home" && <PostList posts={posts} action={action} currentPage={currentPage} total={total} />}
 						{active === "bookmark" && null}
 						{active === "author" && (
 							<div className="flex flex-col space-y-3 ps-6 pe-11">
