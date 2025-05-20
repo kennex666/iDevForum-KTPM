@@ -1,488 +1,689 @@
 <html xmlns:th="http://www.thymeleaf.org">
-<head lang="vi">
-    <title>Viết bài | iDev4rum</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-    />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- charset utff 8 -->
-    <meta charset="UTF-8" />
-    <style>
-        body {
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        }
-        /*  custom scroll bar with gray background */
-        .scrollbar-custom::-webkit-scrollbar {
-            height: 5px;
-        }
+	<head lang="vi">
+		<title>Viết bài | iDev4rum</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+		/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<!-- charset utff 8 -->
+		<meta charset="UTF-8" />
+		<style>
+			.toast-message {
+				position: fixed;
+				bottom: 1.5rem;
+				right: 1.5rem;
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+				min-width: 260px;
+				padding: 1rem 1.5rem;
+				border-radius: 0.75rem;
+				box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+				color: white;
+				font-size: 1rem;
+				font-weight: 500;
+				z-index: 9999;
+				opacity: 0;
+				transform: translateY(1rem);
+				transition: all 0.5s ease;
+			}
+			.toast-success {
+				background: linear-gradient(to right, #34d399, #059669);
+			}
+			.toast-error {
+				background: linear-gradient(to right, #f87171, #ec4899);
+			}
+			.toast-icon {
+				font-size: 1.25rem;
+			}
+		</style>
+		<style>
+			body {
+				font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+			}
+			/*  custom scroll bar with gray background */
+			.scrollbar-custom::-webkit-scrollbar {
+				height: 5px;
+			}
 
-        /* Track */
-        .scrollbar-custom::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
+			/* Track */
+			.scrollbar-custom::-webkit-scrollbar-track {
+				background: #f1f1f1;
+			}
 
-        /* Handle */
-        .scrollbar-custom::-webkit-scrollbar-thumb {
-            background: #dfdddd;
-        }
+			/* Handle */
+			.scrollbar-custom::-webkit-scrollbar-thumb {
+				background: #dfdddd;
+			}
 
-        /* Handle on hover */
-        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-            background: #d9d7d7;
-        }
-    </style>
-    <link
-            rel="stylesheet"
-            href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css"
-    />
-    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
-</head>
-<body class="">
-<!-- Nav bar -->
-<header
-        class="bg-white px-20 py-4 flex justify-between items-center sticky top-0"
->
-    <div class="flex items-end justify-center space-x-4">
-        <div class="flex justify-center space-x-4">
-            <a href="/"><h1 class="text-2xl font-bold">iDev4rum</h1></a>
-        </div>
-        <div
-                class="flex items-center justify-center space-x-2 text-sm"
-                style="padding-bottom: 0.2rem"
-        >
-            <p>Trạng thái:</p>
-            <p class="text-gray-500 font-bold" id="text-save-status">Đã lưu</p>
-        </div>
-    </div>
+			/* Handle on hover */
+			.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+				background: #d9d7d7;
+			}
+		</style>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css"
+		/>
+		<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+	</head>
+	<body class="">
+		<!-- Nav bar -->
+		<header
+			class="bg-white px-20 py-4 flex justify-between items-center sticky top-0"
+		>
+			<div class="flex items-end justify-center space-x-4">
+				<div class="flex justify-center space-x-4">
+					<a href="/"><h1 class="text-2xl font-bold">iDev4rum</h1></a>
+				</div>
+				<div
+					class="flex items-center justify-center space-x-2 text-sm"
+					style="padding-bottom: 0.2rem"
+				>
+					<p>Trạng thái:</p>
+					<p class="text-gray-500 font-bold" id="text-save-status">
+						Đã lưu
+					</p>
+				</div>
+			</div>
 
-    <div class="flex items-center space-x-10">
-        <button
-                id="btn-publish"
-                class="text-white bg-blue-500 focus:outline-none space-x-2 border px-3 py-2 rounded-full"
-        >
-            <i class="fas fa-check"></i>
-            <span>Đăng bài</span>
-        </button>
-        <button class="text-gray-500 focus:outline-none">
-            <i class="fas fa-bell"></i>
-        </button>
-        <img
-                src="https://placehold.co/32x32"
-                alt="User profile image, placeholder image"
-                class="rounded-full"
-        />
-    </div>
-</header>
+			<div class="flex items-center space-x-10">
+				<button
+					id="btn-publish"
+					class="text-white bg-blue-500 focus:outline-none space-x-2 border px-3 py-2 rounded-full"
+				>
+					<i class="fas fa-check"></i>
+					<span>Đăng bài</span>
+				</button>
+			</div>
+		</header>
 
-<!-- Blog space -->
-<div class="container mx-auto px-12 lg:w-10/12">
-    <div class="flex justify-center items-start py-2">
-        <!-- Recommend blog -->
-        <div class="w-2/3 space-y-4">
-            <div class="flex flex-col gap-3">
-                <input id="title" type="text" class="w-full border border-gray-300 p-2 focus:border-gray-300 text-lg" placeholder="Tiêu đề bài viết" required>
-                <div class="flex flex-row items-center gap-6">
-                    <p class="text-lg w-fit whitespace-nowrap">Chủ đề</p>
-                    <select name="tag" id="slt-tag" class="border border-gray-300 py-1 px-2 focus:border-gray-300 text-lg" required>
+		<!-- Blog space -->
+		<div class="container mx-auto px-12 lg:w-10/12">
+			<div class="flex justify-center items-start py-2">
+				<!-- Recommend blog -->
+				<div class="w-2/3 space-y-4">
+					<div class="flex flex-col gap-3">
+						<input
+							id="title"
+							type="text"
+							class="w-full border border-gray-300 p-2 focus:border-gray-300 text-lg"
+							placeholder="Tiêu đề bài viết"
+							required
+						/>
+						<div class="flex flex-row items-center gap-6">
+							<p class="text-lg w-fit whitespace-nowrap">
+								Chủ đề
+							</p>
+							<select
+								name="tag"
+								id="slt-tag"
+								class="border border-gray-300 py-1 px-2 focus:border-gray-300 text-lg"
+								required
+							></select>
+							<input
+								type="text"
+								name="tag-custom"
+								id="txt-tag"
+								class="border border-gray-300 py-1 px-2 focus:border-gray-300 text-lg w-full hidden"
+								placeholder="Nhập chủ đề của bạn ngắn gọn"
+							/>
+						</div>
+						<div>
+							<textarea
+								name="description"
+								id="description"
+								class="w-full border border-gray-300 p-2 focus:border-gray-300 text-lg"
+								rows="2"
+								required
+								maxlength="255"
+								placeholder="Mô tả ngắn"
+							></textarea>
+						</div>
+					</div>
+					<textarea class="" id="editor"></textarea>
+					<style>
+						header {
+							z-index: 1000;
+						}
+						/* Change the editor's background color */
+						.editor-toolbar {
+							border: 1px solid #e1e4e8;
+							position: sticky;
+							background-color: #f8f9fa;
+							opacity: 1;
+							z-index: 100; /* Toolbar nằm dưới nav bar */
+						}
+						.editor-toolbar:hover {
+							border: 1px solid #e1e4e8;
+							position: sticky;
+							background-color: #f8f9fa;
+							opacity: 1;
+							z-index: 100; /* Toolbar nằm dưới nav bar */
+						}
+						.CodeMirror-wrap {
+							/* sticky if move to bottom */
+							font-size: 1.12rem;
+							border: none;
+							cursor: text;
+							/* border: 1px solid #e1e4e8; */
+						}
 
-                    </select>
-                    <input type="text" name="tag-custom" id="txt-tag" class="border border-gray-300 py-1 px-2 focus:border-gray-300 text-lg w-full hidden" placeholder="Nhập chủ đề của bạn ngắn gọn">
-                </div>
-                <div>
-                    <textarea name="description" id="description" class="w-full border border-gray-300 p-2 focus:border-gray-300 text-lg" rows="2" required maxlength="255" placeholder="Mô tả ngắn"></textarea>
-                </div>
-            </div>
-            <textarea class="" id="editor"></textarea>
-            <style>
-                header {
-                    z-index: 1000;
-                }
-                /* Change the editor's background color */
-                .editor-toolbar {
-                    border: 1px solid #e1e4e8;
-                    position: sticky;
-                    background-color: #f8f9fa;
-                    opacity: 1;
-                    z-index: 100; /* Toolbar nằm dưới nav bar */
-                }
-                .editor-toolbar:hover {
-                    border: 1px solid #e1e4e8;
-                    position: sticky;
-                    background-color: #f8f9fa;
-                    opacity: 1;
-                    z-index: 100; /* Toolbar nằm dưới nav bar */
-                }
-                .CodeMirror-wrap {
-                    /* sticky if move to bottom */
-                    font-size: 1.12rem;
-                    border: none;
-                    cursor: text;
-                    /* border: 1px solid #e1e4e8; */
-                }
+						.editor-statusbar {
+							position: fixed;
+							background-color: #f8f9fa;
+							opacity: 1;
+							z-index: 2; /* Toolbar nằm dưới nav bar */
+							bottom: 0;
+							display: flex;
+							justify-content: flex-end;
+							align-items: center;
+						}
 
-                .editor-statusbar {
-                    position: fixed;
-                    background-color: #f8f9fa;
-                    opacity: 1;
-                    z-index: 2; /* Toolbar nằm dưới nav bar */
-                    bottom: 0;
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                }
+						.CodeMirror-code {
+							min-height: 60vh;
+						}
 
-                .CodeMirror-code {
-                    min-height: 60vh;
-                }
-
-                /*.CodeMirror-gutter-filler {
+						/*.CodeMirror-gutter-filler {
                 }; */
-            </style>
+					</style>
 
-            <script>
-                // get access token from cookie "access_token" from cookie
-                function getCookie(name) {
-                    const value = `; ${document.cookie}`;
-                    const parts = value.split(`; ${name}=`);
-                    if (parts.length === 2) return parts.pop().split(";").shift();
-                }
-                function getParameterByName(name, url = window.location.href) {
-                    name = name.replace(/[\[\]]/g, "\\$&");
-                    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-                        results = regex.exec(url);
-                    if (!results) return null;
-                    if (!results[2]) return "";
-                    return decodeURIComponent(results[2].replace(/\+/g, " "));
-                }
-                var editPostId = 0;
-                window.onload = function () {
-                    const postId = getParameterByName("id");
-                    const navSize = document.querySelector("header").offsetHeight;
-                    const textStatus = document.getElementById("text-save-status");
-                    const title = document.getElementById("title");
-                    const description = document.getElementById("description");
-                    var sltTag = document.getElementById("slt-tag");
-                    var txtTag = document.getElementById("txt-tag");
+					<script>
+						// get access token from cookie "access_token" from cookie
+						function getCookie(name) {
+							const value = `; ${document.cookie}`;
+							const parts = value.split(`; ${name}=`);
+							if (parts.length === 2)
+								return parts.pop().split(";").shift();
+						}
 
-                    var editorToolbar = null;
-                    var editorStatusbar = null;
-                    
+						function createToast(message, type = "error") {
+							const toast = document.createElement("div");
+							toast.classList.add(
+								"toast-message",
+								type === "success"
+									? "toast-success"
+									: "toast-error"
+							);
 
-                    const loadSavedContent = () => {
-                        let savedContent = localStorage.getItem("contentEditor");
-                        if (savedContent) {
-                            const data = JSON.parse(savedContent);  
-                            title.value = data.title
-                            description.value = data.description;
-                            sltTag.value = data.tagId;
-                            txtTag.value = data.tag_custom;
-                        }
-                    }
+							const icon = document.createElement("span");
+							icon.className = "toast-icon";
+							icon.innerHTML = type === "success" ? "✔️" : "❌";
 
-                    if (postId) {
-                        fetch(`/api/posts/${postId}`)
-                            .then((response) => response.json())
-                            .then((data) => {
-                                if (data.data){
-                                    const dataPost = data.data.post;
-                                    if (dataPost) {
-                                        title.value = dataPost.title;
-                                        description.value = dataPost.description;
-                                        simplemde.value(dataPost.content);
-                                        editPostId = dataPost.postId;
-                                    } else {
-                                        alert("Không tìm thấy bài viết!");
-                                    }
+							const text = document.createElement("span");
+							text.innerText = message;
 
-                                }
+							toast.appendChild(icon);
+							toast.appendChild(text);
+							document.body.appendChild(toast);
 
-                            })
-                            .catch((error) => {
-                                alert("Lỗi fetch bài viết!");
-                                window.location.href = "/";
-                            });
-                    } else {
+							// Force reflow to trigger animation
+							setTimeout(() => {
+								toast.style.opacity = "1";
+								toast.style.transform = "translateY(0)";
+							}, 10);
 
-                        loadSavedContent();
-                    }
+							// Remove after 3s
+							setTimeout(() => {
+								toast.style.opacity = "0";
+								toast.style.transform = "translateY(1rem)";
+								setTimeout(() => toast.remove(), 500);
+							}, 3000);
+						}
 
-                    const checkIsSaved = () => {
-                        let editorContent = simplemde.value(); // Current content
-                        let autosavedContent =
-                            localStorage.getItem("smde_editorContent"); // Autosaved content
+						if (!getCookie("accessToken")) {
+							window.location.href = "/login";
+						}
 
-                        let allOptions = {
-                            title: title.value,
-                            description: description.value,
-                            tagId: sltTag.value,
-                            tag_custom: txtTag.value,
-                        };
+						function getParameterByName(
+							name,
+							url = window.location.href
+						) {
+							name = name.replace(/[\[\]]/g, "\\$&");
+							var regex = new RegExp(
+									"[?&]" + name + "(=([^&#]*)|&|#|$)"
+								),
+								results = regex.exec(url);
+							if (!results) return null;
+							if (!results[2]) return "";
+							return decodeURIComponent(
+								results[2].replace(/\+/g, " ")
+							);
+						}
+						var editPostId = 0;
+						window.onload = function () {
+							const postId = getParameterByName("id");
+							const navSize =
+								document.querySelector("header").offsetHeight;
+							const textStatus =
+								document.getElementById("text-save-status");
+							const title = document.getElementById("title");
+							const description =
+								document.getElementById("description");
+							var sltTag = document.getElementById("slt-tag");
+							var txtTag = document.getElementById("txt-tag");
 
-                        localStorage.setItem("contentEditor", JSON.stringify(allOptions));
-                            
-                        if (editorContent === autosavedContent) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    };
+							var editorToolbar = null;
+							var editorStatusbar = null;
 
-                    var simplemde = new SimpleMDE({
-                        element: document.getElementById("editor"),
-                        autofocus: true, // Auto-focus the editor on page load
-                        autosave: {
-                            enabled: true,
-                            uniqueId: "editorContent",
-                            delay: 5000, // Save every 1 second
-                        },
-                        placeholder: "Viết bài viết của bạn ở đây...",
-                        spellChecker: false, // Enable the spell checker
-                        status: ["lines", "words"], // Status bar options
-                        toolbar: [
-                            "bold",
-                            "italic",
-                            "heading",
-                            "|", // Basic formatting
-                            "quote",
-                            "unordered-list",
-                            "ordered-list",
-                            "|",
-                            "link",
-                            "image",
-                            "|",
-                            "preview",
-                            "side-by-side",
-                            "fullscreen",
-                            "|",
-                            {
-                                name: "Đăng bài",
-                                action: function customFunction(editor) {
-                                    alert("Custom Button Clicked!");
-                                },
-                                className: "fa fa-star",
-                                title: "Custom Button",
-                            },
-                        ],
-                    });
+							const loadSavedContent = () => {
+								let savedContent =
+									localStorage.getItem("contentEditor");
+								if (savedContent) {
+									const data = JSON.parse(savedContent);
+									title.value = data.title;
+									description.value = data.description;
+									sltTag.value = data.tagId;
+									txtTag.value = data.tag_custom;
+								}
+							};
 
-                    // Event handler
-                    setInterval(() => {
-                        if (checkIsSaved()) {
-                            textStatus.innerText = "Đã lưu bản nháp";
-                        } else {
-                            textStatus.innerText = "Đang lưu bản nháp..";
-                        }
-                    }, 500);
+							if (postId) {
+								fetch(
+									`http://localhost:3000/api/post/${postId}`
+								)
+									.then((response) => response.json())
+									.then((data) => {
+										if (data.data) {
+											const dataPost = data.data.post;
+											if (dataPost) {
+												title.value = dataPost.title;
+												description.value =
+													dataPost.description;
+												simplemde.value(
+													dataPost.content
+												);
+												editPostId = dataPost.postId;
+											} else {
+												createToast(
+													"Không tìm thấy bài viết!",
+                                                    "error"
+												);
+											}
+										}
+									})
+									.catch((error) => {
+										createToast("Lỗi fetch bài viết!", 
+                                           "error"
+                                        );
+										window.location.href = "/";
+									});
+							} else {
+								loadSavedContent();
+							}
 
-                    simplemde.codemirror.on("change", function () {
-                        textStatus.innerText = "";
-                    });
+							const checkIsSaved = () => {
+								let editorContent = simplemde.value(); // Current content
+								let autosavedContent =
+									localStorage.getItem("smde_editorContent"); // Autosaved content
 
-                    simplemde.codemirror.on("refresh", function () {
-                        editorToolbar = document.querySelector(".editor-toolbar");
+								let allOptions = {
+									title: title.value,
+									description: description.value,
+									tagId: sltTag.value,
+									tag_custom: txtTag.value,
+								};
 
-                        editorStatusbar = document.querySelector(".editor-statusbar");
-                        editorStatusbar.style.width = editorToolbar.offsetWidth + "px";
-                    });
+								localStorage.setItem(
+									"contentEditor",
+									JSON.stringify(allOptions)
+								);
 
-                    // Handle scroll event
-                    window.onscroll = function () {
-                        // get size of nav (header)
+								if (editorContent === autosavedContent) {
+									return true;
+								} else {
+									return false;
+								}
+							};
 
-                        var currentScrollPos =
-                            window.pageYOffset || document.documentElement.scrollTop;
-                        if (currentScrollPos > navSize) {
-                            document.querySelector(".editor-toolbar").style.top =
-                                navSize + "px";
-                            console.log(navSize);
-                        } else {
-                            document.querySelector(".editor-toolbar").style.top = "";
-                        }
-                    };
+							var simplemde = new SimpleMDE({
+								element: document.getElementById("editor"),
+								autofocus: true, // Auto-focus the editor on page load
+								autosave: {
+									enabled: true,
+									uniqueId: "editorContent",
+									delay: 5000, // Save every 1 second
+								},
+								placeholder: "Viết bài viết của bạn ở đây...",
+								spellChecker: false, // Enable the spell checker
+								status: ["lines", "words"], // Status bar options
+								toolbar: [
+									"bold",
+									"italic",
+									"heading",
+									"|", // Basic formatting
+									"quote",
+									"unordered-list",
+									"ordered-list",
+									"|",
+									"link",
+									"image",
+									"|",
+									"preview",
+									"side-by-side",
+									"fullscreen",
+									"|",
+									{
+										name: "Đăng bài",
+										action: function customFunction(
+											editor
+										) {
+											createToast("Custom Button Clicked!");
+										},
+										className: "fa fa-star",
+										title: "Custom Button",
+									},
+								],
+							});
 
-                    // Handle drop event
-                    simplemde.codemirror.on("drop", (editor, event) => {
-                        const files = event.dataTransfer.files;
+							// Event handler
+							setInterval(() => {
+								if (checkIsSaved()) {
+									textStatus.innerText = "Đã lưu bản nháp";
+								} else {
+									textStatus.innerText =
+										"Đang lưu bản nháp..";
+								}
+							}, 500);
 
-                        if (files && files[0] && files[0].type.startsWith("image/")) {
-                            const file = files[0];
+							simplemde.codemirror.on("change", function () {
+								textStatus.innerText = "";
+							});
 
-                            // Upload the file to the server
-                            const formData = new FormData();
-                            formData.append("file", file);
+							simplemde.codemirror.on("refresh", function () {
+								editorToolbar =
+									document.querySelector(".editor-toolbar");
 
-                            fetch("/api/upload/image", {
-                                method: "POST",
-                                body: formData,
-                            })
-                                .then((response) => response.json())
-                                .then((data) => {
-                                    if (data.url) {
-                                        // Insert the image URL as markdown
-                                        const imageMarkdown = `!IMAGE:[${data.url}]`;
-                                        const doc = simplemde.codemirror.getDoc();
-                                        const cursor = doc.getCursor();
-                                        doc.replaceRange(imageMarkdown, cursor);
-                                    } else {
-                                        alert("Failed to upload the image.");
-                                    }
-                                })
-                                .catch((error) => {
-                                    console.error("Error uploading image:", error);
-                                    alert("Error uploading the image.");
-                                });
-                        } else {
-                            alert("Only image files are allowed!");
-                        }
+								editorStatusbar =
+									document.querySelector(".editor-statusbar");
+								editorStatusbar.style.width =
+									editorToolbar.offsetWidth + "px";
+							});
 
-                        event.preventDefault(); // Prevent default browser behavior
-                    });
+							// Handle scroll event
+							window.onscroll = function () {
+								// get size of nav (header)
 
-                    // Handle paste event
-                    simplemde.codemirror.on("paste", (editor, event) => {
-                        const items = event.clipboardData.items;
+								var currentScrollPos =
+									window.pageYOffset ||
+									document.documentElement.scrollTop;
+								if (currentScrollPos > navSize) {
+									document.querySelector(
+										".editor-toolbar"
+									).style.top = navSize + "px";
+									console.log(navSize);
+								} else {
+									document.querySelector(
+										".editor-toolbar"
+									).style.top = "";
+								}
+							};
 
-                        for (const item of items) {
-                            if (item.type.startsWith("image/")) {
-                                const file = item.getAsFile();
+							// Handle drop event
+							simplemde.codemirror.on("drop", (editor, event) => {
+								const files = event.dataTransfer.files;
 
-                                // Upload the file to the server
-                                const formData = new FormData();
-                                formData.append("file", file);
+								if (
+									files &&
+									files[0] &&
+									files[0].type.startsWith("image/")
+								) {
+									const file = files[0];
 
-                                fetch("/api/upload/image", {
-                                    method: "POST",
-                                    body: formData,
-                                })
-                                    .then((response) => response.json())
-                                    .then((data) => {
-                                        if (data.url) {
-                                            // Insert the image URL as markdown
-                                            const imageMarkdown = `!IMAGE:[${data.url}]`;
-                                            const doc = simplemde.codemirror.getDoc();
-                                            const cursor = doc.getCursor();
-                                            doc.replaceRange(imageMarkdown, cursor);
-                                        } else {
-                                            alert("Failed to upload the image.");
-                                        }
-                                    })
-                                    .catch((error) => {
-                                        console.error("Error uploading image:", error);
-                                        alert("Error uploading the image.");
-                                    });
-                            }
-                        }
-                    });
+									// Upload the file to the server
+									const formData = new FormData();
+									formData.append("file", file);
 
-                    // Handle select
-                    sltTag.addEventListener("change", function () {
-                        if (sltTag.value == -1) {
-                            txtTag.classList.toggle("hidden", false);
-                            txtTag.focus();
-                            txtTag.required = true;
-                        } else {
-                            txtTag.classList.toggle("hidden", true);
-                            txtTag.required = false;
-                        }
-                    });
+									fetch("/api/upload/image", {
+										method: "POST",
+										body: formData,
+									})
+										.then((response) => response.json())
+										.then((data) => {
+											if (data.url) {
+												// Insert the image URL as markdown
+												const imageMarkdown = `!IMAGE:[${data.url}]`;
+												const doc =
+													simplemde.codemirror.getDoc();
+												const cursor = doc.getCursor();
+												doc.replaceRange(
+													imageMarkdown,
+													cursor
+												);
+											} else {
+												createToast(
+													"Failed to upload the image."
+												);
+											}
+										})
+										.catch((error) => {
+											console.error(
+												"Error uploading image:",
+												error
+											);
+											createToast("Error uploading the image.");
+										});
+								} else {
+									createToast("Only image files are allowed!");
+								}
 
-                    // Fetch tags
-                    fetch("/api/topics")
-                        .then((response) => response.json())
-                        .then((data) => {
-                            if (data && data.errorCode && data.errorCode == 200) {
-                                data.tags.push({ tagId: -1, name: "Khác" });
-                                data.tags.forEach((tag) => {
-                                    const option = document.createElement("option");
-                                    option.value = tag.tagId;
-                                    option.innerText = tag.name;
-                                    sltTag.appendChild(option);
-                                });
-                            } else {
-                                const option = document.createElement("option");
-                                option.value = -1;
-                                option.innerText = "Khác";
-                                sltTag.appendChild(option);
-                            }
-                        })
-                        .catch((error) => {
-                            const option = document.createElement("option");
-                            option.value = -1;
-                            option.innerText = "Khác";
-                            sltTag.appendChild(option);
-                        }).finally(() => {
-                        if (sltTag.value == -1) {
-                            txtTag.classList.toggle("hidden", false);
-                            txtTag.focus();
-                            txtTag.required = true;
-                        } else {
-                            txtTag.classList.toggle("hidden", true);
-                            txtTag.required = false;
-                        }
-                    });
+								event.preventDefault(); // Prevent default browser behavior
+							});
 
-                    // Publish
-                    document
-                        .getElementById("btn-publish")
-                        .addEventListener("click", function () {
-                            // Check input
-                            if (!title.value) {
-                                alert("Vui lòng nhập tiêu đề bài viết!");
-                                title.focus();
-                                return;
-                            }
-                            if (!description.value) {
-                                alert("Vui lòng nhập mô tả ngắn!");
-                                description.focus();
-                                return;
-                            }
-                            if (!simplemde.value().trim()) {
-                                alert("Vui lòng nhập nội dung bài viết!");
-                                simplemde.codemirror.focus();
-                                return;
-                            }
-                            // redirect to submit handle post
+							// Handle paste event
+							simplemde.codemirror.on(
+								"paste",
+								(editor, event) => {
+									const items = event.clipboardData.items;
 
-                            try {
-                                const content = simplemde.value().trim();
-                                fetch("http://localhost:3000/api/post/" + (editPostId != 0 ? 'edit' : 'save'), {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                        "Authorization": "Bearer " + getCookie("accessToken"),
-                                    },
-                                    body: JSON.stringify({
-                                        title: title.value,
-                                        description: description.value,
-                                        tagId: sltTag.value,
-                                        tag_custom: txtTag.value,
-                                        content: content,
-                                        postId: editPostId,
-                                    }),
-                                })
-                                    .then((response) => {
-                                        return response.json();
-                                    }).then((data) => {
-                                    if (data && data.errorCode && data.errorCode == 200) {
-                                        alert("Đăng bài thành công!");
-                                        window.location.href = "/posts/" + data.data.postId;
-                                    } else {
-                                        alert("Đăng bài thất bại: " + data.message);
-                                    }
-                                })
-                                    .catch((error) => {
-                                        alert("Đăng bài thất bại! Lỗi fetch");
-                                    });
-                            } catch (error) {
-                                alert("Đăng bài thất bại! Lỗi js");
-                            }
-                        });
-                };
-            </script>
-        </div>
-    </div>
-</div>
-</body>
+									for (const item of items) {
+										if (item.type.startsWith("image/")) {
+											const file = item.getAsFile();
+
+											// Upload the file to the server
+											const formData = new FormData();
+											formData.append("file", file);
+
+											fetch("/api/upload/image", {
+												method: "POST",
+												body: formData,
+											})
+												.then((response) =>
+													response.json()
+												)
+												.then((data) => {
+													if (data.url) {
+														// Insert the image URL as markdown
+														const imageMarkdown = `!IMAGE:[${data.url}]`;
+														const doc =
+															simplemde.codemirror.getDoc();
+														const cursor =
+															doc.getCursor();
+														doc.replaceRange(
+															imageMarkdown,
+															cursor
+														);
+													} else {
+														createToast(
+															"Failed to upload the image."
+														);
+													}
+												})
+												.catch((error) => {
+													console.error(
+														"Error uploading image:",
+														error
+													);
+													createToast(
+														"Error uploading the image."
+													);
+												});
+										}
+									}
+								}
+							);
+
+							// Handle select
+							sltTag.addEventListener("change", function () {
+								if (sltTag.value == -1) {
+									txtTag.classList.toggle("hidden", false);
+									txtTag.focus();
+									txtTag.required = true;
+								} else {
+									txtTag.classList.toggle("hidden", true);
+									txtTag.required = false;
+								}
+							});
+
+							// Fetch tags
+							fetch("/api/topics")
+								.then((response) => response.json())
+								.then((data) => {
+									if (
+										data &&
+										data.errorCode &&
+										data.errorCode == 200
+									) {
+										data.tags.push({
+											tagId: -1,
+											name: "Khác",
+										});
+										data.tags.forEach((tag) => {
+											const option =
+												document.createElement(
+													"option"
+												);
+											option.value = tag.tagId;
+											option.innerText = tag.name;
+											sltTag.appendChild(option);
+										});
+									} else {
+										const option =
+											document.createElement("option");
+										option.value = -1;
+										option.innerText = "Khác";
+										sltTag.appendChild(option);
+									}
+								})
+								.catch((error) => {
+									const option =
+										document.createElement("option");
+									option.value = -1;
+									option.innerText = "Khác";
+									sltTag.appendChild(option);
+								})
+								.finally(() => {
+									if (sltTag.value == -1) {
+										txtTag.classList.toggle(
+											"hidden",
+											false
+										);
+										txtTag.focus();
+										txtTag.required = true;
+									} else {
+										txtTag.classList.toggle("hidden", true);
+										txtTag.required = false;
+									}
+								});
+
+							// Publish
+							document
+								.getElementById("btn-publish")
+								.addEventListener("click", function () {
+									// Check input
+									if (!title.value) {
+										createToast(
+											"Vui lòng nhập tiêu đề bài viết!"
+										);
+										title.focus();
+										return;
+									}
+									if (!description.value) {
+										createToast("Vui lòng nhập mô tả ngắn!");
+										description.focus();
+										return;
+									}
+									if (!simplemde.value().trim()) {
+										createToast(
+											"Vui lòng nhập nội dung bài viết!"
+										);
+										simplemde.codemirror.focus();
+										return;
+									}
+									// redirect to submit handle post
+
+									try {
+										const content = simplemde
+											.value()
+											.trim();
+										fetch(
+											"http://localhost:3000/api/post/" +
+												(editPostId != 0
+													? editPostId
+													: "save"),
+											{
+												method:
+													editPostId != 0
+														? "PUT"
+														: "POST",
+												headers: {
+													"Content-Type":
+														"application/json",
+													Authorization:
+														"Bearer " +
+														getCookie(
+															"accessToken"
+														),
+												},
+												body: JSON.stringify({
+													title: title.value,
+													description:
+														description.value,
+													tagId: sltTag.value,
+													tag_custom: txtTag.value,
+													content: content,
+												}),
+											}
+										)
+											.then((response) => {
+												return response.json();
+											})
+											.then((data) => {
+												if (
+													data &&
+													data.errorCode &&
+													data.errorCode == 200
+												) {
+													createToast(editPostId != 0
+															? "Cập nhật bài viết thành công, vui lòng chờ kiểm duyệt!"
+															: "Đã tạo bài viết thành công, vui lòng chờ kiểm duyệt!", "success")
+													setTimeout(() => {
+														window.location.href =
+															"/posts/" +
+															data.data.postId;
+													}, 3000);
+												} else {
+													createToast(
+														"Đăng bài thất bại: " +
+															data.message
+													);
+												}
+											})
+											.catch((error) => {
+												createToast(
+													"Đăng bài thất bại! Lỗi fetch"
+												);
+											});
+									} catch (error) {
+										createToast("Đăng bài thất bại! Lỗi js");
+									}
+								});
+						};
+					</script>
+				</div>
+			</div>
+		</div>
+	</body>
 </html>
