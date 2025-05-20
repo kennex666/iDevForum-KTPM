@@ -41,7 +41,7 @@ export const apiDevelopment = {
 export const apiProduction = {
 	...apiDevelopment,
 	domain: {
-		client: "localhost:3000",
+		client: "idev4rum.pj.io.vn",
 		server: "idev4rum.pj.io.vn/api-gateway",
 	},
 	protocol: "https",
