@@ -1,4 +1,7 @@
+import { api, apiParser } from '@/constants/apiConst';
+import axios from 'axios';
 import React, { useState, useEffect } from 'react';
+import Toast from '../Toast';
 
 interface ITopic {
     tagId: string;
@@ -10,6 +13,10 @@ interface ITopic {
 
 const TopicTable: React.FC = () => {
     const [topics, setTopics] = useState<ITopic[]>([]);
+    const [toat , setToat] = useState<{ message: string; type?: 'success' | 'error' }>({
+        message: '',
+        type: 'success',
+    });
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -24,22 +31,14 @@ const TopicTable: React.FC = () => {
         const fetchTopics = async () => {
             try {
                 // Replace with actual API call
-                const mockData: ITopic[] = [
-                    {
-                        tagId: '1',
-                        name: 'React',
-                        hashtag: '#react',
-                        createdAt: new Date(),
-                        updatedAt: new Date()
-                    },
-                    {
-                        tagId: '2',
-                        name: 'TypeScript',
-                        hashtag: '#typescript',
-                        createdAt: new Date(),
-                        updatedAt: new Date()
-                    }
-                ];
+                const response = await axios.get(apiParser(api.apiPath.topic));
+                const mockData: ITopic[] = response.data.data.map((topic: any) => ({
+                    tagId: topic.tagId,
+                    name: topic.name,
+                    hashtag: topic.hashtag,
+                    createdAt: new Date(topic.createdAt),
+                    updatedAt: new Date(topic.updatedAt)
+                }));
                 setTopics(mockData);
                 setLoading(false);
             } catch (error) {
@@ -80,13 +79,69 @@ const TopicTable: React.FC = () => {
         });
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         // Here you would typically make an API call to save/update the topic
         console.log('Saving topic:', {
             ...(selectedTopic || {}),
             name: formData.name,
             hashtag: formData.hashtag
         });
+
+		const token = document.cookie
+				.split("; ")
+				.find((row) => row.startsWith("accessToken="))
+				?.split("=")[1];
+		if (!token) return;
+        const result = await axios(
+            `${apiParser(api.apiPath.topic)}` + (isEditing ? `/${selectedTopic?.tagId}` : '/save'),
+            {
+                method: isEditing ? 'PUT' : 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                data: {
+                    name: formData.name,
+                    hashtag: `#${formData.hashtag}`
+                }
+            }
+        )
+
+        if(result.data.errorCode !== 200) {
+            alert(result.data.errorMessage);
+            return;
+        }
+        if (isEditing) {
+            setTopics((prev) =>
+                prev.map((topic) =>
+                    topic.tagId === selectedTopic?.tagId
+                        ? { ...topic, name: formData.name, hashtag: `#${formData.hashtag}` }
+                        : topic
+                )
+            );
+
+            setToat({
+                message: `Topic ${formData.name} updated successfully!`,
+                type: 'success'
+            });
+        }
+        else {
+            setTopics((prev) => [
+                ...prev,
+                {
+                    tagId: result.data.data.tagId,
+                    name: formData.name,
+                    hashtag: `#${formData.hashtag}`,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                }
+            ]);
+
+            setToat({
+                message: `Topic ${formData.name} added successfully!`,
+                type: 'success'
+            });
+        }
         handleCloseModal();
     };
 
@@ -151,6 +206,34 @@ const TopicTable: React.FC = () => {
                                             <button 
                                                 className="btn btn-sm btn-danger d-flex align-items-center shadow-sm"
                                                 title="Delete topic"
+                                                onClick={async () => {
+                                                    const token = document.cookie
+                                                        .split("; ")
+                                                        .find((row) => row.startsWith("accessToken="))
+                                                        ?.split("=")[1];
+                                                    if (!token) return;
+                                                    const result = await axios(
+                                                        `${apiParser(api.apiPath.topic)}/${topic.tagId}`,
+                                                        {
+                                                            method: 'DELETE',
+                                                            headers: {
+                                                                'Content-Type': 'application/json',
+                                                                Authorization: `Bearer ${token}`,
+                                                            },
+                                                        }
+                                                    )
+                                                    if(result.data.errorCode !== 200) {
+                                                        alert(result.data.errorMessage);
+                                                        return;
+                                                    }
+                                                    setTopics((prev) =>
+                                                        prev.filter((t) => t.tagId !== topic.tagId)
+                                                    );
+                                                    setToat({
+                                                        message: `Topic ${topic.name} have ID ${topic.tagId} deleted successfully!`,
+                                                        type: 'success'
+                                                    });
+                                                }}
                                             >
                                                 <i className="fas fa-trash me-2"></i>
                                                 Delete
@@ -176,6 +259,7 @@ const TopicTable: React.FC = () => {
                 </div>
             </div>
 
+            <Toast message={toat.message} type={toat.type} />
             {/* Topic Modal (Add/Edit) */}
             {showModal && (
                 <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -241,6 +325,7 @@ const TopicTable: React.FC = () => {
                     </div>
                 </div>
             )}
+            
         </div>
     );
 };

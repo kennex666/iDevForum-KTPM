@@ -287,6 +287,7 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                                                 <i className="fas fa-trash me-2"></i>
                                                 Delete
                                             </button>
+
                                         </div>
                                     </td>
                                 </tr>

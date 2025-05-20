@@ -1,6 +1,5 @@
-import { cp } from "fs";
-import { S3, AWS_BUCKET_NAME } from "../config/aws";
-import { console } from "inspector";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
 
 const randomFileName = (originalName: string) => {
     const extension = originalName.split('.').pop();
@@ -9,17 +8,18 @@ const randomFileName = (originalName: string) => {
 
 const uploadFile = async (file: any) => {
     const fileName = randomFileName(file.originalname);
+    const uploadDir = path.resolve(__dirname, "../../uploads");
+    const filePath = path.join(uploadDir, fileName);
 
-    const params = {
-        Bucket: AWS_BUCKET_NAME,
-        Key: fileName,
-        Body: file.buffer,
-    }
     try {
-        const result = await S3.putObject(params).promise();
-        console.log('File uploaded successfully', result);
-        return  `https://${AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+        console.log('File info:', file);
+        console.log('File buffer length:', file.buffer?.length);
+        await mkdir(uploadDir, { recursive: true });
+        await writeFile(filePath, file.buffer);
+        console.log('File uploaded to local successfully:', filePath);
+        return `http://localhost:3000/uploads/image/${fileName}`;
     } catch (error) {
+        console.error('Error when writing file:', error);
         throw new Error('Upload file failed');
     }
 }

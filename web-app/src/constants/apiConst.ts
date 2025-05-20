@@ -20,17 +20,28 @@ export const apiDevelopment = {
 			update: "/user/profile/:id",
 			delete: "/user/profile/:id",
 			createByAdmin: "/user/createUserByAdmin",
+    },
+		userAction: {
+			"follow": "/user/action/follow/:id",
 		},
 		post: {
 			getAll: "/post",
 			getInfo: "/post/:id",
+			updateStatus: "/post/admin",
+		},
+		postReport: {
+			getAll: "/postreport",
+			getInfo: "/postreport/:id",
+			create: "/postreport/save",
+			update: "/postreport",
+			delete: "/postreport/:id",
+			search: "/postreport/search",
 		},
 		postReport: {
 			getAll: "/postreport",
 		},
 		comment: "/comment",
 		like: "/like",
-
 		topic:"/topic",
 	},
 };

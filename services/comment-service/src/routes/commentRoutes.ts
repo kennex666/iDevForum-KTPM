@@ -15,15 +15,16 @@ router.get('/search', commentController.searchComments);
  */
 router.get('/', commentController.getAllComments);
 
+
+/**
+ * Get all comments bad
+ */
+router.get('/bad', commentController.getAllCommentsBad);
+
 /**
  * Create new comment
  */
 router.post('/save', authenticate, commentController.createComment);
-
-/**
- * Get comment by ID
- */
-router.get('/:id', commentController.getCommentById);
 
 /**
  * Get comments by post ID
@@ -34,6 +35,11 @@ router.get('/post/:postId', commentController.getCommentsByPostId);
  * Get comments by user ID
  * */
 router.get('/user/:userId', commentController.getCommentsByUserId);
+
+/**
+ * Get comment by ID
+ */
+router.get('/:id', commentController.getCommentById);
 
 /**
  * Update comment

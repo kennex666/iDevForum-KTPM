@@ -1,5 +1,6 @@
 export enum PostStatus {
+    PENDING = 'PENDING',
     PUBLISHED = 'PUBLISHED',
     DELETED = 'DELETED',
-    SUPERSEDED = 'SUPERSEDED',
+    SUSPENDED = 'SUSPENDED', 
 }

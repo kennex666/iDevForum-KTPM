@@ -26,10 +26,8 @@ const uploadErrorResponse = (message: string, code: number = 400): ApiResponse<n
     data: null,
 });
 
-// Configure storage
 const storage = multer.memoryStorage();
 
-// Configure file filters
 const imageFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
     if (file.mimetype.startsWith('image/')) {
         cb(null, true);
@@ -38,7 +36,6 @@ const imageFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFil
     }
 };
 
-// Create upload instances with different configurations
 const uploadImage = multer({ 
     storage,
     fileFilter: imageFilter,
@@ -47,17 +44,13 @@ const uploadImage = multer({
     },
 });
 
-// Image upload route
 router.post('/image', uploadImage.single('file'), authenticate, (req: Request, res: Response) => {
     const file = req.file;
     if (!file) {
         res.status(200).json(uploadErrorResponse('No file uploaded'));
         return;
     }
-
     const userId = req.user?._id;
-    
-    // Prepare data object with file and additional fields from request body
     const data = {
         file,
         userId: userId,
@@ -74,7 +67,8 @@ router.post('/image', uploadImage.single('file'), authenticate, (req: Request, r
         .catch((error) => {
             const message = error instanceof Error ? error.message : 'Unknown error';
             res.status(200).json(uploadErrorResponse(message));
-        });
+    });
 });
+
 
 export default router;

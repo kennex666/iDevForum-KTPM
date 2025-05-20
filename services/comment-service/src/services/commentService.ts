@@ -1,6 +1,7 @@
 import { CommentModel, IComment } from "../models/commentModel";
 import { ICommentService, CreateCommentDTO } from '../interfaces/commentService.interface';
 import { postClient, userClient } from "../clients/user.client";
+import {generateResponse} from "../utils/modelAI";
 /**
  * Custom error class for comment service
  */
@@ -25,19 +26,15 @@ class CommentService implements ICommentService {
       // Use Promise.all to resolve all async operations in parallel
       const comments = await Promise.all(
         items.map(async (item: any) => {
-          console.log(item.userId, item.postId);
+          console.log("322121", item.userId, item.postId);
           try {
-            const user = await userClient.getUserById(item.userId);
-            
-            const post = await postClient.getPostById(item.postId);
+            const user = await userClient.getUserById(item.userId.toString()).catch(() => null);
+            const post = await postClient.getPostById(item.postId.toString()).catch(() => null);
           
             return {
-              id: item._id,
-              content: item.content,
-              post: post,
-              user: user ,
-              createdAt: item.createdAt,
-              updatedAt: item.updatedAt,
+              ...item.toObject(),
+              user: user?.data || null,
+              post: post?.data || 1,
             };
           } catch (error) {
             console.error(`Error fetching related data for comment ID ${item._id}:`, error);
@@ -51,6 +48,60 @@ class CommentService implements ICommentService {
     } catch (error) {
       console.error('Error getting all comments:', error);
       throw new Error('Failed to fetch comments');
+    }
+  }
+
+  /**
+   * Get all comments bad
+   */
+  async getAllCommentsBad(): Promise<any[]> {
+    try {
+      // Lấy các comment chưa được kiểm tra hoặc chưa có trường isCheck
+      const uncheckedComments = await CommentModel.find({ $or: [{ isCheck: false }, { isCheck: { $exists: false } }] });
+      if (uncheckedComments.length === 0) return [];
+
+      // Tạo prompt cho AI
+      const prompt = uncheckedComments.map((item: any) => `ID: ${item._id}, Nội dung: ${item.content}`).join('\n');
+      const response = await generateResponse(prompt);
+
+      // Lấy danh sách ID comment bị đánh dấu là bad từ AI
+      const ids = (response || "")
+        .split('\n')
+        .map((id: string) => id.trim())
+        .filter((id: string) => id.length > 0);
+
+      // Đánh dấu các comment là bad
+      for (const id of ids) {
+        const updated = await CommentModel.findOneAndUpdate(
+          { commentId: id },  
+          { isCheck: true, isBad: true },
+          { new: true, runValidators: true }
+        );
+      }
+      const badComments = await CommentModel.find({ isBad: true });
+      // Lấy thông tin user và post cho từng comment
+      const comments = await Promise.all(
+        badComments.map(async (item: any) => {
+          try {
+            const user = await userClient.getUserById(item.userId.toString()).catch(() => null);
+            const post = await postClient.getPostById(item.postId.toString()).catch(() => null);
+            return {
+              ...item.toObject(),
+              user: user?.data || null,
+              post: post?.data || null,
+            };
+          } catch (error) {
+            console.error(`Error fetching related data for comment ID ${item._id}:`, error);
+            return null;
+          }
+        })
+      );
+
+      // Trả về danh sách comment bad đã có thông tin user và post
+      return comments.filter((comment: any) => comment !== null);
+    } catch (error) {
+      console.error('Error getting all bad comments:', error);
+      throw new Error('Failed to fetch bad comments');
     }
   }
 
@@ -110,11 +161,13 @@ class CommentService implements ICommentService {
       const comments = await Promise.all(
         items.map(async (item: any) => {
           try {
+            const post = await postClient.getPostById(item.postId);
             const user = await userClient.getUserById(item.userId);
             return {
               id: item._id,
               content: item.content,
               postId: item.postId,
+              post: post,
               user: user,
               createdAt: item.createdAt,
               updatedAt: item.updatedAt,
@@ -203,16 +256,16 @@ class CommentService implements ICommentService {
    */
   async deleteComment(id: string, userId: string): Promise<boolean> {
     try {
+      const user = await userClient.getUserById(userId);
+      console.log("user312", user.data);
+      if (!user) throw new Error(`User with ID ${userId} not found`);
+      if (user?.data.role == "1") {
+        const result = await CommentModel.findByIdAndDelete(id);
+        return result !== null;
+      }
       const comment = await CommentModel.findById(id);
-
-      if (!comment) {
-        throw new Error(`Comment with ID ${id} not found`);
-      }
-
-      // Check if the userId matches the userId of the comment
-      if (comment.userId.toString() !== userId) {
-        throw new Error("You are not authorized to delete this comment");
-      }
+      if (!comment) throw new Error(`Comment with ID ${id} not found`);
+      if (comment.userId.toString() !== userId) throw new Error("You are not authorized to delete this comment");
 
       const result = await CommentModel.findByIdAndDelete(id);
       return result !== null;

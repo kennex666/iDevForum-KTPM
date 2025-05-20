@@ -24,6 +24,4 @@ router.put("/updatepassword/:id", UserController.updatePasswordHandler);
 
 router.post("/createUserByAdmin",authenticate ,UserController.createUserByAdminHandler);
 
-
-
 export default router;

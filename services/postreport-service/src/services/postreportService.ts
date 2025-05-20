@@ -1,9 +1,36 @@
+import { postClient, userClient } from "../clients/user.client";
 import { IPostReport, PostReportModel } from "../models/postreportModel";
 import { PostReportState } from "../models/postreportState";
 
 class PostReportService {
-    async getAllPostReports(): Promise<IPostReport[]> {
-        return await PostReportModel.find();
+    async getAllPostReports(): Promise<any []> {
+        const items = await PostReportModel.find();
+
+        const postReports = await Promise.all(
+            items.map(async (item: any) => {
+                try {
+                    const user = await userClient.getUserById(item.reporterId);
+                    const post = await postClient.getPostById(item.postId);
+                    return {
+                        id: item._id,
+                        postreportId: item._id,
+                        reason: item.reason,
+                        state: item.state,
+                        postId: item.postId,
+                        post: post?.data?.post,
+                        reporterId: item.reporterId,
+                        reporter: user?.data,
+                        inspectorId: item.inspectorId,
+                        createdAt: item.createdAt,
+                        updatedAt: item.updatedAt,
+                    };
+                } catch (error) {
+                    console.error(`Error fetching related data for post report ID ${item._id}:`, error);
+                    return null;
+                }
+            })
+        );
+        return postReports;
     }
 
     async getPostReportById(id: string): Promise<IPostReport | null> { 
