@@ -18,7 +18,7 @@ import {
 import { api, apiParser } from "@/constants/apiConst";
 import Error from "@/components/Error";
 import Loading from "@/components/user/Loading";
-import { guestUser } from "@/context/UserContext";
+import { EUserRole, guestUser, useUser } from "@/context/UserContext";
 import { formatDate, getDateOnly, getReadingTime } from '../../../utils/datetimeformat';
 import { getAccessToken } from "@/app/utils/cookiesParse";
 import Toast from "@/components/Toast";
@@ -59,6 +59,7 @@ export default function PostDetailPage() {
 	const [comment, setComment] = useState("");
 	const [isLoading, setIsLoading] = useState(true);
 	const [showToast, setShowToast] = useState("");
+	const { user } = useUser();
 
 	useEffect(() => {
 		fetch(apiParser(api.apiPath.post.getInfo.replace(":id", id)))
@@ -77,6 +78,15 @@ export default function PostDetailPage() {
 						tagId: "unknown",
 						name: "<<Topic>>",
 					};
+				}
+				p.post.isOwner = p.post.userId == user._id;
+				if (!p.post.isOwner && p.post.status != "PUBLISHED" && user.role != EUserRole.ADMIN) {
+					setShowToast("Bài viết không tồn tại hoặc đã bị xóa");
+					setTimeout(() => {
+						setShowToast("");
+						window.history.back();
+					}, 4000);
+					return;
 				}
 				p.post.contentDOM = DOMPurify.sanitize(p.post.content);
 				setData(p);

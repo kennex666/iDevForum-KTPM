@@ -1,7 +1,12 @@
 import { Post } from "@/interfaces/Post";
 import PostItem from "./PostItem";
 
-const PostList = ({ posts }: { posts: Post[] }) => {
+const PostList = ({ 
+	posts, total = posts?.length || 0, 
+	action = { prev: () => {}, next: () => {} },
+	currentPage = 0
+	}
+	: { posts: Post[], total?: any, action?: any, currentPage?: any }) => {
 	if (!posts || posts.length === 0) {
 		return (
 			<div className="flex flex-col items-center space-y-4">
@@ -16,10 +21,37 @@ const PostList = ({ posts }: { posts: Post[] }) => {
 	}
 
 	return (
-		<div className="flex flex-col space-y-3">
-			{posts.map((post, idx) => (
-				<PostItem key={idx} post={post} />
-			))}
+		<div>
+			<div className="flex flex-col space-y-3">
+				{posts.map((post, idx) => (
+					<PostItem key={idx} post={post} />
+				))}
+			</div>
+			<div className="flex justify-center mt-4">
+				{total > 10 && (
+					<div className="flex items-center space-x-2">
+						<button
+							onClick={action?.prev}
+							className="text-gray-500 hover:text-gray-700 hover:cursor-pointer"
+						>
+							Trước
+						</button>
+
+						<span> | </span>
+
+						<span className="text-gray-500">
+							{`${currentPage + 1} / ${Math.ceil(total / 10)}`}
+						</span>
+						<span> | </span>
+						<button
+							onClick={action?.next}
+							className="text-gray-500 hover:text-gray-700 hover:cursor-pointer"
+						>
+							Sau
+						</button>
+					</div>
+				)}
+			</div>
 		</div>
 	);
 };

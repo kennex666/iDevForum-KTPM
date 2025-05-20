@@ -7,7 +7,11 @@ import { PostStatus } from '../models/postStatus';
 const getPostByAuthor = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const result = await getPosts({limit: 10, offset: 0}, {userId: id});
+        req.query.offset = req.query.offset || 0;
+        const result = await getPosts(
+			{ limit: 10, offset: req.query.offset },
+			{ userId: id }
+		);
         res.status(200).json({
 			errorCode: 200,
 			errorMessage: "Lấy danh sách bài đăng thành công",
@@ -34,7 +38,8 @@ const getPostByAuthor = async (req: Request, res: Response) => {
 
 const getPostController = async (req: Request, res: Response) => {
     try {
-        const result = await getPosts({limit: 10, offset: 0});
+        req.query.offset = req.query.offset || 0;
+        const result = await getPosts({ limit: 10, offset: req.query.offset });
         res.status(200).json({
 			errorCode: 200,
 			errorMessage: "Lấy danh sách bài đăng thành công",

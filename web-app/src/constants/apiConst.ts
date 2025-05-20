@@ -17,12 +17,13 @@ export const apiDevelopment = {
 		},
 		user: "/user",
 		userAction: {
-			"follow": "/user/action/follow/:id",
+			follow: "/user/action/follow/:id",
 		},
 		post: {
 			getAll: "/post",
 			getInfo: "/post/:id",
 			updateStatus: "/post/admin",
+			getAuthor: "/post/author/",
 		},
 		postReport: {
 			getAll: "/postreport",
@@ -34,7 +35,7 @@ export const apiDevelopment = {
 		},
 		topic: "/topic",
 		comment: "/comment",
-		like: "/like",  
+		like: "/like",
 	},
 };
 

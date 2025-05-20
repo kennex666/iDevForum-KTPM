@@ -5,9 +5,10 @@ import MarkdownRenderer from "@/components/user/MarkdownRenderer";
 import PostList from "@/components/user/PostList";
 import { guestUser, useUser } from "@/context/UserContext";
 import { Post } from "@/interfaces/Post";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaRegEnvelope } from "react-icons/fa";
 import DOMPurify from 'dompurify';
+import { api, apiParser } from "@/constants/apiConst";
 
 
 export default function MyProfileHome() {
@@ -15,40 +16,66 @@ export default function MyProfileHome() {
     const {user, isLogin} = useUser();
     const [active, setActive] = useState("home");
 
-	const posts = [
-		{
-			title: "Giới thiệu về Java",
-			description:
-				"Java là một ngôn ngữ lập trình hướng đối tượng, được phát triển bởi Sun Microsystems.",
-			topic: { tagId: "java", name: "Java" },
-			date: "2023-04-17",
-			totalUpVote: 100,
-			totalComments: 50,
-			url: "gioi-thieu-ve-java",
+	// const posts = [
+	// 	{
+	// 		title: "Giới thiệu về Java",
+	// 		description:
+	// 			"Java là một ngôn ngữ lập trình hướng đối tượng, được phát triển bởi Sun Microsystems.",
+	// 		topic: { tagId: "java", name: "Java" },
+	// 		date: "2023-04-17",
+	// 		totalUpVote: 100,
+	// 		totalComments: 50,
+	// 		url: "gioi-thieu-ve-java",
 
-			author: {
-				userId: "123",
-				name: "Duong Thai Bao",
-				profilePicture: "https://placehold.co/40x40",
-			},
-		},
-		{
-			title: "Giới thiệu về Java",
-			description:
-				"Java là một ngôn ngữ lập trình hướng đối tượng, được phát triển bởi Sun Microsystems.",
-			topic: { tagId: "java", name: "Java" },
-			date: "2023-04-17",
-			totalUpVote: 100,
-			totalComments: 50,
-			url: "gioi-thieu-ve-java",
+	// 		author: {
+	// 			userId: "123",
+	// 			name: "Duong Thai Bao",
+	// 			profilePicture: "https://placehold.co/40x40",
+	// 		},
+	// 	},
+	// 	{
+	// 		title: "Giới thiệu về Java",
+	// 		description:
+	// 			"Java là một ngôn ngữ lập trình hướng đối tượng, được phát triển bởi Sun Microsystems.",
+	// 		topic: { tagId: "java", name: "Java" },
+	// 		date: "2023-04-17",
+	// 		totalUpVote: 100,
+	// 		totalComments: 50,
+	// 		url: "gioi-thieu-ve-java",
 
-			author: {
-				userId: "123",
-				name: "Duong Thai Bao",
-				profilePicture: "https://placehold.co/40x40",
-			},
-		},
-	] as Post[]; // fetch từ API hoặc mock
+	// 		author: {
+	// 			userId: "123",
+	// 			name: "Duong Thai Bao",
+	// 			profilePicture: "https://placehold.co/40x40",
+	// 		},
+	// 	},
+	// ] as Post[]; // fetch từ API hoặc mock
+
+	const [posts, setPosts] = useState<Post[]>([]);
+
+	useEffect(() => {
+		const fetchPosts = async () => {
+			const params: Record<string, any> = {};
+			params.sort = -1;
+			fetch(`${apiParser(api.apiPath.post.getAuthor)}${user._id}`)
+				.then((res) => res.json())
+				.then((data) => {
+					if (data.errorCode === 200) {
+						setPosts(data.data);
+					} else {
+						console.error(
+							"Error fetching posts:",
+							data.errorMessage
+						);
+					}
+				})
+				.catch((error) => {
+					console.error("Error fetching posts:", error);
+				});
+		};
+
+		fetchPosts();
+	}, [user]);
 
     const [animationKey, setAnimationKey] = useState(0); // Key để reset animation
 

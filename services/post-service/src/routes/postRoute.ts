@@ -11,8 +11,9 @@ postRoute.post('/save',authenticate ,createPostController);
 
 
 // Lấy bài viết theo ID
-// postRoute.get('/:id', authenticate, getPostByIdController);
 postRoute.get("/author/:id", getPostByAuthor);
+
+postRoute.get("/:id", getPostByIdController);
 
 // Cap nhat bai viet cua quan tri vien
 postRoute.put('/admin/:id', authenticate, updatePostByAdminController);

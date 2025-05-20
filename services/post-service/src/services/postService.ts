@@ -2,7 +2,7 @@ import { PostModel, IPost } from "../models/postModel";
 import { BookMarkModel,IBookMark } from "../models/bookMarkModel";
 import { PostStatus } from "../models/postStatus";
 import { UserClient } from '../clients/users';
-const getPosts = async (query: any, externalQuery: any) => {
+const getPosts = async (query: any, externalQuery: any = {}) => {
     // Get post by offset and limit with full info (merge with authors...)
     const { offset = 0, limit = 100 } = query;
     const posts = await PostModel.find( externalQuery || {} ).skip(offset).limit(limit).sort({ createdAt: -1 }); // Sort by createdAt in descending order
@@ -60,8 +60,10 @@ const createPost = async (postData: {
 
 const getPostById = async (id: string): Promise<{ post: IPost | null; user: any | null }> => {
     try {
-        const post = await PostModel.findById(id);
+        // Search via id or url
+        const post = await PostModel.findById(id).catch(() => null) || await PostModel.findOne({ url: id }).catch(() => null);
 
+        console.log(id)
         if (!post) {
             return { post: null, user: null }; // Trả về null nếu không tìm thấy bài viết
         }
