@@ -137,32 +137,64 @@ export default function PostDetailPage() {
 		if (!data) return;
 
 		
-		fetch(`/api/vote/${data.postId}?type=${type ? 1 : 0}`)
+		fetch(
+			`${apiParser(api.apiPath.reaction.action)}${
+				type ? "upvote" : "downvote"
+			}/${data.post.postId}`
+		, {
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${getAccessToken()}`,
+			}
+		})
 			.then((res) => res.json())
 			.then((data) => {
-				if (data.errorCode === 200) {
-					if (reaction == "upvote" && type) {
-						setReaction("");
-						setData((prev: any) => ({
-							...prev,
-							totalUpvote: prev.totalUpvote - 1,
-						}));
+				if (data.errorCode == 200) {
+					const reactionAfter = !data?.data
+						? ""
+						: data?.data.type.toString().toLowerCase();
+					
+					if (reactionAfter == reaction) {
+						return;
 					}
-					if (reaction == "downvote" && !type) {
+					
+					if (reactionAfter == "upvote") {
+						setData( pre => {
+							return {
+								...pre,
+								post: {
+									...pre.post,
+									totalUpvote: pre.post.totalUpvote + 1,
+									totalDownvote: pre.post.totalDownvote + reaction == "downvote" ? -1 : 0,
+								},
+							};
+						})
+						
+						setReaction("upvote");
+					} else if (reactionAfter == "downvote") {
+						setData( pre => {
+							return {
+								...pre,
+								post: {
+									...pre.post,
+									totalDownvote: pre.post.totalDownvote + 1,
+									totalUpvote: pre.post.totalUpvote + reaction == "upvote" ? -1 : 0,
+								},
+							};
+						})
+						setReaction("downvote");
+					} else {
+						setData( pre => {
+							return {
+								...pre,
+								post: {
+									...pre.post,
+									totalUpvote: pre.post.totalUpvote + reaction == "upvote" ? -1 : 0,
+									totalDownvote: pre.post.totalDownvote + reaction == "downvote" ? -1 : 0,
+								},
+							};
+						})
 						setReaction("");
-						setData((prev: Post) => ({
-							...prev,
-							totalDownvote: prev.totalDownvote - 1,
-						}));
-					}
-
-					if (reaction == "") {
-						setData((prev: Post) => ({
-							...prev,
-							totalUpvote: prev.totalUpvote + (type ? 1 : 0),
-							totalDownvote: prev.totalDownvote + (type ? 0 : 1),
-						}));
-						setReaction(type ? "upvote" : "downvote");
 					}
 				}
 			});

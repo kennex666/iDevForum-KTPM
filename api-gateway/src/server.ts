@@ -69,6 +69,24 @@ app.use(
 	})
 );
 
+
+app.use(
+	"/api/reaction",
+	commentLimiter, // Đặt trước proxy
+	conditionalAuthenticate(["POST", "PUT", "DELETE"]),
+	createProxyMiddleware({
+		target: "http://comment-service:3001/reaction",
+		changeOrigin: true,
+		on: {
+			proxyReq: (proxyReq, req) => {
+				if (req.user) {
+					proxyReq.setHeader("user", JSON.stringify(req.user));
+				}
+			},
+		},
+	})
+);
+
 app.use(
 	"/api/file",
 	conditionalAuthenticate(["POST", "PUT", "DELETE"]),

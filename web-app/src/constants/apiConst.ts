@@ -20,7 +20,7 @@ export const apiDevelopment = {
 			update: "/user/profile/:id",
 			delete: "/user/profile/:id",
 			createByAdmin: "/user/createUserByAdmin",
-    },
+		},
 		userAction: {
 			follow: "/user/action/follow/:id",
 		},
@@ -40,7 +40,12 @@ export const apiDevelopment = {
 		},
 		comment: "/comment",
 		like: "/like",
-		topic:"/topic",
+		topic: "/topic",
+		reaction: {
+			action: "/reaction/action/",
+			getAllViaUser: "/reaction/getAllViaUser/",
+			getAllViaPost: "/reaction/getAllViaPost/",
+		},
 	},
 };
 
