@@ -15,7 +15,12 @@ export const apiDevelopment = {
 			refresh: "/auth/refresh",
 			queryMe: "/auth/me",
 		},
-		user: "/user",
+		user: {
+			getAll: "/user/getall",
+			update: "/user/profile/:id",
+			delete: "/user/profile/:id",
+			createByAdmin: "/user/createUserByAdmin",
+    },
 		userAction: {
 			"follow": "/user/action/follow/:id",
 		},
@@ -32,9 +37,12 @@ export const apiDevelopment = {
 			delete: "/postreport/:id",
 			search: "/postreport/search",
 		},
-		topic: "/topic",
+		postReport: {
+			getAll: "/postreport",
+		},
 		comment: "/comment",
-		like: "/like",  
+		like: "/like",
+		topic:"/topic",
 	},
 };
 
