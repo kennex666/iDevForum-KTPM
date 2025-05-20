@@ -168,6 +168,18 @@
 
                     var editorToolbar = null;
                     var editorStatusbar = null;
+                    
+
+                    const loadSavedContent = () => {
+                        let savedContent = localStorage.getItem("contentEditor");
+                        if (savedContent) {
+                            const data = JSON.parse(savedContent);  
+                            title.value = data.title
+                            description.value = data.description;
+                            sltTag.value = data.tagId;
+                            txtTag.value = data.tag_custom;
+                        }
+                    }
 
                     if (postId) {
                         fetch(`/api/posts/${postId}`)
@@ -191,12 +203,25 @@
                                 alert("Lỗi fetch bài viết!");
                                 window.location.href = "/";
                             });
+                    } else {
+
+                        loadSavedContent();
                     }
 
                     const checkIsSaved = () => {
                         let editorContent = simplemde.value(); // Current content
                         let autosavedContent =
                             localStorage.getItem("smde_editorContent"); // Autosaved content
+
+                        let allOptions = {
+                            title: title.value,
+                            description: description.value,
+                            tagId: sltTag.value,
+                            tag_custom: txtTag.value,
+                        };
+
+                        localStorage.setItem("contentEditor", JSON.stringify(allOptions));
+                            
                         if (editorContent === autosavedContent) {
                             return true;
                         } else {
@@ -431,7 +456,7 @@
                                     body: JSON.stringify({
                                         title: title.value,
                                         description: description.value,
-                                        tag: sltTag.value,
+                                        tagId: sltTag.value,
                                         tag_custom: txtTag.value,
                                         content: content,
                                         postId: editPostId,
@@ -440,9 +465,9 @@
                                     .then((response) => {
                                         return response.json();
                                     }).then((data) => {
-                                    if (data && data.errorCode && data.errorCode == 201) {
+                                    if (data && data.errorCode && data.errorCode == 200) {
                                         alert("Đăng bài thành công!");
-                                        window.location.href = "/";
+                                        window.location.href = "/posts/" + data.data.postId;
                                     } else {
                                         alert("Đăng bài thất bại: " + data.message);
                                     }

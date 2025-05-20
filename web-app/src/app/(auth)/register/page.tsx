@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
@@ -16,6 +16,7 @@ export default function RegisterPage() {
 		email: "",
 		password: "",
 	});
+	const [registered, setRegistered] = useState(false);
 	const [errors, setErrors] = useState({
 		fullname: "",
 		email: "",
@@ -83,12 +84,11 @@ export default function RegisterPage() {
 					...prev,
 					global: data.errorMessage,
 				}));
+				setLoading(false);
 				return;
-			}
-			
-			router.push("/login");
-
-			setLoading(false);
+			} else {
+				setRegistered(true);
+			} 
 		} catch (error) {
 			console.error("Đã xảy ra lỗi:", error);
 			setLoading(false);
@@ -98,6 +98,15 @@ export default function RegisterPage() {
 			}));
 		}
 	};
+
+	useEffect(() => {
+		if (registered) {
+			const timer = setTimeout(() => {
+				router.push("/login");
+			}, 3000); // Redirect after 3 seconds
+			return () => clearTimeout(timer);
+		}
+	}, [registered, router]);
 
 	return (
 		<div className="flex flex-row min-h-screen font-sans">
@@ -199,6 +208,12 @@ export default function RegisterPage() {
 								<p className="text-red-500 text-sm">
 									{errors.global}
 								</p>
+							)}
+
+							{registered && (
+								<p className="text-green-500 text-sm">
+									Đăng ký thành công! Vui lòng kiểm tra email của bạn để xác nhận tài khoản.
+									</p>
 							)}
 
 							<button

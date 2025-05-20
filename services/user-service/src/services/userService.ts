@@ -13,12 +13,20 @@ const createUser = async (
 	if (CheckExistUser) throw new Error("Email already exists!");
 	try {
 		const passwordHash = password; // Tạm bỏ hash vì lỗi trên docker
-		const user = new UserModel({ name, role, accountState, username, email, password: passwordHash });
+		const user = new UserModel({
+			name,
+			role,
+			accountState,
+			username,
+			email,
+			password: passwordHash,
+			profilePicture: "/assets/img/avt-default.png",
+			coverPicture: "https://picsum.photos/1000/300",
+		});
 		return await user.save();
 	} catch (error: any) {
 		throw new Error(error.message);
 	}
-
 };
 
 const getUserByEmail = async (email: string): Promise<IUser | null> => {
