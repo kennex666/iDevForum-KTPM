@@ -41,7 +41,7 @@ const updateUser = async (id: string, updateData: Partial<IUser>): Promise<IUser
 	}
 	const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 	const usernameRegex = /^[a-zA-Z0-9]{6,}$/;
-	const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
+	const nameRegex = /^[a-zA-ZÀ-ỹ\s0-9]+$/;
 	// Loại bỏ các thuộc tính rỗng trong updateData
     Object.keys(updateData).forEach((key) => {
         const value = updateData[key as keyof IUser];
@@ -102,4 +102,27 @@ const searchUsers = async (filters: any): Promise<IUser[]> => {
 	}
 }
 
-export { createUser, getUserByEmail, updateUser, getAllUsers, getUserById, deleteUser, updatePassword, searchUsers };
+const createUserByAdmin = async (
+	name: string,
+	role: number,
+	accountState: string,
+	username: string,
+	email: string,
+	password: string,
+	title: string,
+	bio: string,
+	description: string,
+): Promise<IUser> => {
+	const CheckExistUser = await UserModel.findOne({ email });
+	if (CheckExistUser) throw new Error("Email already exists!");
+	try {
+		const passwordHash = password;
+		const user = new UserModel({ name, role, accountState, username, email, password: passwordHash, title, bio, description});
+		return await user.save();
+	} catch (error: any) {
+		throw new Error(error.message);
+	}
+}
+
+
+export { createUser, getUserByEmail, updateUser, getAllUsers, getUserById, deleteUser, updatePassword, searchUsers, createUserByAdmin };
