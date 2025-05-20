@@ -37,7 +37,6 @@ services:
       - post-service
       - user-service
       - postreport-service
-      - bookmark-service
     networks:
       - app-network
 
@@ -77,18 +76,6 @@ services:
     networks:
       - app-network
 
-  # Reaction Service
-  reaction-service:
-    build: ./services/reaction-service
-    ports:
-      - "3004:3004"
-    environment:
-      MONGO_URI: mongodb://admin:secret@mongodb:27017/reactiondb?authSource=admin
-    depends_on:
-      - mongodb
-    networks:
-      - app-network
-
   # Authenticate Service
   authenticate-service:
     build: ./services/authenticate-service
@@ -120,17 +107,6 @@ services:
       - "3007:3007"
     environment:
       MONGO_URI: mongodb://admin:secret@mongodb:27017/postreportdb?authSource=admin
-    depends_on:
-      - mongodb
-    networks:
-      - app-network
-  # bookmark Service
-  bookmark-service:
-    build: ./services/bookmark-service
-    ports:
-      - "3008:3008"
-    environment:
-      MONGO_URI: mongodb://admin:secret@mongodb:27017/bookmarkdb?authSource=admin
     depends_on:
       - mongodb
     networks:

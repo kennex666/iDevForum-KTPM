@@ -1,4 +1,5 @@
 import { PostModel, IPost } from "../models/postModel";
+import { BookMarkModel,IBookMark } from "../models/bookMarkModel";
 import { PostStatus } from "../models/postStatus";
 import { UserClient } from '../clients/users';
 const getPosts = async (query: any) => {
@@ -134,4 +135,28 @@ const searchPost = async (query: any): Promise<IPost[]> => {
         throw new Error("Không thể tìm kiếm bài đăng. Vui lòng thử lại sau.");
     }
 };
-export { createPost, getPosts, getPostById, updatePost, deletePost , searchPost, updatePostByAdmin};
+
+const actionBookmark = async (userId: string, postId: string): Promise<IPost | null> => {
+    try {
+        const existingBookmark = await BookMarkModel.findOne({ userId, postId });
+        if (existingBookmark) {
+            await BookMarkModel
+                .findOneAndDelete({ userId, postId })
+                .then(() => {
+                    console.log("Bookmark removed successfully");
+                })
+                .catch((err: any) => {
+                    console.error("Error removing bookmark:", err);
+                });
+            return null;
+        } else {
+            const newBookmark = new BookMarkModel({ userId, postId });
+            await newBookmark.save();
+            return newBookmark; 
+        }
+    } catch (error) {
+        console.error("Error while toggling bookmark:", error);
+        throw new Error("Không thể thực hiện hành động đánh dấu. Vui lòng thử lại sau.");
+    }
+}
+export { createPost, getPosts, getPostById, updatePost,actionBookmark, deletePost , searchPost, updatePostByAdmin};
