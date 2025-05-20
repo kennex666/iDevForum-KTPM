@@ -2,12 +2,12 @@ import { PostModel, IPost } from "../models/postModel";
 import { BookMarkModel,IBookMark } from "../models/bookMarkModel";
 import { PostStatus } from "../models/postStatus";
 import { UserClient } from '../clients/users';
-const getPosts = async (query: any) => {
+const getPosts = async (query: any, externalQuery: any) => {
     // Get post by offset and limit with full info (merge with authors...)
     const { offset = 0, limit = 100 } = query;
-    const posts = await PostModel.find().skip(offset).limit(limit).sort({ createdAt: -1 }); // Sort by createdAt in descending order
+    const posts = await PostModel.find( externalQuery || {} ).skip(offset).limit(limit).sort({ createdAt: -1 }); // Sort by createdAt in descending order
 
-    const count = await PostModel.countDocuments();
+    const count = await PostModel.countDocuments(externalQuery || {}); // Count total documents matching the query
     const postsWithAuthor = await Promise.all(
         posts.map(async (post: any) => {
             let author = null;

@@ -4,6 +4,33 @@ import { Request, Response } from 'express';
 import { toSlugWithTimestamp } from '../utils/string';
 import { PostStatus } from '../models/postStatus';
 
+const getPostByAuthor = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const result = await getPosts({limit: 10, offset: 0}, {userId: id});
+        res.status(200).json({
+			errorCode: 200,
+			errorMessage: "Lấy danh sách bài đăng thành công",
+			data: result.data,
+            total: result.total,
+		});
+    } catch (err) {
+        console.error("Error while getting posts:", err);
+        if (err instanceof Error) {
+            res.status(200).json({
+                errorCode: 400,
+                errorMessage: err.message,
+                data: null,
+            });
+        } else {
+            res.status(200).json({
+                errorCode: 400,
+                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
+            });
+        }
+    }
+}
 
 const getPostController = async (req: Request, res: Response) => {
     try {
@@ -339,4 +366,14 @@ const acctionBookmarkController = async (req:Request, res:Response) => {
     }
 }
 
-export {getPostController,acctionBookmarkController, getPostByIdController,updatePostByAdminController, createPostController, updatePostController, deletePostController, searchPostController};
+export {
+	getPostByAuthor, 
+    getPostController,
+	acctionBookmarkController,
+	getPostByIdController,
+	updatePostByAdminController,
+	createPostController,
+	updatePostController,
+	deletePostController,
+	searchPostController,
+};
