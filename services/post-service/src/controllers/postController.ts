@@ -138,11 +138,7 @@ const updatePostController = async (req:Request, res:Response) => {
         title,
         description,
         content,
-        url,
-        totalComments,
-        totalUpvote,
-        totalDownvote,
-       
+        tagId
     } = req.body;
     const { id } = req.params;
     if (!content || content.trim().length === 0) {
@@ -155,7 +151,7 @@ const updatePostController = async (req:Request, res:Response) => {
     }
 
     try {
-        const post = await updatePost(id,title,description,content,url,totalComments ,totalUpvote, totalDownvote);
+        const post = await updatePost(id,title,description,content,tagId);
         res.status(200).json({
             errorCode: 200,
             errorMessage: "Cập nhật bài viết thành công",
