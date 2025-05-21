@@ -21,33 +21,13 @@ export default function Navbar() {
 	
 
 	const handleSearchKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && searchRef.current) {
-        const keyword = searchRef.current.value.trim();
-        if (!keyword) return;
-
-        // Gửi request tìm kiếm đến backend
-        const res = await fetch("http://localhost:3000/api/post/search", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                title: keyword,
-                content: keyword,
-				describetion: keyword,
-				
-            }),
-        });
-        const result = await res.json();
-
-        // Chuyển trang với kết quả tìm kiếm (hoặc xử lý kết quả tại chỗ)
-        if (result.errorCode === 200) {
-            // Ví dụ: chuyển trang và truyền kết quả qua query (hoặc lưu vào state/context)
-            router.push(`/search?q=${encodeURIComponent(keyword)}`);
-        } else {
-            // Xử lý lỗi nếu cần
-            alert(result.errorMessage || "Không tìm thấy bài viết phù hợp.");
-        }
-    }
-};
+		if (e.key === "Enter" && searchRef.current) {
+			const keyword = searchRef.current.value.trim();
+			if (keyword) {
+				router.push(`/search?q=${keyword}`);
+			}
+		}
+	};
 
 	return (
 		<header className="bg-white px-20 py-4 flex justify-between items-center">

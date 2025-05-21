@@ -14,6 +14,7 @@ import {
 	FaBookmark,
 	FaShare,
 	FaPen,
+	FaTimes,
 } from "react-icons/fa";
 import { api, apiParser } from "@/constants/apiConst";
 import Error from "@/components/Error";
@@ -58,8 +59,11 @@ export default function PostDetailPage() {
 	const [comments, setComments] = useState<Comment[]>([]);
 	const [comment, setComment] = useState("");
 	const [isLoading, setIsLoading] = useState(true);
+	const [toastType, setToastType] = useState("error");
 	const [showToast, setShowToast] = useState("");
-	const { user, isUserReady } = useUser();
+	const { user, isUserReady, isLogin } = useUser();
+	const [showReportModel, setShowReportModel] = useState(false);
+	const [reason, setReason] = useState("");
 
 	useEffect(() => {
 		if (id && isUserReady)
@@ -125,6 +129,7 @@ export default function PostDetailPage() {
 					setIsFollowing(data.action == "follow");
 				} else {
 					setShowToast("Có lỗi xảy ra, vui lòng thử lại sau");
+					setToastType("error");
 					setTimeout(() => {
 						setShowToast("");
 					}
@@ -214,16 +219,88 @@ export default function PostDetailPage() {
 			});
 	};
 
+	const sendReport = (reason: string, postId: string) => {
+		// info
+		// reason and postId
+		// /api/postreport/save
+		fetch(`${apiParser(api.apiPath.postReport.create)}`, {
+			method: "POST",
+			headers: { 
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${getAccessToken()}`,
+			 },
+			body: JSON.stringify({ reason, postId }),
+		})
+			.then((res) => res.json())
+			.then((data) => {
+				if (data.errorCode == 200) {
+					
+					setToastType("success");
+					setShowToast("Báo cáo thành công");
+				} else {
+					setShowToast(data.errorMessage || "Có lỗi xảy ra");
+					setToastType("error");
+				}
+				setTimeout(() => {
+					setShowToast("");
+				}, 4000);
+			}).catch((err) => {
+				setShowToast("Có lỗi xảy ra");
+				setToastType("error");
+				setTimeout(() => {
+					setShowToast("");
+				}, 4000);
+			});
+	}
+
+	const showModelForReport = () => {
+		// show modal for report
+		setShowReportModel(!showReportModel);
+	}
+
 	if (!data) return !isLoading ? <Error /> : <Loading />;
 
 	return (
 		<div className="container mx-auto px-6 lg:w-6/12 w-full mt-12 pb-12">
-			{showToast && (
-				<Toast
-					message={showToast}
-					type="error"
-				/>
+			{showReportModel && (
+				<div className="fixed inset-0 flex items-center justify-center z-[25]">
+					<div onClick={() => setShowReportModel(false)} className="fixed inset-0 bg-gray-700 opacity-50 flex items-center justify-center z-[23]"></div>
+					<div className="bg-white rounded-lg p-6 w-96 z-[25]">
+						<div className="flex justify-between items-center mb-4">
+							
+							<h2 className="text-lg font-semibold">
+								Báo cáo bài viết
+							</h2>
+							{/* Nút đóng */}
+							<button
+								onClick={() => setShowReportModel(false)}
+								className="text-gray-500 hover:text-gray-700 focus:outline-none"
+							>
+								<FaTimes />
+							</button>
+						</div>
+						
+						<textarea
+							value={reason}
+							onChange={(e) => setReason(e.target.value)}
+							className="w-full p-4 border border-gray-200 rounded-md focus:outline-none"
+							placeholder="Nhập lý do báo cáo..."
+						></textarea>
+						<div className="flex justify-end mt-4">
+							<button
+								onClick={() => {
+									sendReport(reason, data.post.postId);
+									setShowReportModel(false);
+								}}
+								className={`px-6 py-1 rounded-full text-white focus:outline-none bg-blue-500 hover:bg-blue-400`}
+							>
+								Gửi
+							</button>
+						</div>
+					</div>
+				</div>
 			)}
+			{showToast && <Toast message={showToast} type={toastType as any || "error"} />}
 			<h1 className="text-3xl font-semibold mb-2">{data.post.title}</h1>
 			<p className="text text-gray-700 mb-4">{data.post.description}</p>
 
@@ -289,9 +366,14 @@ export default function PostDetailPage() {
 					</a>
 				</div>
 				<div className="flex flex-row gap-6">
-					<button className="text-gray-500 focus:outline-none">
-						<FaExclamation />
-					</button>
+					{isLogin && (
+						<button
+							onClick={showModelForReport}
+							className="text-gray-500 focus:outline-none"
+						>
+							<FaExclamation />
+						</button>
+					)}
 					<button className="text-gray-500 focus:outline-none">
 						<FaBookmark />
 					</button>
@@ -340,10 +422,11 @@ export default function PostDetailPage() {
 						<button
 							disabled={!comment.trim()}
 							onClick={handleComment}
-							className={`px-6 py-1 rounded-full text-white focus:outline-none ${comment.trim()
+							className={`px-6 py-1 rounded-full text-white focus:outline-none ${
+								comment.trim()
 									? "bg-blue-500 hover:bg-blue-400"
 									: "bg-gray-500"
-								}`}
+							}`}
 						>
 							Gửi
 						</button>

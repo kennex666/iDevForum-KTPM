@@ -39,6 +39,14 @@ app.use(
 		changeOrigin: true,
 	})
 );
+
+app.use(
+	"/api/post/search",
+	createProxyMiddleware({
+		target: "http://post-service:3002/posts/search",
+		changeOrigin: true,
+	})
+);
 app.use(
 	"/api/post",
 	conditionalAuthenticate(["POST", "PUT", "DELETE"]),

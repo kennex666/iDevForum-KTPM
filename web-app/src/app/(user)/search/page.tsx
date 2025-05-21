@@ -32,24 +32,25 @@ export default function SearchPage() {
         if (!q) return;
         setLoading(true);
         Promise.all([
-            fetch("http://localhost:3000/api/post/search", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title: q, content: q, description: q }),
-            }).then((res) => res.json()),
-            searchByTopicName(q),
-        ])
-            .then(([postResult, postsByTopic]) => {
-                const posts1 = postResult.data || [];
-                const posts2 = postsByTopic || [];
-                // Loại bỏ trùng lặp theo postId
-                const allPosts = [...posts1, ...posts2].filter(
-                    (post, index, self) =>
-                        index === self.findIndex((p) => p.postId === post.postId)
-                );
-                setPosts(allPosts);
-            })
-            .finally(() => setLoading(false));
+			fetch("http://localhost:3000/api/post/search", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ title: q, content: q, description: q }),
+			}).then((res) => res.json()),
+			searchByTopicName(q),
+		])
+			.then(([postResult, postsByTopic]) => {
+				const posts1 = postResult.data || [];
+				const posts2 = postsByTopic || [];
+				// Loại bỏ trùng lặp theo postId
+				const allPosts = [...posts1, ...posts2].filter(
+					(post, index, self) =>
+						index ===
+						self.findIndex((p) => p.postId === post.postId)
+				);
+				setPosts(allPosts);
+			})
+			.finally(() => setLoading(false));
     }, [q]);
 
     return (

@@ -49,8 +49,18 @@ class PostReportService {
         postId: string;
         reporterId: string;
         inspectorId: string;
-    }): Promise<IPostReport> {
+    }){
         try {
+
+            // check if postId have been reported
+            const isExist = await PostReportModel.findOne({ postId: postReportData.postId });
+            if (isExist) {
+                return {
+                    errorCode: 400,
+                    errorMessage: "Bài đăng đã được báo cáo trước đó",
+                    data: null,
+                };
+            }
 
             const postReport = new PostReportModel(postReportData);
             return await postReport.save();

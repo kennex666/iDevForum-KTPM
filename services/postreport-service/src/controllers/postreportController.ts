@@ -70,6 +70,17 @@ class PostReportController {
             const { reason, postId} = req.body;
             const state = PostReportState.PROCCESSING;
             const userId = req.user._id;
+
+            // check all if empty
+            if (!reason || !postId || !userId) {
+                return res.status(200).json({
+                    errorCode: 400,
+                    errorMessage: "Thiếu thông tin cần thiết",
+                    data: null,
+                });
+            }
+
+
             const report = await postReportService.createPostReport({
                 reason,
                 state,
@@ -77,9 +88,18 @@ class PostReportController {
                 reporterId: userId,
                 inspectorId: "",
             });
+
+            if (report && report?.errorCode) {
+				return res.status(200).json({
+					errorCode: 201,
+					errorMessage: "Bài viết đã có người báo cáo trước đó",
+					data: report,
+				});
+			}
+            
             res.status(200).json({
                 errorCode: 200,
-                message: 'Create post report successfully',
+                message: 'Đã báo cáo bài viết thành công!',
                 data: report
             });
         } catch (err) {

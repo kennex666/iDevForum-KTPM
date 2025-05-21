@@ -10,13 +10,11 @@ export default function Home() {
 	const router = useRouter();
 
 	useEffect(() => {
-		setTimeout(() => {
-			if (user) {
-				router.replace("/home");
-			} else {
-				router.replace("/login");
-			}
-		}, 1500);
+		if (user) {
+			router.replace("/home");
+		} else {
+			router.replace("/login");
+		}
 	}, [user]);
 
 	return (
