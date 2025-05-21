@@ -17,6 +17,7 @@ export const apiDevelopment = {
 		},
 		user: {
 			getAll: "/user/getall",
+			get: "/user/profile/:id",
 			update: "/user/profile/:id",
 			delete: "/user/profile/:id",
 			createByAdmin: "/user/createUserByAdmin",

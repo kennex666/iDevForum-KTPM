@@ -264,10 +264,12 @@ export default function PostDetailPage() {
 		<div className="container mx-auto px-6 lg:w-6/12 w-full mt-12 pb-12">
 			{showReportModel && (
 				<div className="fixed inset-0 flex items-center justify-center z-[25]">
-					<div onClick={() => setShowReportModel(false)} className="fixed inset-0 bg-gray-700 opacity-50 flex items-center justify-center z-[23]"></div>
+					<div
+						onClick={() => setShowReportModel(false)}
+						className="fixed inset-0 bg-gray-700 opacity-50 flex items-center justify-center z-[23]"
+					></div>
 					<div className="bg-white rounded-lg p-6 w-96 z-[25]">
 						<div className="flex justify-between items-center mb-4">
-							
 							<h2 className="text-lg font-semibold">
 								Báo cáo bài viết
 							</h2>
@@ -279,7 +281,7 @@ export default function PostDetailPage() {
 								<FaTimes />
 							</button>
 						</div>
-						
+
 						<textarea
 							value={reason}
 							onChange={(e) => setReason(e.target.value)}
@@ -300,7 +302,12 @@ export default function PostDetailPage() {
 					</div>
 				</div>
 			)}
-			{showToast && <Toast message={showToast} type={toastType as any || "error"} />}
+			{showToast && (
+				<Toast
+					message={showToast}
+					type={(toastType as any) || "error"}
+				/>
+			)}
 			<h1 className="text-3xl font-semibold mb-2">{data.post.title}</h1>
 			<p className="text text-gray-700 mb-4">{data.post.description}</p>
 
@@ -313,7 +320,7 @@ export default function PostDetailPage() {
 				<div>
 					<div className="flex items-center gap-2">
 						<p className="text-sm font-semibold">
-							{data.user.name}
+							<a href={`/author/${data.post.userId}`}>{data.user.name}</a>
 						</p>
 						<span className="text-gray-500">·</span>
 						<button
