@@ -32,6 +32,8 @@ export const apiDevelopment = {
 			getInfo: "/post/:id",
 			updateStatus: "/post/admin",
 			getAuthor: "/post/author/",
+			getBookmark: "/post/bookmark/",
+			actionBookmark: "/post/actionBookmark",
 		},
 		postReport: {
 			getAll: "/postreport",

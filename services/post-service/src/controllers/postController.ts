@@ -1,5 +1,5 @@
 import { get } from 'http';
-import { createPost, getPosts, getPostById, updatePost,actionBookmark, deletePost, searchPost, updatePostByAdmin } from '../services/postService';
+import { createPost, getPosts, getPostById, updatePost,actionBookmark, deletePost, searchPost, updatePostByAdmin, listBookmarks } from '../services/postService';
 import { Request, Response } from 'express';
 import { toSlugWithTimestamp } from '../utils/string';
 import { PostStatus } from '../models/postStatus';
@@ -365,7 +365,7 @@ const acctionBookmarkController = async (req:Request, res:Response) => {
         res.status(200).json({
             errorCode: 200,
             errorMessage: "Thao tác bookmark thành công",
-            data: acctionBookmark,
+            action: acctionBookmark,
         });
     } catch (err) {
         console.error("Error while processing request:", err);
@@ -385,7 +385,45 @@ const acctionBookmarkController = async (req:Request, res:Response) => {
     }
 }
 
+const getBookmarkByUserId = async (req:Request, res:Response) => {
+    const { userId} = req.params;
+    const offset = req.query.offset || 0;
+    const limit = req.query.limit || 10;
+    if (!userId) {
+        return res.status(200).json({
+            errorCode: 400,
+            message: "Không rõ người dùng",
+            data: null,
+        });
+    }
+    try {
+        const bookmark = await listBookmarks(userId, offset, limit);
+        res.status(200).json({
+            errorCode: 200,
+            errorMessage: "Lấy danh sách bookmark thành công",
+            data: bookmark?.data || [],
+            total: bookmark?.total || 0,
+        });
+    } catch (err) {
+        console.error("Error while processing request:", err);
+        if (err instanceof Error) {
+            res.status(200).json({
+                errorCode: 400,
+                message: err.message,
+                data: null,
+            });
+        } else {
+            res.status(200).json({
+                errorCode: 400,
+                message: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
+            });
+        }
+    }
+}
+
 export {
+    getBookmarkByUserId,
 	getPostByAuthor, 
     getPostController,
 	acctionBookmarkController,

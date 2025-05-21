@@ -141,6 +141,49 @@ export default function PostDetailPage() {
 			});
 	};
 
+	const handleBookmark = () => {
+		if (!data) return;
+		fetch(
+			`${apiParser(api.apiPath.post.actionBookmark)}`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${getAccessToken()}`,
+				},
+				body: JSON.stringify({
+					postId: data.post.postId
+				}),
+			}
+		)
+			.then((res) => res.json())
+			.then((data) => {
+				if (data.errorCode == 200) {
+					setToastType("success");
+					setShowToast((pre) => {
+						return data.action == "save"
+							? "Đã lưu bài viết"
+							: "Đã bỏ lưu bài viết";
+					});
+				} else {
+					setShowToast(
+						data.errorMessage ||
+							"Có lỗi xảy ra, vui lòng thử lại sau"
+					);
+					setToastType("error");
+				}
+				setTimeout(() => {
+					setShowToast("");
+				}, 4000);
+			}).catch((err) => {
+				setShowToast("Có lỗi xảy ra");
+				setToastType("error");
+				setTimeout(() => {
+					setShowToast("");
+				}, 4000);
+			});
+	}
+
 	const handleVote = (type: boolean) => {
 		if (!data) return;
 
@@ -389,7 +432,7 @@ export default function PostDetailPage() {
 							<FaExclamation />
 						</button>
 					)}
-					<button className="text-gray-500 focus:outline-none">
+					<button onClick={handleBookmark} className="text-gray-500 focus:outline-none">
 						<FaBookmark />
 					</button>
 					<button

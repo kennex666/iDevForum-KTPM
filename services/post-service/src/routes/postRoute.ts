@@ -1,5 +1,5 @@
 import express from 'express';
-import { createPostController, deletePostController, updatePostByAdminController, getPostByIdController, getPostController, searchPostController, updatePostController, acctionBookmarkController, getPostByAuthor } from '../controllers/postController';
+import { createPostController, deletePostController, updatePostByAdminController, getPostByIdController, getPostController, searchPostController, updatePostController, acctionBookmarkController, getPostByAuthor, getBookmarkByUserId } from '../controllers/postController';
 import { authenticate } from '../utils/authenticate';
 
 const postRoute = express.Router();
@@ -29,5 +29,8 @@ postRoute.post('/search', searchPostController);
 
 // click bookmark
 postRoute.post('/actionBookmark', authenticate, acctionBookmarkController);
+
+// list bookmark from user
+postRoute.get('/bookmark/:userId', getBookmarkByUserId);
 
 export default postRoute;
