@@ -279,7 +279,9 @@ const deletePostController = async (req:Request, res:Response) => {
 
 const searchPostController = async (req:Request, res:Response) => {
     try {
-        const { postId, userId, content, createdAt, title, description,tagId } = req.body;
+        const offset = req.query.offset || 0;
+        const limit = req.query.limit || 10;
+        const { postId, userId, content, createdAt, title, description, tagId } = req.body;
         const query: any = {};
 
         console.log("Search parameters:", req.body);
@@ -325,11 +327,12 @@ const searchPostController = async (req:Request, res:Response) => {
             query.createdAt = { $gte: startOfDay, $lte: endOfDay }; // Tìm kiếm trong khoảng thời gian của ngày
         }
 
-        const posts = await searchPost(query);
+        const posts = await getPosts({offset, limit}, query);
         res.status(200).json({
             errorCode: 200,
             errorMessage: "Lấy bài đắng thành công",
-            data: posts,
+            data: posts.data,
+            total: posts.total,
         });
     } catch (err) {
         console.error("Error while searching comments:", err);

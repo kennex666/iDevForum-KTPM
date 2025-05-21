@@ -34,6 +34,7 @@ export const apiDevelopment = {
 			getAuthor: "/post/author/",
 			getBookmark: "/post/bookmark/",
 			actionBookmark: "/post/actionBookmark",
+			search: "/post/search",
 		},
 		postReport: {
 			getAll: "/postreport",

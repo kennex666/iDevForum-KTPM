@@ -1,54 +1,98 @@
 import Footer from "@/components/Footer";
 import { EUserRole, guestUser } from "@/context/UserContext";
 import { SidebarProps } from "@/interfaces/Sidebar";
+import { useUser } from '../../../context/UserContext';
+import { useEffect, useState } from "react";
+import { api, apiParser } from "@/constants/apiConst";
 
-const Sidebar = ({ currentUser }: SidebarProps) => {
-	const isLogin = currentUser && currentUser.role != EUserRole.GUEST;
+const Sidebar = ({ currentUser }: any) => {
+
+	const { isLogin, user } = useUser();
+
+	const [bookmarks, setBookmarks] = useState<any>([]);
+	
+	useEffect(() => {
+		if (isLogin) {
+			fetch(`${apiParser(api.apiPath.post.getBookmark)}${user?._id}`)
+				.then((res) => {
+					return res.json();
+				})
+				.then((data) => {
+					if (data?.data) {
+						setBookmarks(data.data);
+					} else {
+						console.error("Error fetching bookmarks:", data);
+						setBookmarks([]);
+					}
+				})
+				.catch((error) => {
+					console.error("Error fetching bookmarks:", error);
+					setBookmarks([]);
+				});
+		}
+	}, [isLogin]);
+
 	return (
 		<div className="w-1/3 pl-4 space-y-12">
 			{/* Bookmarks */}
-			{currentUser && (
 				<div className="mt-12 bg-white p-4 rounded-lg shadow">
 					<h3 className="font-semibold mb-5">Đã lưu gần đây</h3>
 					<div className="space-y-5">
-						{currentUser.bookMarks ? (
-							currentUser.bookMarks.map(
-								(bookmark: any, idx: any) => (
-									<div key={idx} className="py-2">
-										<a
-											href={`/author/${bookmark.post.author.userId}`}
-											className="flex flex-row items-center space-x-2 mb-3 text-sm"
-										>
-											<img
-												src={
-													bookmark.post.author
-														.profilePicture
-												}
-												alt="User profile image"
-												className="rounded-full w-6 h-6"
-											/>
-											<span className="font-semibold hover:text-gray-500">
-												{bookmark.post.author.name}
-											</span>
-										</a>
-										<a
-											href={`/posts/${bookmark.post.postId}`}
-										>
-											<h2 className="font-semibold">
-												{bookmark.post.title}
-											</h2>
-										</a>
-										<div className="flex items-center space-x-2 text-xs mt-2">
-											<p>
-												{new Date(
-													bookmark.post.date
-												).toLocaleDateString()}
-											</p>
-											<p>·</p>
-											<p>{bookmark.post.topic.name}</p>
+						{bookmarks.length === 0 && (
+							<p className="text-gray-500 mb-4">
+								Bạn chưa lưu nội dung nào
+								</p>
+								)}
+						{bookmarks ? (
+							bookmarks.map(
+								(bookmark: any, idx: any) => { 
+									if (!bookmark.author) {
+										bookmark.author = guestUser;
+									}
+									if (!bookmark.topic) {
+										bookmark.topic = {
+											tagId: bookmark.tagId || "-1",
+											name: bookmark.tagId == -1 ? "Chưa phân loại" : bookmark.tagId,
+										};
+									}
+									return (
+										<div key={idx} className="py-2">
+											<a
+												href={`/author/${bookmark.author.userId}`}
+												className="flex flex-row items-center space-x-2 mb-3 text-sm"
+											>
+												<img
+													src={
+														bookmark.author
+															.profilePicture
+													}
+													alt="User profile image"
+													className="rounded-full w-6 h-6"
+												/>
+												<span className="font-semibold hover:text-gray-500">
+													{bookmark.author.name}
+												</span>
+											</a>
+											<a
+												href={`/posts/${bookmark.postId}`}
+											>
+												<h2 className="text-sm">
+													{bookmark.title}
+												</h2>
+											</a>
+											<div className="flex items-center space-x-2 text-xs mt-2">
+												<p>
+													{new Date(
+														bookmark.createdAt
+													).toLocaleDateString()}
+												</p>
+												<p>·</p>
+												<p>{bookmark.topic.name}</p>
+											</div>
 										</div>
-									</div>
-								)
+									);
+							}
+								
 							)
 						) : // Login to see bookmarks
 						isLogin ? (
@@ -68,7 +112,7 @@ const Sidebar = ({ currentUser }: SidebarProps) => {
 							</p>
 						)}
 					</div>
-					{currentUser.bookMarks && (
+					{bookmarks && (
 						<a
 							href="/bookmarks"
 							className="text-blue-500 text-sm hover:text-blue-400"
@@ -77,7 +121,6 @@ const Sidebar = ({ currentUser }: SidebarProps) => {
 						</a>
 					)}
 				</div>
-			)}
 
 			{/* Chủ đề */}
 			<div className="bg-white p-4 rounded-lg shadow">

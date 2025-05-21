@@ -176,11 +176,12 @@ const listBookmarks = async (
 		const totalDocument = await BookMarkModel.countDocuments({ userId });
 
 		const postIds = bookmarks.map((bookmark: any) => bookmark.postId);
-		const posts = await PostModel.find({ _id: { $in: postIds } });
+		const data = await getPosts({}, { _id: { $in: postIds } });
+        const posts = data.data;
 
 		// Map lại theo thứ tự bookmarks
 		const postMap = new Map(
-			posts.map((post: any) => [post._id.toString(), post.toObject()])
+			posts.map((post: any) => [post._id.toString(), post])
 		);
 
 		const bookmarksWithPosts = bookmarks
