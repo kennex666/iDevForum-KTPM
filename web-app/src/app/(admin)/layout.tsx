@@ -1,11 +1,25 @@
+"use client";
 import Navbar from "@/components/admin/Navbar";
 import Sidebar from "@/components/admin/Sidebar";
+import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUser,guestUser } from "@/context/UserContext";
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const router = useRouter();
+  const {user, isLogin} = useUser();
+  useEffect(() => {
+    if (user.email === guestUser.email) return;
+    if (!isLogin) {
+      router.push("/login");
+    } else if (user.role !== 1) {
+      router.push("/");
+    }
+ }, [isLogin, user, router]);
   return (
     <>
       <>

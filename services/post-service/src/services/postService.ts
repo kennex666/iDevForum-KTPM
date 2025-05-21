@@ -2,12 +2,12 @@ import { PostModel, IPost } from "../models/postModel";
 import { BookMarkModel,IBookMark } from "../models/bookMarkModel";
 import { PostStatus } from "../models/postStatus";
 import { UserClient } from '../clients/users';
-const getPosts = async (query: any) => {
+const getPosts = async (query: any, externalQuery: any = {}) => {
     // Get post by offset and limit with full info (merge with authors...)
     const { offset = 0, limit = 100 } = query;
-    const posts = await PostModel.find().skip(offset).limit(limit).sort({ createdAt: -1 }); // Sort by createdAt in descending order
+    const posts = await PostModel.find( externalQuery || {} ).skip(offset).limit(limit).sort({ createdAt: -1 }); // Sort by createdAt in descending order
 
-    const count = await PostModel.countDocuments();
+    const count = await PostModel.countDocuments(externalQuery || {}); // Count total documents matching the query
     const postsWithAuthor = await Promise.all(
         posts.map(async (post: any) => {
             let author = null;
@@ -60,8 +60,10 @@ const createPost = async (postData: {
 
 const getPostById = async (id: string): Promise<{ post: IPost | null; user: any | null }> => {
     try {
-        const post = await PostModel.findById(id);
+        // Search via id or url
+        const post = await PostModel.findById(id).catch(() => null) || await PostModel.findOne({ url: id }).catch(() => null);
 
+        console.log(id)
         if (!post) {
             return { post: null, user: null }; // Trả về null nếu không tìm thấy bài viết
         }
@@ -106,9 +108,9 @@ const updatePostByAdmin = async (
     }
 }
 
-const updatePost = async (id:String,title: string,description: string,content: string,url: string): Promise<IPost | null> => {
+const updatePost = async (id:String,title: string,description: string,content: string, tagId: string): Promise<IPost | null> => {
    try {
-    return await PostModel.findByIdAndUpdate(id, {title,description,content,url}, { new: true });  // new: true returns the updated document
+    return await PostModel.findByIdAndUpdate(id, {title,description,content, tagId}, { new: true });  // new: true returns the updated document
    } catch (error) {
        console.error("Error while updating post:", error);
        throw new Error("Không thể cập nhật bài đăng. Vui lòng thử lại sau.");

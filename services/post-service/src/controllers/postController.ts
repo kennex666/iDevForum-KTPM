@@ -4,10 +4,42 @@ import { Request, Response } from 'express';
 import { toSlugWithTimestamp } from '../utils/string';
 import { PostStatus } from '../models/postStatus';
 
+const getPostByAuthor = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        req.query.offset = req.query.offset || 0;
+        const result = await getPosts(
+			{ limit: 10, offset: req.query.offset },
+			{ userId: id }
+		);
+        res.status(200).json({
+			errorCode: 200,
+			errorMessage: "Lấy danh sách bài đăng thành công",
+			data: result.data,
+            total: result.total,
+		});
+    } catch (err) {
+        console.error("Error while getting posts:", err);
+        if (err instanceof Error) {
+            res.status(200).json({
+                errorCode: 400,
+                errorMessage: err.message,
+                data: null,
+            });
+        } else {
+            res.status(200).json({
+                errorCode: 400,
+                errorMessage: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
+            });
+        }
+    }
+}
 
 const getPostController = async (req: Request, res: Response) => {
     try {
-        const result = await getPosts({limit: 10, offset: 0});
+        req.query.offset = req.query.offset || 0;
+        const result = await getPosts({ limit: 10, offset: req.query.offset });
         res.status(200).json({
 			errorCode: 200,
 			errorMessage: "Lấy danh sách bài đăng thành công",
@@ -189,7 +221,7 @@ const updatePostController = async (req:Request, res:Response) => {
         title,
         description,
         content,
-        url,
+        tagId
     } = req.body;
     const { id } = req.params;
     if (!content || content.trim().length === 0) {
@@ -202,7 +234,7 @@ const updatePostController = async (req:Request, res:Response) => {
     }
 
     try {
-        const post = await updatePost(id,title,description,content,url);
+        const post = await updatePost(id,title,description,content,tagId);
         res.status(200).json({
             errorCode: 200,
             errorMessage: "Cập nhật bài viết thành công",
@@ -247,7 +279,7 @@ const deletePostController = async (req:Request, res:Response) => {
 
 const searchPostController = async (req:Request, res:Response) => {
     try {
-        const { postId, userId, content, createdAt } = req.body;
+        const { postId, userId, content, createdAt, title, description,tagId } = req.body;
         const query: any = {};
 
         console.log("Search parameters:", req.body);
@@ -258,8 +290,22 @@ const searchPostController = async (req:Request, res:Response) => {
         if (userId) {
             query.userId = { $regex: userId, $options: 'i' }; // Tìm kiếm userId chứa giá trị
         }
+        // Tìm kiếm theo title, content, description (OR)
+        const orConditions = [];
+        if (title) {
+            orConditions.push({ title: { $regex: title, $options: 'i' } });
+        }
         if (content) {
-            query.content = { $regex: content, $options: 'i' }; // Tìm kiếm nội dung chứa giá trị
+            orConditions.push({ content: { $regex: content, $options: 'i' } });
+        }
+        if (description) {
+            orConditions.push({ description: { $regex: description, $options: 'i' } });
+        }
+        if (tagId) {
+            orConditions.push({ tagId: { $regex: tagId, $options: 'i' } });
+        }
+        if (orConditions.length > 0) {
+            query.$or = orConditions;
         }
         if (createdAt) {
             const parsedDate = new Date(createdAt as string);
@@ -339,4 +385,14 @@ const acctionBookmarkController = async (req:Request, res:Response) => {
     }
 }
 
-export {getPostController,acctionBookmarkController, getPostByIdController,updatePostByAdminController, createPostController, updatePostController, deletePostController, searchPostController};
+export {
+	getPostByAuthor, 
+    getPostController,
+	acctionBookmarkController,
+	getPostByIdController,
+	updatePostByAdminController,
+	createPostController,
+	updatePostController,
+	deletePostController,
+	searchPostController,
+};
