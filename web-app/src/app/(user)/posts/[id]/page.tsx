@@ -18,7 +18,7 @@ import {
 import { api, apiParser } from "@/constants/apiConst";
 import Error from "@/components/Error";
 import Loading from "@/components/user/Loading";
-import { guestUser } from "@/context/UserContext";
+import { EUserRole, guestUser, useUser } from "@/context/UserContext";
 import { formatDate, getDateOnly, getReadingTime } from '../../../utils/datetimeformat';
 import { getAccessToken } from "@/app/utils/cookiesParse";
 import Toast from "@/components/Toast";
@@ -59,31 +59,50 @@ export default function PostDetailPage() {
 	const [comment, setComment] = useState("");
 	const [isLoading, setIsLoading] = useState(true);
 	const [showToast, setShowToast] = useState("");
+	const { user, isUserReady } = useUser();
 
 	useEffect(() => {
-		fetch(apiParser(api.apiPath.post.getInfo.replace(":id", id)))
-			.then((res) => res.json())
-			.then((data) => {
-				if (data.errorCode != 200) {
-					return;
-				}
-				const p = data.data;
-				if (!p.user) {
-					p.user = guestUser;
-					p.user.name = "<<Name>>";
-				}
-				if (!p.topic) {
-					p.topic = {
-						tagId: "unknown",
-						name: "<<Topic>>",
-					};
-				}
-				p.post.contentDOM = DOMPurify.sanitize(p.post.content);
-				setData(p);
-				setReaction("");
-				setComments(p.comments || []);
-			}).finally(() => setIsLoading(false));
-	}, [id]);
+		if (id && isUserReady)
+			fetch(apiParser(api.apiPath.post.getInfo.replace(":id", id)))
+				.then((res) => res.json())
+				.then((data) => {
+					if (data.errorCode != 200) {
+						return;
+					}
+					const p = data.data;
+					if (!p.user) {
+						p.user = guestUser;
+						p.user.name = "<<Name>>";
+					}
+					if (!p.topic) {
+						p.topic = {
+							tagId: "unknown",
+							name: "<<Topic>>",
+						};
+					}
+					console.log(user._id)
+					p.post.isOwner = p.post.userId == user?._id;
+					if (
+						!p.post.isOwner &&
+						p.post.status != "PUBLISHED" &&
+						user.role != EUserRole.ADMIN
+					) {
+						setShowToast("Bài viết không tồn tại hoặc đã bị xóa");
+						setTimeout(() => {
+							setShowToast("");
+							window.history.back();
+						}, 4000);
+						setData(null);
+						setIsLoading(false);
+						return;
+					}
+					p.post.contentDOM = DOMPurify.sanitize(p.post.content);
+					setData(p);
+					setReaction("");
+					setComments(p.comments || []);
+				})
+				.finally(() => setIsLoading(false));
+	}, [id, isUserReady, user?._id]);
 
 	const handleFollow = () => {
 		if (!data) return;
@@ -118,32 +137,64 @@ export default function PostDetailPage() {
 		if (!data) return;
 
 		
-		fetch(`/api/vote/${data.postId}?type=${type ? 1 : 0}`)
+		fetch(
+			`${apiParser(api.apiPath.reaction.action)}${
+				type ? "upvote" : "downvote"
+			}/${data.post.postId}`
+		, {
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${getAccessToken()}`,
+			}
+		})
 			.then((res) => res.json())
 			.then((data) => {
-				if (data.errorCode === 200) {
-					if (reaction == "upvote" && type) {
-						setReaction("");
-						setData((prev: any) => ({
-							...prev,
-							totalUpvote: prev.totalUpvote - 1,
-						}));
+				if (data.errorCode == 200) {
+					const reactionAfter = !data?.data
+						? ""
+						: data?.data.type.toString().toLowerCase();
+					
+					if (reactionAfter == reaction) {
+						return;
 					}
-					if (reaction == "downvote" && !type) {
+					
+					if (reactionAfter == "upvote") {
+						setData( pre => {
+							return {
+								...pre,
+								post: {
+									...pre.post,
+									totalUpvote: pre.post.totalUpvote + 1,
+									totalDownvote: pre.post.totalDownvote + reaction == "downvote" ? -1 : 0,
+								},
+							};
+						})
+						
+						setReaction("upvote");
+					} else if (reactionAfter == "downvote") {
+						setData( pre => {
+							return {
+								...pre,
+								post: {
+									...pre.post,
+									totalDownvote: pre.post.totalDownvote + 1,
+									totalUpvote: pre.post.totalUpvote + reaction == "upvote" ? -1 : 0,
+								},
+							};
+						})
+						setReaction("downvote");
+					} else {
+						setData( pre => {
+							return {
+								...pre,
+								post: {
+									...pre.post,
+									totalUpvote: pre.post.totalUpvote + reaction == "upvote" ? -1 : 0,
+									totalDownvote: pre.post.totalDownvote + reaction == "downvote" ? -1 : 0,
+								},
+							};
+						})
 						setReaction("");
-						setData((prev: Post) => ({
-							...prev,
-							totalDownvote: prev.totalDownvote - 1,
-						}));
-					}
-
-					if (reaction == "") {
-						setData((prev: Post) => ({
-							...prev,
-							totalUpvote: prev.totalUpvote + (type ? 1 : 0),
-							totalDownvote: prev.totalDownvote + (type ? 0 : 1),
-						}));
-						setReaction(type ? "upvote" : "downvote");
 					}
 				}
 			});
@@ -289,11 +340,10 @@ export default function PostDetailPage() {
 						<button
 							disabled={!comment.trim()}
 							onClick={handleComment}
-							className={`px-6 py-1 rounded-full text-white focus:outline-none ${
-								comment.trim()
+							className={`px-6 py-1 rounded-full text-white focus:outline-none ${comment.trim()
 									? "bg-blue-500 hover:bg-blue-400"
 									: "bg-gray-500"
-							}`}
+								}`}
 						>
 							Gửi
 						</button>

@@ -1,64 +1,65 @@
 import {Request, Response} from 'express';
 import {reactionService} from '../services/reactionService';
+import { IReaction } from '../models/reactionModel';
 
-interface ApiResponse<T> {
-    errorCode: number;
-    errorMessage: string;
-    data: T | null;
-}
-
-const createSuccessResponse = <T>(data: T, message: string, code: number = 200): ApiResponse<T> => ({
-    errorCode: code,
-    errorMessage: message,
-    data
-});
-
-const createErrorResponse = (message: string, code: number = 400): ApiResponse<null> => ({
-    errorCode: code,
-    errorMessage: message,
-    data: null
-});
 
 class ReactionController {
-     async downvoteComment(req: Request, res: Response): Promise<void> {
+    async getAllReactionsViaPost (req: Request, res: Response) {
+        const postId = req.params.id;
+        if (!postId) {
+            return res.status(200).json({errorMessage: "Post ID is required", errorCode: 400, data: null});
+        }
         try {
-            const userId = req.user._id;
-            const {postId} = req.body;
-            const reaction = await reactionService.downvoteComment(postId, userId);
-            res.status(200).json(createSuccessResponse(reaction, 'Downvote comment successfully'));
+            const reactions = await reactionService.getReactionViaPostId(postId);
+            res.status(200).json({errorMessage: "Retrieved success", errorCode: 200, data: reactions});
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Unknown error';
-            res.status(200).json(createErrorResponse(message));
+            return res.status(200).json({
+				errorMessage: "Error service",
+				errorCode: 400,
+				data: null,
+			});
         }
     }
 
-    async upvoteComment(req: Request, res: Response): Promise<void> {
+    async getAllReactionsViaUser (req: Request, res: Response) {
+        const userId = req.params.id;
+        if (!userId) {
+            return res.status(400).json({errorMessage: "User ID is required", errorCode: 400, data: null});
+        }
         try {
-            const user = req.user;
-            const {commentId} = req.body;
-            const reaction = await reactionService.upvoteComment(commentId, user._id);
-            res.status(200).json(createSuccessResponse(reaction, 'Upvote comment successfully'));
+            const reactions = await reactionService.getReactionViaUserId(userId);
+            res.status(200).json({errorMessage: "Retrieved success", errorCode: 200, data: reactions});
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Unknown error';
-            res.status(200).json(createErrorResponse(message));
+            return res
+				.status(200)
+				.json({
+					errorMessage: "Error service",
+					errorCode: 500,
+					data: null,
+				});
         }
     }
-    async getReactionByCommentId(req: Request, res: Response): Promise<void> {
+
+    async reactionAction (req: Request, res: Response) {
+        const {action} = req.params;
+        const userId = req.user._id;
+        const postId = req.params.postId;
+        if (!postId) {
+            return res.status(400).json({errorMessage: "Post ID is required", errorCode: 400, data: null});
+        }
         try {
-            const {postId} = req.params;
-            const temp = await reactionService.getReactionByCommentId(postId);
-            // Ensure temp is an array and not null
-            const reactions: Array<{ type: string }> = Array.isArray(temp) ? temp : [];
-            const numberOfUpvote = reactions.filter((item: { type: string }) => item.type === 'UPVOTE').length;
-            const numberOfDownvote = reactions.filter((item: { type: string }) => item.type === 'DOWNVOTE').length;
-            const reaction = {
-                numberOfUpvote,
-                numberOfDownvote
-            };
-            res.status(200).json(createSuccessResponse(reaction, 'Get upvote comment successfully'));
+            const reaction = await reactionService.addReaction({
+                type: action.toUpperCase() as "UPVOTE" | "DOWNVOTE",
+                postId: postId,
+                userId: userId,
+            } as IReaction);
+            res.status(200).json({errorMessage: "Action success", errorCode: 200, data: reaction});
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Unknown error';
-            res.status(200).json(createErrorResponse(message));
+            return res.status(200).json({
+				errorMessage: "Error service",
+				errorCode: 500,
+				data: null,
+			});
         }
     }
 }

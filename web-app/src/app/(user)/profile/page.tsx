@@ -5,57 +5,105 @@ import MarkdownRenderer from "@/components/user/MarkdownRenderer";
 import PostList from "@/components/user/PostList";
 import { guestUser, useUser } from "@/context/UserContext";
 import { Post } from "@/interfaces/Post";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaRegEnvelope } from "react-icons/fa";
-import DOMPurify from 'dompurify';
-
+import DOMPurify from "dompurify";
+import { api, apiParser } from "@/constants/apiConst";
+import axios from "axios";
 
 export default function MyProfileHome() {
-	const profile = guestUser;
-    const {user, isLogin} = useUser();
-    const [active, setActive] = useState("home");
+	const { user, isLogin, isUserReady } = useUser();
+	const [active, setActive] = useState("home");
 
-	const posts = [
-		{
-			title: "Giới thiệu về Java",
-			description:
-				"Java là một ngôn ngữ lập trình hướng đối tượng, được phát triển bởi Sun Microsystems.",
-			topic: { tagId: "java", name: "Java" },
-			date: "2023-04-17",
-			totalUpVote: 100,
-			totalComments: 50,
-			url: "gioi-thieu-ve-java",
+	// const posts = [
+	// 	{
+	// 		title: "Giới thiệu về Java",
+	// 		description:
+	// 			"Java là một ngôn ngữ lập trình hướng đối tượng, được phát triển bởi Sun Microsystems.",
+	// 		topic: { tagId: "java", name: "Java" },
+	// 		date: "2023-04-17",
+	// 		totalUpVote: 100,
+	// 		totalComments: 50,
+	// 		url: "gioi-thieu-ve-java",
 
-			author: {
-				userId: "123",
-				name: "Duong Thai Bao",
-				profilePicture: "https://placehold.co/40x40",
-			},
+	// 		author: {
+	// 			userId: "123",
+	// 			name: "Duong Thai Bao",
+	// 			profilePicture: "https://placehold.co/40x40",
+	// 		},
+	// 	},
+	// 	{
+	// 		title: "Giới thiệu về Java",
+	// 		description:
+	// 			"Java là một ngôn ngữ lập trình hướng đối tượng, được phát triển bởi Sun Microsystems.",
+	// 		topic: { tagId: "java", name: "Java" },
+	// 		date: "2023-04-17",
+	// 		totalUpVote: 100,
+	// 		totalComments: 50,
+	// 		url: "gioi-thieu-ve-java",
+
+	// 		author: {
+	// 			userId: "123",
+	// 			name: "Duong Thai Bao",
+	// 			profilePicture: "https://placehold.co/40x40",
+	// 		},
+	// 	},
+	// ] as Post[]; // fetch từ API hoặc mock
+
+	const [posts, setPosts] = useState<Post[]>([]);
+	const [total, setTotal] = useState(0);
+	const [currentPage, setCurrentPage] = useState(0);
+
+	const fetchPosts = async () => {
+		const params: Record<string, any> = {};
+
+		params.sort = -1;
+
+		const res = await axios.get(
+			`${apiParser(api.apiPath.post.getAuthor)}${user._id}?offset=${
+				currentPage * 10
+			}`,
+			{
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${user.accessToken}`,
+				},
+				params,
+			}
+		);
+
+		const data = await res.data;
+		if (data?.data) {
+			setPosts(data.data);
+			setTotal(data.total);
+		} else {
+			console.error("Error fetching posts:", data);
+		}
+	};
+
+	useEffect(() => {
+		if (isUserReady) fetchPosts();
+	}, [isUserReady, currentPage]);
+
+	const action = {
+		prev: () => {
+			if (currentPage > 0) {
+				setCurrentPage(currentPage - 1);
+			}
 		},
-		{
-			title: "Giới thiệu về Java",
-			description:
-				"Java là một ngôn ngữ lập trình hướng đối tượng, được phát triển bởi Sun Microsystems.",
-			topic: { tagId: "java", name: "Java" },
-			date: "2023-04-17",
-			totalUpVote: 100,
-			totalComments: 50,
-			url: "gioi-thieu-ve-java",
-
-			author: {
-				userId: "123",
-				name: "Duong Thai Bao",
-				profilePicture: "https://placehold.co/40x40",
-			},
+		next: () => {
+			if (currentPage < Math.floor(total / 10)) {
+				setCurrentPage(currentPage + 1);
+			}
 		},
-	] as Post[]; // fetch từ API hoặc mock
+	};
 
-    const [animationKey, setAnimationKey] = useState(0); // Key để reset animation
+	const [animationKey, setAnimationKey] = useState(0); // Key để reset animation
 
-    const handleTabClick = (tabName) => {
-            setActive(tabName);
-            setAnimationKey((prev) => prev + 1); // Tăng key để React render lại animation
-    };
+	const handleTabClick = (tabName: any) => {
+		setActive(tabName);
+		setAnimationKey((prev) => prev + 1); // Tăng key để React render lại animation
+	};
 
 	return (
 		<div className="container mx-auto px-12 lg:w-10/12">
@@ -96,16 +144,23 @@ export default function MyProfileHome() {
 						))}
 					</div>
 					<div key={animationKey} className="animate-fade-in-up">
-						{active === "home" && <PostList posts={posts} />}
+						{active === "home" && (
+							<PostList
+								posts={posts}
+								action={action}
+								currentPage={currentPage}
+								total={total}
+							/>
+						)}
 						{active === "bookmark" && null}
 						{active === "author" && (
 							<div className="flex flex-col space-y-3 ps-6 pe-11">
 								{" "}
 								<MarkdownRenderer
-									content={
-										DOMPurify.sanitize(user.description ||
-										"Người dùng hiện không viết mô tả nào về bản thân họ")
-									}
+									content={DOMPurify.sanitize(
+										user.description ||
+											"Người dùng hiện không viết mô tả nào về bản thân họ"
+									)}
 								></MarkdownRenderer>
 							</div>
 						)}

@@ -1,78 +1,64 @@
 import { ReactionModel, IReaction } from "../models/reactionModel";
 
 class ReactionService {
-    async downvoteComment(postId: string, userId: string): Promise<IReaction | null> {
-        const existing = await ReactionModel.findOne({ postId, userId });
-        if (!existing) {
-            // Chưa có hành động, tạo mới với type là DOWNVOTE
-            return await ReactionModel.findOneAndUpdate(
-                { postId, userId },
-                { type: "DOWNVOTE" },
-                { new: true, upsert: true }
-            );
-        } else if (existing.type === "DOWNVOTE") {
-            // Nếu đã downvote, nhấn lần nữa thì thành NONE
-            return await ReactionModel.findOneAndUpdate(
-                { postId, userId },
-                { type: "NONE" },
-                { new: true }
-            );
-        } else if (existing.type === "NONE") {
-            // Nếu đang là NONE, nhấn thì thành DOWNVOTE
-            return await ReactionModel.findOneAndUpdate(
-                { postId, userId },
-                { type: "DOWNVOTE" },
-                { new: true }
-            );
-        } else {
-            // Nếu là trạng thái khác (ví dụ UPVOTE), chuyển sang DOWNVOTE
-            return await ReactionModel.findOneAndUpdate(
-                { postId, userId },
-                { type: "DOWNVOTE" },
-                { new: true }
-            );
-        }
-    }
+	async addReaction(reaction: IReaction): Promise<IReaction | null> {
+		const newReaction = new ReactionModel(reaction);
+		// find if exist
+		const existingReaction = await ReactionModel.findOne({
+			postId: reaction.postId,
+			userId: reaction.userId,
+		}).exec();
+		if (existingReaction) {
+            if (existingReaction.type == reaction.type) {
+                return await this.deleteReaction(reaction.postId, reaction.userId);
+            }
+			await ReactionModel.updateOne(
+				{ postId: reaction.postId, userId: reaction.userId },
+				{ type: reaction.type }
+			).exec();
+			return await ReactionModel.findOne({
+					postId: reaction.postId,
+					userId: reaction.userId,
+				}).exec();;
+		}
+		return await newReaction.save();
+	}
 
-    async upvoteComment(commentId: string, userId: string): Promise<IReaction | null> {
-        const existing = await ReactionModel.findOne({ commentId, userId });
-        if (!existing) {
-            // Chưa có hành động, tạo mới với type là UPVOTE
-            return await ReactionModel.findOneAndUpdate(
-            { commentId, userId },
-            { type: "UPVOTE" },
-            { new: true, upsert: true }
-            );
-        } else if (existing.type === "UPVOTE") {
-            // Nếu đã upvote, nhấn lần nữa thì thành NONE
-            return await ReactionModel.findOneAndUpdate(
-            { commentId, userId },
-            { type: "NONE" },
-            { new: true }
-            );
-        } else if (existing.type === "NONE") {
-            // Nếu đang là NONE, nhấn thì thành UPVOTE
-            return await ReactionModel.findOneAndUpdate(
-            { commentId, userId },
-            { type: "UPVOTE" },
-            { new: true }
-            );
-        } else {
-            // Nếu là trạng thái khác (ví dụ DOWNVOTE), chuyển sang UPVOTE
-            return await ReactionModel.findOneAndUpdate(
-            { commentId, userId },
-            { type: "UPVOTE" },
-            { new: true }
-            );
+	async deleteReaction(postId: string, userId: string) {
+		const reaction = await ReactionModel.findOneAndDelete({
+			postId: postId,
+			userId: userId,
+		}).exec();
+        if (reaction.deletedCount === 0) {
+            return null
         }
-    }
+		return null;
+	}
 
-    async getReactionByCommentId(commentId: string): Promise<IReaction | null> {
-        const reaction = await ReactionModel.findOne({
-            commentId,
-        });
-        return reaction;
-    }
+	async getReactionViaPostIdAndUserId(
+		postId: string,
+		userId: string
+	): Promise<IReaction | null> {
+		const reaction = await ReactionModel.findOne({
+			postId: postId,
+			userId: userId,
+		}).exec();
+		return reaction;
+	}
+
+	async getReactionViaUserId(
+		userId: string
+	): Promise<IReaction | null> {
+		const reaction = await ReactionModel.findOne({
+			userId: userId,
+		}).exec();
+		return reaction;
+	}
+
+	async getReactionViaPostId(postId: string): Promise<IReaction[]> {
+		const reactions = await ReactionModel.find({ postId: postId }).exec();
+		return reactions;
+	}
 }
 const reactionService = new ReactionService();
 export { reactionService };

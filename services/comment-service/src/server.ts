@@ -30,8 +30,9 @@ app.get("/ping", (req, res) => {
 	});
 });
 
+app.use("/reaction", reactionRoutes);
+
 app.use('/', commentRoutes);
-app.use('/reaction', reactionRoutes);
 
 const PORT = process.env.PORT || 3001;
 
