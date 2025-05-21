@@ -36,6 +36,16 @@ services:
     ports:
       - "3001:3001"
 
+  third-party-service:
+    build:
+      context: ./services/third-party-service
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./services/third-party-service/src:/app/src
+      - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
+    ports:
+      - "3004:3004"
+
   file-service:
     build:
       context: ./services/file-service
