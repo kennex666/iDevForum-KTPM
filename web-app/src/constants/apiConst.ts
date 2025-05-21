@@ -18,8 +18,10 @@ export const apiDevelopment = {
 		user: {
 			getAll: "/user/getall",
 			get: "/user/profile/:id",
+			getFollowerProfile: "/user/action/follower",
 			update: "/user/profile/:id",
 			delete: "/user/profile/:id",
+			updatePassword: "/user/updatepassword",
 			createByAdmin: "/user/createUserByAdmin",
 		},
 		userAction: {

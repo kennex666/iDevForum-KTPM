@@ -264,8 +264,8 @@ export default function MyProfileHome() {
 									</p>
 								) : (
 									<p className="text-gray-500 mb-4">
-										Vui lòng đăng nhập để xem danh sách đã
-										lưu
+										Vui lòng <a className="hover:underline text-blue-500" href="/login">đăng nhập</a> để xem danh
+										sách đã lưu
 									</p>
 								)}
 							</div>

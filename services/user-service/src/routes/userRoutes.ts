@@ -20,8 +20,8 @@ router.put("/profile/:id", UserController.updateUserHandler);
 
 router.delete("/profile/:id", UserController.deleteUserHandler);
 
-router.put("/updatepassword/:id", UserController.updatePasswordHandler);
+router.put("/updatepassword", authenticate, UserController.updatePasswordHandler);
 
-router.post("/createUserByAdmin",authenticate ,UserController.createUserByAdminHandler);
+router.post("/createUserByAdmin", authenticate, UserController.createUserByAdminHandler);
 
 export default router;

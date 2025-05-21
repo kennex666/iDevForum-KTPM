@@ -16,16 +16,18 @@ import Toast from "@/components/Toast";
 
 export default function AuthorHome() {
 	const { id } = useParams();
-	const { isLogin } = useUser();
 	const [active, setActive] = useState("home");
 
 	const [ user, setUser ] = useState<any>({});
+	const { isLogin, user: me, isUserReady: isMeReady } = useUser();
 	const [isFollowing, setIsFollowing] = useState(false);
 
 	const [posts, setPosts] = useState<Post[]>([]);
 	const [total, setTotal] = useState(0);
 	const [currentPage, setCurrentPage] = useState(0);
 	const [isUserReady, setIsUserReady] = useState(false);
+
+	const [totalFollowers, setTotalFollowers] = useState(0);
 
 	// Toát
 	const [toastType, setToastType] = useState("error");
@@ -58,8 +60,57 @@ export default function AuthorHome() {
 		}
 	};
 
+	const getFollowerProfile = async () => {
+		const queryParams = new URLSearchParams({
+			id: id,
+			userId: me?._id || "",
+		} as any).toString();
+		// query params id, userId
+		fetch(
+			`${apiParser(api.apiPath.user.getFollowerProfile)}?${queryParams}`,
+			{
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			}
+		)
+			.then((res) => res.json())
+			.then((data) => {
+				if (data.errorCode === 200) {
+					setTotalFollowers(data.data.totalFollower);
+					setIsFollowing(data.data.isFollowing);
+				} else {
+					setShowToast(
+						data.errorMessage ||
+							"Có lỗi xảy ra, vui lòng thử lại sau"
+					);
+					setToastType("error");
+					setTimeout(() => {
+						setShowToast("");
+					}, 4000);
+				}
+			});
+	}
+
+
 	const handleFollow = () => {
-		if (!user) return;
+		if (!user) {
+			setShowToast("Không tìm thấy ID người dùng, hãy thử refresh lại trang");
+			setToastType("error");
+			setTimeout(() => {
+				setShowToast("");
+			}, 4000);
+			return;
+		}
+		if (!isLogin) {
+			setShowToast("Vui lòng đăng nhập để thực hiện hành động này");
+			setToastType("error");
+			setTimeout(() => {
+				setShowToast("");
+			}, 4000);
+			return;
+		}
 		fetch(
 			`${apiParser(
 				api.apiPath.userAction.follow.replace(
@@ -79,6 +130,11 @@ export default function AuthorHome() {
 			.then((res) => res.json())
 			.then((data) => {
 				if (data.errorCode === 200) {
+					if (data.action == "follow") {
+						setTotalFollowers((prev) => prev + 1);
+					} else {
+						setTotalFollowers((prev) => prev - 1);
+					}
 					setIsFollowing(data.action == "follow");
 				} else {
 					setShowToast(
@@ -109,9 +165,16 @@ export default function AuthorHome() {
 	}
 
 	useEffect(() => {
-		if (isUserReady) 
+		if (isUserReady){
 			fetchPosts();
+		}
 	}, [isUserReady, currentPage]);
+
+	useEffect(() => {
+		if (isUserReady) {
+			getFollowerProfile();
+		}
+	}, [isMeReady]);
 
 	useEffect(() => {
 		if (id)
@@ -222,7 +285,15 @@ export default function AuthorHome() {
 							<h2 className="font-semibold text-lg">
 								{user?.name}
 							</h2>
-							<p className="text-gray-500">1.2K Followers</p>
+							<p className="text-gray-500">{`${totalFollowers.toLocaleString(
+								// I want this like 1,000
+								// 10,000
+								"en-US",
+								{
+									minimumFractionDigits: 0,
+									maximumFractionDigits: 0,
+								}
+							) || 0} Followers`}</p>
 							<p className="text-sm text-gray-500">
 								{user?.bio ||
 									"Người dùng hiện không viết mô tả nào về bản thân họ"}
@@ -239,7 +310,9 @@ export default function AuthorHome() {
 									{isFollowing ? "Đang theo dõi" : "Theo dõi"}
 								</button>
 								<a
-									href={`mailto:${user?.email || "idev4rum@pj.io.vn"}`}
+									href={`mailto:${
+										user?.email || "idev4rum@pj.io.vn"
+									}`}
 								>
 									<div className="bg-blue-400 rounded-full px-4 py-2 text-white text-sm font-bold hover:bg-blue-300 hover:cursor-pointer">
 										<FaRegEnvelope className="text-lg text-white stroke-black stroke-1" />

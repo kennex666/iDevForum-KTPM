@@ -57,7 +57,14 @@ const Sidebar = ({ currentUser }: SidebarProps) => {
 							</p>
 						) : (
 							<p className="text-gray-500 mb-4">
-								Vui lòng đăng nhập để xem danh sách đã lưu
+								Vui lòng{" "}
+								<a
+									className="hover:underline text-blue-500"
+									href="/login"
+								>
+									đăng nhập
+								</a>{" "}
+								để xem danh sách đã lưu
 							</p>
 						)}
 					</div>
@@ -107,7 +114,10 @@ const Sidebar = ({ currentUser }: SidebarProps) => {
 					<li>Chia sẻ kiến thức</li>
 					<li>Mở rộng networking</li>
 				</ul>
-				<a href="/write" className="bg-black text-white px-4 py-2 rounded-full mt-6 text-sm">
+				<a
+					href="/write"
+					className="bg-black text-white px-4 py-2 rounded-full mt-6 text-sm"
+				>
 					Viết bài ngay
 				</a>
 			</div>
