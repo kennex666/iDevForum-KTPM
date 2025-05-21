@@ -1,6 +1,7 @@
 import express from "express";
 
 import * as UserController from "../controllers/UserController";
+import { authenticate } from "../middleware/authenticate";
 
 const router = express.Router();
 
@@ -15,12 +16,12 @@ router.get("/search", UserController.searchUsersHandler);
 
 router.post("/search-email", UserController.getUserByEmailHandler);
 
-router.put("/profile", UserController.updateUserHandler);
+router.put("/profile/:id", UserController.updateUserHandler);
 
-router.delete("/profile", UserController.deleteUserHandler);
+router.delete("/profile/:id", UserController.deleteUserHandler);
 
 router.put("/updatepassword/:id", UserController.updatePasswordHandler);
 
-
+router.post("/createUserByAdmin",authenticate ,UserController.createUserByAdminHandler);
 
 export default router;

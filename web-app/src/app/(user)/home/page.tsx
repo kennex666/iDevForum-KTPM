@@ -33,35 +33,50 @@ export default function HomePage() {
 	const { user } = useUser();
 
 	const [	posts, setPosts ] = useState<any>([]);
+	const [ total, setTotal ] = useState(0);
+	const [ currentPage, setCurrentPage ] = useState(0);
+	
+	const fetchPosts = async () => {
+		const params: Record<string, any> = {};
+
+		params.sort = -1;
+
+		if (activeTab !== "home") {
+			params.topicId = activeTab; // hoặc topicId ?? undefined để tránh null
+		}
+		const res = await axios.get(apiParser(api.apiPath.post.getAll) + `?offset=${currentPage * 10}`, {
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${user.accessToken}`,
+			},
+			params,
+		});
+
+		const data = await res.data;
+		if (data?.data) {
+			setPosts(data.data);
+			setTotal(data.total);
+		} else {
+			console.error("Error fetching posts:", data);
+		}
+	};
 	
 	useEffect(() => {
-		const fetchPosts = async () => {
-			const params: Record<string, any> = {};
-
-			params.sort = -1
-
-			if (activeTab !== 'home') {
-				params.topicId = activeTab; // hoặc topicId ?? undefined để tránh null
-			}
-			const res = await axios.get(apiParser(api.apiPath.post.getAll), {
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${user.accessToken}`,
-				},
-				params,
-			});
-			
-			const data = await res.data;
-			if (data?.data) {
-				setPosts(data.data);
-			} else {
-				console.error("Error fetching posts:", data);
-			}
-		};
-
 		fetchPosts();
-	}, [activeTab])
+	}, [activeTab, currentPage]);
 
+	const action = {
+		prev: () => {
+			if (currentPage > 0) {
+				setCurrentPage(currentPage - 1);
+			}
+		},
+		next: () => {
+			if (currentPage < Math.floor(total / 10)) {
+				setCurrentPage(currentPage + 1);
+			}
+		},
+	};
 
 	
 
@@ -95,7 +110,7 @@ export default function HomePage() {
 				<div className="flex justify-between items-start py-4">
 					<div className="w-2/3 space-y-8">
 						<TabBar activeTab={activeTab} />
-						<PostList posts={posts} />
+						<PostList posts={posts} total={total} action={action} currentPage={currentPage} />
 						{/* Phân trang nếu cần */}
 					</div>
 					<Sidebar currentUser={user} />

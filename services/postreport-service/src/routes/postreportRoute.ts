@@ -5,21 +5,21 @@ import { authenticate } from '../utils/authenticate';
 const postrepostRoute = express.Router();
 
 // Lấy tất cả báo cáo
-postrepostRoute.get('/', postreportController.getPostAllReport);
+postrepostRoute.get('/',authenticate, postreportController.getPostAllReport);
 
 // Lấy báo cáo theo ID
-postrepostRoute.get('/:id', postreportController.getPostReportById);
+postrepostRoute.get('/:id',authenticate, postreportController.getPostReportById);
 
 // Tạo báo cáo mới
 postrepostRoute.post('/save',authenticate ,postreportController.createPostReport);
 
 // Cập nhật báo cáo
-postrepostRoute.put('/:id', postreportController.updatePostReport);
+postrepostRoute.put('/:id',authenticate, postreportController.updatePostReport);
 
 // Xóa báo cáo
-postrepostRoute.delete('/:id', postreportController.deletePostReport);
+postrepostRoute.delete('/:id',authenticate, postreportController.deletePostReport);
 
 // Tìm kiếm báo cáo
-postrepostRoute.post('/search', postreportController.searchPostReport);
+postrepostRoute.post('/search',authenticate, postreportController.searchPostReport);
 
 export default postrepostRoute;

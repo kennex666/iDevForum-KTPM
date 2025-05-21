@@ -18,8 +18,10 @@ import {
 import { api, apiParser } from "@/constants/apiConst";
 import Error from "@/components/Error";
 import Loading from "@/components/user/Loading";
-import { guestUser } from "@/context/UserContext";
+import { EUserRole, guestUser, useUser } from "@/context/UserContext";
 import { formatDate, getDateOnly, getReadingTime } from '../../../utils/datetimeformat';
+import { getAccessToken } from "@/app/utils/cookiesParse";
+import Toast from "@/components/Toast";
 
 interface User {
 	userId: number;
@@ -40,7 +42,7 @@ interface Post {
 	content: string;
 	date: string;
 	topic: { name: string };
-	author: User;
+	user: User;
 	comments: Comment[];
 	totalUpvote: number;
 	totalDownvote: number;
@@ -56,42 +58,146 @@ export default function PostDetailPage() {
 	const [comments, setComments] = useState<Comment[]>([]);
 	const [comment, setComment] = useState("");
 	const [isLoading, setIsLoading] = useState(true);
+	const [showToast, setShowToast] = useState("");
+	const { user, isUserReady } = useUser();
 
 	useEffect(() => {
-		fetch(apiParser(api.apiPath.post.getInfo.replace(":id", id)))
-			.then((res) => res.json())
-			.then((data) => {
-				if (data.errorCode != 200) {
-					return;
-				}
-				const p = data.data;
-				if (!p.author) {
-					p.author = guestUser;
-					p.author.name = "<<Name>>";
-				}
-				if (!p.topic) {
-					p.topic = {
-						tagId: "unknown",
-						name: "<<Topic>>",
-					};
-				}
-				p.post.contentDOM = DOMPurify.sanitize(p.post.content);
-				setData(p);
-				setReaction("");
-				setComments(p.comments || []);
-			}).finally(() => setIsLoading(false));
-	}, [id]);
+		if (id && isUserReady)
+			fetch(apiParser(api.apiPath.post.getInfo.replace(":id", id)))
+				.then((res) => res.json())
+				.then((data) => {
+					if (data.errorCode != 200) {
+						return;
+					}
+					const p = data.data;
+					if (!p.user) {
+						p.user = guestUser;
+						p.user.name = "<<Name>>";
+					}
+					if (!p.topic) {
+						p.topic = {
+							tagId: "unknown",
+							name: "<<Topic>>",
+						};
+					}
+					console.log(user._id)
+					p.post.isOwner = p.post.userId == user?._id;
+					if (
+						!p.post.isOwner &&
+						p.post.status != "PUBLISHED" &&
+						user.role != EUserRole.ADMIN
+					) {
+						setShowToast("Bài viết không tồn tại hoặc đã bị xóa");
+						setTimeout(() => {
+							setShowToast("");
+							window.history.back();
+						}, 4000);
+						setData(null);
+						setIsLoading(false);
+						return;
+					}
+					p.post.contentDOM = DOMPurify.sanitize(p.post.content);
+					setData(p);
+					setReaction("");
+					setComments(p.comments || []);
+				})
+				.finally(() => setIsLoading(false));
+	}, [id, isUserReady, user?._id]);
 
 	const handleFollow = () => {
 		if (!data) return;
-		fetch(`/api/users/following?id=${data.author.userId}`)
+		fetch(
+			`${apiParser(
+				api.apiPath.userAction.follow.replace(":id", data.user.userId)
+			)}`,
+			{
+				// header jwt in cookies
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${getAccessToken()}`,
+				},
+			}
+		)
 			.then((res) => res.json())
 			.then((data) => {
-				if (data.errorCode === 200) setIsFollowing(!isFollowing);
+				if (data.errorCode === 200) {
+					setIsFollowing(data.action == "follow");
+				} else {
+					setShowToast("Có lỗi xảy ra, vui lòng thử lại sau");
+					setTimeout(() => {
+						setShowToast("");
+					}
+					, 4000);
+				}
 			});
 	};
 
-	const handleVote = async (type: boolean) => {
+	const handleVote = (type: boolean) => {
+		if (!data) return;
+
+		
+		fetch(
+			`${apiParser(api.apiPath.reaction.action)}${
+				type ? "upvote" : "downvote"
+			}/${data.post.postId}`
+		, {
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${getAccessToken()}`,
+			}
+		})
+			.then((res) => res.json())
+			.then((data) => {
+				if (data.errorCode == 200) {
+					const reactionAfter = !data?.data
+						? ""
+						: data?.data.type.toString().toLowerCase();
+					
+					if (reactionAfter == reaction) {
+						return;
+					}
+					
+					if (reactionAfter == "upvote") {
+						setData( pre => {
+							return {
+								...pre,
+								post: {
+									...pre.post,
+									totalUpvote: pre.post.totalUpvote + 1,
+									totalDownvote: pre.post.totalDownvote + reaction == "downvote" ? -1 : 0,
+								},
+							};
+						})
+						
+						setReaction("upvote");
+					} else if (reactionAfter == "downvote") {
+						setData( pre => {
+							return {
+								...pre,
+								post: {
+									...pre.post,
+									totalDownvote: pre.post.totalDownvote + 1,
+									totalUpvote: pre.post.totalUpvote + reaction == "upvote" ? -1 : 0,
+								},
+							};
+						})
+						setReaction("downvote");
+					} else {
+						setData( pre => {
+							return {
+								...pre,
+								post: {
+									...pre.post,
+									totalUpvote: pre.post.totalUpvote + reaction == "upvote" ? -1 : 0,
+									totalDownvote: pre.post.totalDownvote + reaction == "downvote" ? -1 : 0,
+								},
+							};
+						})
+						setReaction("");
+					}
+				}
+			});
 	};
 
 	const handleComment = () => {
@@ -112,19 +218,25 @@ export default function PostDetailPage() {
 
 	return (
 		<div className="container mx-auto px-6 lg:w-6/12 w-full mt-12 pb-12">
+			{showToast && (
+				<Toast
+					message={showToast}
+					type="error"
+				/>
+			)}
 			<h1 className="text-3xl font-semibold mb-2">{data.post.title}</h1>
 			<p className="text text-gray-700 mb-4">{data.post.description}</p>
 
 			<div className="flex items-center gap-3 mb-6">
 				<img
-					src={data.author.profilePicture}
+					src={data.user.profilePicture}
 					alt="avatar"
 					className="w-10 h-10 rounded-full"
 				/>
 				<div>
 					<div className="flex items-center gap-2">
 						<p className="text-sm font-semibold">
-							{data.author.name}
+							{data.user.name}
 						</p>
 						<span className="text-gray-500">·</span>
 						<button

@@ -6,10 +6,13 @@ import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from 'axios';
 import { api, apiParser } from "@/constants/apiConst";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/context/UserContext";
 export default function Home() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [error, setError] = useState("");
 	const [form, setForm] = useState({ username: "", password: "" });
+
+	const { setUser, setIsLogin } = useUser();
 
 	const router = useRouter();
 
@@ -52,6 +55,9 @@ export default function Home() {
 			// Lưu thông tin người dùng vào cookies
 			document.cookie = `accessToken=${response.data.data.accessToken}; path=/`;
 
+			setUser(response.data.data);
+			setIsLogin(true);
+			
 			router.push("/home");
 		} catch (error) {
 			console.error("Đã xảy ra lỗi:", error);

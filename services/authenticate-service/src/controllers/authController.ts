@@ -28,13 +28,9 @@ export const registerUser = async (req: any, res: any) => {
 		if (!user)
 			return res.status(200).json({
 				errorCode: 505,
-				errorMessage: "User already exists",
+				errorMessage: "User service error",
 			});
-		return res.status(200).json({
-			errorCode: 200,
-			errorMessage: "User created successfully",
-			data: user,
-		});
+		return res.status(200).json(user);
 	} catch (error) {
 		console.log("Error creating user", error);
 		res.status(200).json({

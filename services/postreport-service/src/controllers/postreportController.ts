@@ -4,6 +4,15 @@ import { Request, Response } from 'express';
 
 class PostReportController {
     async getPostAllReport(req: Request, res: Response) {
+        const user = req.user;
+        if(user.role !== 1) {
+            return res.status(403).json({
+                errorCode: 403,
+                errorMessage: "Bạn không có quyền truy cập vào tài nguyên này.",
+                data: null,
+            });
+        }
+
         try {
             const report = await postReportService.getAllPostReports();
             res.status(200).json({
@@ -58,7 +67,7 @@ class PostReportController {
 
     async createPostReport(req: Request, res: Response) {
         try {
-            const { reason, postId, inspectorId } = req.body;
+            const { reason, postId} = req.body;
             const state = PostReportState.PROCCESSING;
             const userId = req.user._id;
             const report = await postReportService.createPostReport({
@@ -66,7 +75,7 @@ class PostReportController {
                 state,
                 postId,
                 reporterId: userId,
-                inspectorId
+                inspectorId: "",
             });
             res.status(200).json({
                 errorCode: 200,
@@ -92,6 +101,14 @@ class PostReportController {
     }
 
     async updatePostReport(req: Request, res: Response) { 
+        const user = req.user;
+        if(user.role !== 1) {
+            return res.status(403).json({
+                errorCode: 403,
+                errorMessage: "Bạn không có quyền truy cập vào tài nguyên này.",
+                data: null,
+            });
+        }
         try {
             const { id } = req.params;
             const { state } = req.body;

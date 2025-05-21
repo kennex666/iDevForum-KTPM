@@ -15,20 +15,44 @@ export const apiDevelopment = {
 			refresh: "/auth/refresh",
 			queryMe: "/auth/me",
 		},
-		user: "/user",
+		user: {
+			getAll: "/user/getall",
+			update: "/user/profile/:id",
+			delete: "/user/profile/:id",
+			createByAdmin: "/user/createUserByAdmin",
+		},
+		userAction: {
+			follow: "/user/action/follow/:id",
+		},
 		post: {
 			getAll: "/post",
 			getInfo: "/post/:id",
+			updateStatus: "/post/admin",
+			getAuthor: "/post/author/",
+		},
+		postReport: {
+			getAll: "/postreport",
+			getInfo: "/postreport/:id",
+			create: "/postreport/save",
+			update: "/postreport",
+			delete: "/postreport/:id",
+			search: "/postreport/search",
 		},
 		comment: "/comment",
 		like: "/like",
+		topic: "/topic",
+		reaction: {
+			action: "/reaction/action/",
+			getAllViaUser: "/reaction/getAllViaUser/",
+			getAllViaPost: "/reaction/getAllViaPost/",
+		},
 	},
 };
 
 export const apiProduction = {
 	...apiDevelopment,
 	domain: {
-		client: "localhost:3000",
+		client: "idev4rum.pj.io.vn",
 		server: "idev4rum.pj.io.vn/api-gateway",
 	},
 	protocol: "https",

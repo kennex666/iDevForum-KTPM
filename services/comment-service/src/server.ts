@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/database';
 import commentRoutes from './routes/commentRoutes';
+import reactionRoutes from './routes/reactionRoutes';
 import cors from 'cors';
 dotenv.config();
 const app = express();
@@ -28,6 +29,8 @@ app.get("/ping", (req, res) => {
 		data: null,
 	});
 });
+
+app.use("/reaction", reactionRoutes);
 
 app.use('/', commentRoutes);
 

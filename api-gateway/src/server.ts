@@ -3,6 +3,7 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 import cors from 'cors';
 import { authenticate } from "./middlewares/authenticate";
 import conditionalAuthenticate from "./middlewares/conditionalAuthenticate";
+import rateLimit from "express-rate-limit";
 
 const app = express();
 const PORT = 3000;
@@ -15,6 +16,13 @@ app.use(cors({
 	methods: ['GET', 'POST', 'PUT', 'DELETE'],
 	credentials: true
 }));
+
+// Giới hạn 5 request/phút cho mỗi IP đến comment-service
+const commentLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 150,
+  message: { error: "Bạn đã vượt quá 5 lần gọi API cho phép trong 1 phút!" }
+});
 
 // Proxy config
 app.use(
@@ -33,7 +41,7 @@ app.use(
 );
 app.use(
 	"/api/post",
-	//conditionalAuthenticate(["POST", "PUT", "DELETE"]),
+	conditionalAuthenticate(["POST", "PUT", "DELETE"]),
 	createProxyMiddleware({
 		target: "http://post-service:3002/posts",
 		changeOrigin: true,
@@ -48,6 +56,7 @@ app.use(
 );
 app.use(
 	"/api/comment",
+	commentLimiter, // Đặt trước proxy
 	conditionalAuthenticate(["POST", "PUT", "DELETE"]),
 	createProxyMiddleware({
 		target: "http://comment-service:3001",
@@ -60,6 +69,24 @@ app.use(
 	})
 );
 
+
+app.use(
+	"/api/reaction",
+	commentLimiter, // Đặt trước proxy
+	conditionalAuthenticate(["POST", "PUT", "DELETE"]),
+	createProxyMiddleware({
+		target: "http://comment-service:3001/reaction",
+		changeOrigin: true,
+		on: {
+			proxyReq: (proxyReq, req) => {
+				if (req.user) {
+					proxyReq.setHeader("user", JSON.stringify(req.user));
+				}
+			},
+		},
+	})
+);
+
 app.use(
 	"/api/file",
 	conditionalAuthenticate(["POST", "PUT", "DELETE"]),
@@ -68,12 +95,14 @@ app.use(
 		changeOrigin: true,
 	})
 );
+
 app.use(
-	"/api/reaction",
-	createProxyMiddleware({
-		target: "http://reaction-service:3004",
-		changeOrigin: true,
-	})
+  '/uploads',
+  createProxyMiddleware({
+    target: 'http://file-service:3003',
+    changeOrigin: true,
+    pathRewrite: { '^/uploads': '/uploads' }
+  })
 );
 
 app.use(
@@ -81,14 +110,6 @@ app.use(
 	conditionalAuthenticate(["GET","POST", "PUT", "DELETE"]),
 	createProxyMiddleware({
 		target: "http://postreport-service:3007/postreports",
-		changeOrigin: true,
-	})
-);
-app.use(
-	"/api/bookmark",
-	conditionalAuthenticate(["GET","POST", "PUT", "DELETE"]),
-	createProxyMiddleware({
-		target: "http://bookmark-service:3008/bookmarks",
 		changeOrigin: true,
 	})
 );

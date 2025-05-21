@@ -13,6 +13,7 @@
 		"typescript": "^5.7.3"
 	},
 	"dependencies": {
+		"@langchain/google-genai": "^0.2.9",
 		"axios": "^1.9.0",
 		"cors": "^2.8.5",
 		"dotenv": "^16.4.7",
