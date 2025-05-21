@@ -112,7 +112,7 @@ export default function PostDetailPage() {
 		if (!data) return;
 		fetch(
 			`${apiParser(
-				api.apiPath.userAction.follow.replace(":id", data.user.userId)
+				api.apiPath.userAction.follow.replace(":id", data.post.userId)
 			)}`,
 			{
 				// header jwt in cookies
@@ -128,7 +128,10 @@ export default function PostDetailPage() {
 				if (data.errorCode === 200) {
 					setIsFollowing(data.action == "follow");
 				} else {
-					setShowToast("Có lỗi xảy ra, vui lòng thử lại sau");
+					setShowToast(
+						data.errorMessage ||
+							"Có lỗi xảy ra, vui lòng thử lại sau"
+					);
 					setToastType("error");
 					setTimeout(() => {
 						setShowToast("");
@@ -320,14 +323,19 @@ export default function PostDetailPage() {
 				<div>
 					<div className="flex items-center gap-2">
 						<p className="text-sm font-semibold">
-							<a href={`/author/${data.post.userId}`}>{data.user.name}</a>
+							<a
+								href={`/author/${data.post.userId}`}
+								className="hover:underline"
+							>
+								{data.user.name}
+							</a>
 						</p>
 						<span className="text-gray-500">·</span>
 						<button
 							onClick={handleFollow}
-							className="text-blue-500 text-sm"
+							className="text-blue-500 text-sm hover:text-blue-600 hover:underline focus:outline-none"
 						>
-							{isFollowing ? "Huỷ theo dõi" : "Theo dõi"}
+							{isFollowing ? "Đang theo dõi" : "Theo dõi"}
 						</button>
 					</div>
 					<p className="text-sm text-gray-500">

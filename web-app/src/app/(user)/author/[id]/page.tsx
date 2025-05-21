@@ -11,6 +11,8 @@ import DOMPurify from "dompurify";
 import { api, apiParser } from "@/constants/apiConst";
 import axios from "axios";
 import { useParams } from "next/navigation";
+import { getAccessToken } from "@/app/utils/cookiesParse";
+import Toast from "@/components/Toast";
 
 export default function AuthorHome() {
 	const { id } = useParams();
@@ -18,11 +20,16 @@ export default function AuthorHome() {
 	const [active, setActive] = useState("home");
 
 	const [ user, setUser ] = useState<any>({});
+	const [isFollowing, setIsFollowing] = useState(false);
 
 	const [posts, setPosts] = useState<Post[]>([]);
 	const [total, setTotal] = useState(0);
 	const [currentPage, setCurrentPage] = useState(0);
 	const [isUserReady, setIsUserReady] = useState(false);
+
+	// Toát
+	const [toastType, setToastType] = useState("error");
+	const [showToast, setShowToast] = useState("");
 
 	const fetchPosts = async () => {
 		const params: Record<string, any> = {};
@@ -49,6 +56,41 @@ export default function AuthorHome() {
 		} else {
 			console.error("Error fetching posts:", data);
 		}
+	};
+
+	const handleFollow = () => {
+		if (!user) return;
+		fetch(
+			`${apiParser(
+				api.apiPath.userAction.follow.replace(
+					":id",
+					id
+				)
+			)}`,
+			{
+				// header jwt in cookies
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${getAccessToken()}`,
+				},
+			}
+		)
+			.then((res) => res.json())
+			.then((data) => {
+				if (data.errorCode === 200) {
+					setIsFollowing(data.action == "follow");
+				} else {
+					setShowToast(
+						data.errorMessage ||
+							"Có lỗi xảy ra, vui lòng thử lại sau"
+					);
+					setToastType("error");
+					setTimeout(() => {
+						setShowToast("");
+					}, 4000);
+				}
+			});
 	};
 
 	const fetchUserProfile = async () => {
@@ -98,6 +140,12 @@ export default function AuthorHome() {
 
 	return (
 		<div className="container mx-auto px-12 lg:w-10/12">
+			{showToast && (
+				<Toast
+					message={showToast}
+					type={(toastType as any) || "error"}
+				/>
+			)}
 			<div className="flex justify-between items-start">
 				{/* Main blog section */}
 				<div className="w-2/3 space-y-1">
@@ -180,14 +228,20 @@ export default function AuthorHome() {
 									"Người dùng hiện không viết mô tả nào về bản thân họ"}
 							</p>
 							<div className="flex flex-row space-x-2">
-								<button className="bg-blue-400 rounded-full px-4 py-2 text-white text-sm font-bold">
-									Follow
+								<button
+									onClick={handleFollow}
+									className={
+										isFollowing
+											? "bg-red-400 rounded-full px-4 py-2 text-white text-sm font-bold hover:bg-red-200"
+											: "bg-blue-400 rounded-full px-4 py-2 text-white text-sm font-bold hover:bg-blue-300 hover:cursor-pointer"
+									}
+								>
+									{isFollowing ? "Đang theo dõi" : "Theo dõi"}
 								</button>
 								<a
-									href={`mailto:${user?.email}`}
-									className="flex"
+									href={`mailto:${user?.email || "idev4rum@pj.io.vn"}`}
 								>
-									<div className="bg-blue-400 rounded-full w-9 text-white text-sm font-bold flex justify-center items-center">
+									<div className="bg-blue-400 rounded-full px-4 py-2 text-white text-sm font-bold hover:bg-blue-300 hover:cursor-pointer">
 										<FaRegEnvelope className="text-lg text-white stroke-black stroke-1" />
 									</div>
 								</a>

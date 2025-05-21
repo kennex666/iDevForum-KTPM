@@ -4,14 +4,17 @@ import { FaStar, FaThumbsUp, FaComment, FaThumbsDown } from "react-icons/fa";
 import { formatDate } from '../../app/utils/datetimeformat';
 
 const PostItem = ({ post }: { post: Post }) => {
+	if (post?.tagId && post?.tagId == -1){
+		post.tagId = "Chưa phân loại";
+	}
 	if (!post.author){
 		post.author = guestUser;
-		post.author.name = "<<Name>>"
+		post.author.name = "Ẩn danh"
 	}
 	if (!post.topic) {
 		post.topic = {
-			tagId: "unknown",
-			name: "<<Topic>>",
+			tagId: post.tagId || '-1',
+			name: post.tagId|| "Chưa phân loại",
 		};
 	}
 	return (
@@ -20,14 +23,20 @@ const PostItem = ({ post }: { post: Post }) => {
 				{/* Tác giả + chủ đề */}
 				<div className="flex items-center space-x-2 mb-3">
 					<img
-						src={post.author.profilePicture || "https://placehold.co/40x40"}
+						src={
+							post.author.profilePicture ||
+							"https://placehold.co/40x40"
+						}
 						className="w-6 h-6 rounded-full"
 						alt={`${post.author.name} avatar`}
 					/>
 					<p className="text-sm text-gray-500">
-						<span className="font-semibold">
+						<a
+							href={`/author/${post.userId}`}
+							className="hover:underline font-semibold"
+						>
 							{post.author.name}
-						</span>{" "}
+						</a>{" "}
 						với chủ đề{" "}
 						<span className="font-semibold">{post.topic.name}</span>
 					</p>
