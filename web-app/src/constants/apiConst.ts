@@ -2,10 +2,10 @@ import path from "path";
 
 export const apiDevelopment = {
 	domain: {
-		client: "localhost:3000",
-		server: "api-gateway:3000",
+		client: "idev4rum.pj.io.vn/api-gateway",
+		server: "idev4rum.pj.io.vn/api-gateway",
 	},
-	protocol: "http",
+	protocol: "https",
 	apiPath: {
 		base: "/api",
 		auth: {
