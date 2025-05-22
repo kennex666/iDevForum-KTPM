@@ -261,18 +261,15 @@ class CommentService implements ICommentService {
   /**
    * Delete a comment
    */
-  async deleteComment(id: string, userId: string): Promise<boolean> {
+  async deleteComment(id: string, user: any): Promise<boolean> {
     try {
-      const user = await userClient.getUserById(userId);
-      console.log("user312", user.data);
-      if (!user) throw new Error(`User with ID ${userId} not found`);
-      if (user?.data.role == "1") {
+      if (user.role == 1) {
         const result = await CommentModel.findByIdAndDelete(id);
         return result !== null;
       }
       const comment = await CommentModel.findById(id);
       if (!comment) throw new Error(`Comment with ID ${id} not found`);
-      if (comment.userId.toString() !== userId) throw new Error("You are not authorized to delete this comment");
+      if (comment.userId.toString() !== user.id) throw new Error("You are not authorized to delete this comment");
 
       const result = await CommentModel.findByIdAndDelete(id);
       return result !== null;

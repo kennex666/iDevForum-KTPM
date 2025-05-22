@@ -31,6 +31,7 @@ interface User {
 }
 
 interface Comment {
+	commentId: String;
 	user: User;
 	content: string;
 	createdAt: string;
@@ -329,6 +330,47 @@ export default function PostDetailPage() {
 		setShowReportModel(!showReportModel);
 	}
 
+	const removeComment = (c: any) => {
+		console.log("remove", c)
+		if (!id) return;
+
+		const token = document.cookie
+			.split("; ")
+			.find((row) => row.startsWith("accessToken="))
+			?.split("=")[1];
+		console.log(token)
+		if (!token) {
+			console.error("Token không tồn tại");
+			return;
+		}
+
+		fetch(`${apiParser(api.apiPath.comment)}/${c.id}`, {
+			method: "DELETE",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${token}`,
+			},
+		})
+			.then((res) => res.json())
+			.then((data) => {
+				if (data.errorCode == 200) {
+					setComments((prev) => prev.filter((item) => item.id !== c.id));
+					setToastType("success");
+					setShowToast("Xóa bình luận thành công");
+				} else {
+					setToastType("error");
+					setShowToast("Xóa bình luận thất bại");
+				}
+				setTimeout(() => setShowToast(""), 3000);
+			})
+			.catch((err) => {
+				setToastType("error");
+				setShowToast("Có lỗi xảy ra");
+				setTimeout(() => setShowToast(""), 3000);
+			});
+	};
+
+
 	if (!data) return !isLoading ? <Error /> : <Loading />;
 
 	return (
@@ -524,24 +566,50 @@ export default function PostDetailPage() {
 					)}
 
 					{comments.map((c, idx) => (
-						<div key={idx} className="flex gap-4 items-start">
-							<img
-								src={c.user.profilePicture || 'https://placehold.co/400'}
-								alt="user"
-								className="w-10 h-10 rounded-full"
-							/>
-							<div>
-								<div className="flex gap-2 items-center">
-									<p className="text-sm font-semibold">
-										{c.user.name}
-									</p>
-									<span className="text-gray-500">·</span>
-									<span className="text-sm text-gray-500">
-										{formatDate(c.createdAt)}
-									</span>
-								</div>
-								<p className="text-sm">{c.content}</p>
+						<div key={idx} className="flex gap-3 items-start relative group py-3 px-2 hover:bg-gray-50 rounded-md">
+						<img
+							src={c.user.profilePicture || 'https://placehold.co/400'}
+							alt="user"
+							className="w-10 h-10 rounded-full object-cover border"
+						/>
+						<div className="flex-1">
+							<div className="flex items-center gap-2 mb-1">
+							<p className="text-sm font-bold text-gray-900">{c.user.name}</p>
+							<span className="text-gray-400">•</span>
+							<span className="text-sm text-gray-500">{formatDate(c.createdAt)}</span>
 							</div>
+							<p className="text-sm text-gray-700">{c.content}</p>
+						</div>
+
+						{/* Nút tuỳ chọn */}
+						<button
+							className="p-1 rounded-full hover:bg-gray-200 transition focus:outline-none absolute top-2 right-2"
+							onClick={() => {
+							const menu = document.getElementById(`comment-menu-${idx}`);
+							if (menu) menu.classList.toggle('hidden');
+							}}
+						>
+							<span className="text-xl text-gray-600">⋮</span>
+						</button>
+
+						{/* Menu tuỳ chọn */}
+						<div
+							id={`comment-menu-${idx}`}
+							className="hidden absolute right-2 top-10 bg-white border border-gray-200 rounded-md shadow-lg z-20 min-w-[140px] overflow-hidden"
+						>
+							<button
+							className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700"
+							// onClick={...}
+							>
+							✏️ Chỉnh sửa
+							</button>
+							<button
+							className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-500"
+							onClick={() => removeComment(c)}
+							>
+							🗑️ Xoá
+							</button>
+						</div>
 						</div>
 					))}
 				</div>
