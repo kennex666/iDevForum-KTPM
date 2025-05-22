@@ -75,12 +75,12 @@ const CommentTable: React.FC<CommentTableProps> = ({ items, handleDeleteComment 
                             </td>
                             <td className="px-4">
                                 <a 
-                                    href={item.post?.post.url || '#'} 
+                                    href={item.post?.url || '#'} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     className="text-decoration-none"
                                 >
-                                    <span className="text-primary">{item.post?.post.title || 'Không có tiêu đề'}</span>
+                                    <span className="text-primary">{item.post?.title || 'Không có tiêu đề'}</span>
                                 </a>
                             </td>
                             <td className="px-4 text-muted">

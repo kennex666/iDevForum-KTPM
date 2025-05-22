@@ -108,10 +108,19 @@ class CommentService implements ICommentService {
   /**
    * Create a new comment
    */
-  async createComment(data: CreateCommentDTO): Promise<IComment> {
+  async createComment(data: CreateCommentDTO): Promise<any> {
     try {
       const comment = new CommentModel(data);
-      return await comment.save();
+      const item = await comment.save();
+      const user = await userClient.getUserById(data.userId);
+      return {
+        id: item._id,
+        content: item.content,
+        postId: item.postId,
+        user: user,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      };
     } catch (error) {
       console.error('Error creating comment:', error);
       throw error;
@@ -161,13 +170,11 @@ class CommentService implements ICommentService {
       const comments = await Promise.all(
         items.map(async (item: any) => {
           try {
-            const post = await postClient.getPostById(item.postId);
             const user = await userClient.getUserById(item.userId);
             return {
               id: item._id,
               content: item.content,
               postId: item.postId,
-              post: post,
               user: user,
               createdAt: item.createdAt,
               updatedAt: item.updatedAt,
@@ -254,18 +261,15 @@ class CommentService implements ICommentService {
   /**
    * Delete a comment
    */
-  async deleteComment(id: string, userId: string): Promise<boolean> {
+  async deleteComment(id: string, user: any): Promise<boolean> {
     try {
-      const user = await userClient.getUserById(userId);
-      console.log("user312", user.data);
-      if (!user) throw new Error(`User with ID ${userId} not found`);
-      if (user?.data.role == "1") {
+      if (user.role == 1) {
         const result = await CommentModel.findByIdAndDelete(id);
         return result !== null;
       }
       const comment = await CommentModel.findById(id);
       if (!comment) throw new Error(`Comment with ID ${id} not found`);
-      if (comment.userId.toString() !== userId) throw new Error("You are not authorized to delete this comment");
+      if (comment.userId.toString() !== user.id) throw new Error("You are not authorized to delete this comment");
 
       const result = await CommentModel.findByIdAndDelete(id);
       return result !== null;

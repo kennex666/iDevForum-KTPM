@@ -204,9 +204,9 @@ class CommentController {
         return;
       }
 
-      const userId = req.user._id || null;
+      const user = req.user || null;
 
-      const isDeleted = await commentService.deleteComment(id, userId);
+      const isDeleted = await commentService.deleteComment(id, user);
       if (!isDeleted) {
         res.status(200).json(createErrorResponse('Không tìm thấy bình luận', 404));
         return;

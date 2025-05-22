@@ -92,7 +92,7 @@ export const userClient = {
 				url: `/profile/${userId}`,
 			});
 			if (!response.data) return null;
-			return response.data;
+			return response.data.data;
 		} catch (error) {
 			console.error("Error fetching user by ID:", error);
 			throw new Error("Failed to fetch user data");
