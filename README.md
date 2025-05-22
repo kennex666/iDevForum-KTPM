@@ -36,9 +36,9 @@
 
 ## 🛠️ Technologies & Tools
 
-- **Backend**: Java, Spring Boot, JDBC
-- **Database**: Microsoft SQL Server
-- **Frontend & UI**: Figma, HTML/CSS/JS
+- **Backend**: NodeJS, NextJS
+- **Database**: MongoDB
+- **Frontend & UI**: Figma, HTML/CSS/JS, React, Bootstrap & Tailwind
 - **IDE & Tools**: Eclipse, Visual Studio Code, Visual Paradigm
 - **CI/CD**: GitLab CI/CD, Jenkins
 - **Containerization**: Docker, Docker Compose
