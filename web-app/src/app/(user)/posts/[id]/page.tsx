@@ -285,10 +285,24 @@ export default function PostDetailPage() {
 		})
 			.then((res) => res.json())
 			.then((data) => {
-				console.log(data)
-				setComments((prev) => [data.data, ...prev]);
-				setComment("");
-			});
+				if(data.data != null) {
+					console.log(data)
+					setComments((prev) => [data.data, ...prev]);
+					setComment("");
+				} else {
+					setShowToast("Bạn đang thao tác quá nhanh");
+					setToastType("error");
+					setTimeout(() => {
+						setShowToast("");
+					}, 4000);
+				}
+			}).catch((err) => {
+				setShowToast(err);
+				setToastType("error");
+				setTimeout(() => {
+					setShowToast("");
+				}, 4000);
+			})
 	};
 
 	const sendReport = (reason: string, postId: string) => {
