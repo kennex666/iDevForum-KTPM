@@ -25,9 +25,6 @@ services:
   # RabbitMQ (nếu bạn dùng message-broker kiểu AMQP)
   rabbitmq:
     image: rabbitmq:3-management
-    ports:
-      - "5672:5672"     # AMQP
-      - "15672:15672"   # Web UI
     hostname: rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: guest
