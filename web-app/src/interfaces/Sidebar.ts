@@ -15,7 +15,3 @@ export interface Bookmark {
 		};
 	};
 }
-
-export interface SidebarProps {
-	currentUser?:  any
-}

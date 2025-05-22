@@ -19,9 +19,11 @@ app.use(cors({
 
 // Giới hạn 5 request/phút cho mỗi IP đến comment-service
 const commentLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 150,
-  message: { error: "Bạn đã vượt quá 5 lần gọi API cho phép trong 1 phút!" }
+  windowMs: 60000,
+  max: 5,
+  message: { 
+	errorCode: 429,
+	errorMessage: "Bạn đang thao tác quá nhanh, vui lòng thử lại sau 1 phút",}
 });
 
 // Proxy config
@@ -36,6 +38,14 @@ app.use(
 	"/api/user",
 	createProxyMiddleware({
 		target: "http://user-service:3006",
+		changeOrigin: true,
+	})
+);
+
+app.use(
+	"/api/post/search",
+	createProxyMiddleware({
+		target: "http://post-service:3002/posts/search",
 		changeOrigin: true,
 	})
 );
@@ -61,29 +71,16 @@ app.use(
 	createProxyMiddleware({
 		target: "http://comment-service:3001",
 		changeOrigin: true,
-		on: {proxyReq: (proxyReq, req) => {
-			if (req.user) {
-				proxyReq.setHeader("user", JSON.stringify(req.user));
-			}
-		}},
 	})
 );
 
 
 app.use(
 	"/api/reaction",
-	commentLimiter, // Đặt trước proxy
 	conditionalAuthenticate(["POST", "PUT", "DELETE"]),
 	createProxyMiddleware({
 		target: "http://comment-service:3001/reaction",
-		changeOrigin: true,
-		on: {
-			proxyReq: (proxyReq, req) => {
-				if (req.user) {
-					proxyReq.setHeader("user", JSON.stringify(req.user));
-				}
-			},
-		},
+		changeOrigin: true
 	})
 );
 

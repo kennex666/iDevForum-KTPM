@@ -1,14 +1,22 @@
-import { actionFollow } from "../services/followService";
+import { actionFollow, getCountFollower, isFollower } from "../services/followService";
 
 export const followUser = async (req: any, res: any) => {
     const userId = req.user._id;
     const { id } = req.params;
     
     if (!userId || !id) {
-        return res.status(400).json({ message: "User ID and Follow ID are required" });
+        return res.status(400).json({
+            errorCode: 400,
+            errorMessage: "Follower ID and Following ID are required",
+            data: null,
+        });
     }
     if (userId === id) {
-        return res.status(400).json({ message: "You cannot follow yourself" });
+        return res.status(200).json({
+            errorCode: 400,
+            errorMessage: "You cannot follow yourself",
+            data: null,
+         });
     }
     
     try {
@@ -21,4 +29,32 @@ export const followUser = async (req: any, res: any) => {
 			data: null,
 		});
     }
+}
+
+// get total following
+export const getAuthorProfileFollower = async (req: any, res:any)  => {
+    const {userId, id} = req.query;
+    if (!id) {
+        return res.status(400).json({
+            errorCode: 400,
+            errorMessage: "Following ID are required",
+            data: null,
+        });
+    }
+
+    var countFollower = await getCountFollower(id);
+    var isFollowing = false; 
+    if (userId) {
+        isFollowing = await isFollower(userId, id);
+    }
+
+    return res.status(200).json({
+        errorCode: 200,
+        errorMessage: "Get author profile successfully",
+        data: {
+            targetId: id,
+            totalFollower: countFollower,
+            isFollowing
+        },
+    });
 }

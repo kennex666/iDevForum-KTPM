@@ -1,5 +1,5 @@
 import { get } from 'http';
-import { createPost, getPosts, getPostById, updatePost,actionBookmark, deletePost, searchPost, updatePostByAdmin } from '../services/postService';
+import { createPost, getPosts, getPostById, updatePost,actionBookmark, deletePost, searchPost, updatePostByAdmin, listBookmarks } from '../services/postService';
 import { Request, Response } from 'express';
 import { toSlugWithTimestamp } from '../utils/string';
 import { PostStatus } from '../models/postStatus';
@@ -234,6 +234,26 @@ const updatePostController = async (req:Request, res:Response) => {
     }
 
     try {
+        // check post:
+        const oldPost = await getPostById(id);
+        if (!oldPost) {
+            res.status(200).json({
+                errorCode: 404,
+                message: "Không tìm thấy bài đăng",
+                data: null,
+            });
+            return;
+        }
+        // check userId
+        const userId = req.user._id;
+        if (oldPost.userId !== userId) {
+            res.status(200).json({
+                errorCode: 403,
+                message: "Bạn không có quyền thực hiện hành động này",
+                data: null,
+            });
+            return;
+        }
         const post = await updatePost(id,title,description,content,tagId);
         res.status(200).json({
             errorCode: 200,
@@ -279,7 +299,9 @@ const deletePostController = async (req:Request, res:Response) => {
 
 const searchPostController = async (req:Request, res:Response) => {
     try {
-        const { postId, userId, content, createdAt, title, description,tagId } = req.body;
+        const offset = req.query.offset || 0;
+        const limit = req.query.limit || 10;
+        const { postId, userId, content, createdAt, title, description, tagId } = req.body;
         const query: any = {};
 
         console.log("Search parameters:", req.body);
@@ -325,11 +347,12 @@ const searchPostController = async (req:Request, res:Response) => {
             query.createdAt = { $gte: startOfDay, $lte: endOfDay }; // Tìm kiếm trong khoảng thời gian của ngày
         }
 
-        const posts = await searchPost(query);
+        const posts = await getPosts({offset, limit}, query);
         res.status(200).json({
             errorCode: 200,
             errorMessage: "Lấy bài đắng thành công",
-            data: posts,
+            data: posts.data,
+            total: posts.total,
         });
     } catch (err) {
         console.error("Error while searching comments:", err);
@@ -365,7 +388,7 @@ const acctionBookmarkController = async (req:Request, res:Response) => {
         res.status(200).json({
             errorCode: 200,
             errorMessage: "Thao tác bookmark thành công",
-            data: acctionBookmark,
+            action: acctionBookmark,
         });
     } catch (err) {
         console.error("Error while processing request:", err);
@@ -385,7 +408,45 @@ const acctionBookmarkController = async (req:Request, res:Response) => {
     }
 }
 
+const getBookmarkByUserId = async (req:Request, res:Response) => {
+    const { userId} = req.params;
+    const offset = req.query.offset || 0;
+    const limit = req.query.limit || 10;
+    if (!userId) {
+        return res.status(200).json({
+            errorCode: 400,
+            message: "Không rõ người dùng",
+            data: null,
+        });
+    }
+    try {
+        const bookmark = await listBookmarks(userId, offset, limit);
+        res.status(200).json({
+            errorCode: 200,
+            errorMessage: "Lấy danh sách bookmark thành công",
+            data: bookmark?.data || [],
+            total: bookmark?.total || 0,
+        });
+    } catch (err) {
+        console.error("Error while processing request:", err);
+        if (err instanceof Error) {
+            res.status(200).json({
+                errorCode: 400,
+                message: err.message,
+                data: null,
+            });
+        } else {
+            res.status(200).json({
+                errorCode: 400,
+                message: "Lỗi không xác định. Vui lòng thử lại sau.",
+                data: null,
+            });
+        }
+    }
+}
+
 export {
+    getBookmarkByUserId,
 	getPostByAuthor, 
     getPostController,
 	acctionBookmarkController,

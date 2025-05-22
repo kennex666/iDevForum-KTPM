@@ -138,7 +138,7 @@ const searchPost = async (query: any): Promise<IPost[]> => {
     }
 };
 
-const actionBookmark = async (userId: string, postId: string): Promise<IPost | null> => {
+const actionBookmark = async (userId: string, postId: string) => {
     try {
         const existingBookmark = await BookMarkModel.findOne({ userId, postId });
         if (existingBookmark) {
@@ -150,15 +150,64 @@ const actionBookmark = async (userId: string, postId: string): Promise<IPost | n
                 .catch((err: any) => {
                     console.error("Error removing bookmark:", err);
                 });
-            return null;
+            return "remove";
         } else {
             const newBookmark = new BookMarkModel({ userId, postId });
             await newBookmark.save();
-            return newBookmark; 
+            return "save"; 
         }
     } catch (error) {
         console.error("Error while toggling bookmark:", error);
         throw new Error("Không thể thực hiện hành động đánh dấu. Vui lòng thử lại sau.");
     }
 }
-export { createPost, getPosts, getPostById, updatePost,actionBookmark, deletePost , searchPost, updatePostByAdmin};
+
+const listBookmarks = async (
+	userId: string,
+	offset: number = 0,
+	limit: number = 10
+) => {
+	try {
+		const bookmarks = await BookMarkModel.find({ userId })
+			.skip(offset)
+			.limit(limit)
+			.sort({ createdAt: -1 });
+
+		const totalDocument = await BookMarkModel.countDocuments({ userId });
+
+		const postIds = bookmarks.map((bookmark: any) => bookmark.postId);
+		const data = await getPosts({}, { _id: { $in: postIds } });
+        const posts = data.data;
+
+		// Map lại theo thứ tự bookmarks
+		const postMap = new Map(
+			posts.map((post: any) => [post._id.toString(), post])
+		);
+
+		const bookmarksWithPosts = bookmarks
+			.map((bookmark: any) => postMap.get(bookmark.postId.toString()))
+			.filter(Boolean); // loại null
+
+		return {
+			data: bookmarksWithPosts,
+			total: totalDocument,
+		};
+	} catch (error) {
+		console.error("Error while fetching bookmarks:", error);
+		throw new Error(
+			"Không thể lấy danh sách đánh dấu. Vui lòng thử lại sau."
+		);
+	}
+};
+
+
+export {
+	listBookmarks, createPost,
+	getPosts,
+	getPostById,
+	updatePost,
+	actionBookmark,
+	deletePost,
+	searchPost,
+	updatePostByAdmin,
+};

@@ -35,7 +35,7 @@ export default function Toast({ message, type = "success" }: ToastProps) {
 
     return (
         <div
-            className={`fixed bottom-6 right-6 flex items-center gap-3 px-6 py-4 ${bgClass} text-white rounded-xl shadow-2xl min-w-[260px] transition-all duration-500 ${
+            className={`z-[999] fixed bottom-6 right-6 flex items-center gap-3 px-6 py-4 ${bgClass} text-white rounded-xl shadow-2xl min-w-[260px] transition-all duration-500 ${
                 visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
             }`}
         >

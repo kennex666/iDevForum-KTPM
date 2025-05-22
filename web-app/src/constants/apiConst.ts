@@ -17,8 +17,11 @@ export const apiDevelopment = {
 		},
 		user: {
 			getAll: "/user/getall",
+			get: "/user/profile/:id",
+			getFollowerProfile: "/user/action/follower",
 			update: "/user/profile/:id",
 			delete: "/user/profile/:id",
+			updatePassword: "/user/updatepassword",
 			createByAdmin: "/user/createUserByAdmin",
 		},
 		userAction: {
@@ -29,6 +32,9 @@ export const apiDevelopment = {
 			getInfo: "/post/:id",
 			updateStatus: "/post/admin",
 			getAuthor: "/post/author/",
+			getBookmark: "/post/bookmark/",
+			actionBookmark: "/post/actionBookmark",
+			search: "/post/search",
 		},
 		postReport: {
 			getAll: "/postreport",

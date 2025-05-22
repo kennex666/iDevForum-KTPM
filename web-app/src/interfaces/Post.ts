@@ -1,12 +1,13 @@
 export interface Post {
+	userId?: string;
+	postId?: string;
 	title: string;
 	description: string;
+	status: any;
 	url: string;
 	author: any;
-	topic: {
-		tagId: string;
-		name: string;
-	};
+	user?: any;
+	topic: any;
 	createdAt: string;
 	totalUpvote: number;
 	totalDownvote: number;

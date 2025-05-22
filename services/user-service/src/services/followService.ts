@@ -50,3 +50,31 @@ export const actionFollow = async (followerId: string, followingId: string) => {
         action: "follow",
     };
 }
+
+export const getFollowerList = async (userId: string) => {
+    if (!userId) {
+        throw new Error("User ID is required");
+    }
+    const result = await FollowingModel.find({ followingId: userId });
+    return result;
+}
+
+export const getCountFollower = async (userId: string) => {
+    if (!userId) {
+        throw new Error("User ID is required");
+    }
+    const result = await FollowingModel.countDocuments({ followingId: userId }).catch(() => 0);
+    const total = result || 0;
+    return total;
+}
+
+export const isFollower = async (userId: string, targetId: string) => {
+    if (!userId || !targetId) {
+		throw new Error("User ID is required");
+	}
+    const result = await FollowingModel.find({
+		followerId: userId,
+		followingId: targetId,
+	}).catch(() => []);
+    return result.length > 0;
+}

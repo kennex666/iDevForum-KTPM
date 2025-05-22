@@ -24,7 +24,7 @@ router.get('/bad', commentController.getAllCommentsBad);
 /**
  * Create new comment
  */
-router.post('/save', authenticate, commentController.createComment);
+router.post("/save", authenticate, commentController.createComment);
 
 /**
  * Get comments by post ID

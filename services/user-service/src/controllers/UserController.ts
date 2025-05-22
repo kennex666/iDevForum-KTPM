@@ -254,13 +254,20 @@ const deleteUserHandler = async (req: any, res: any) => {
 
 const updatePasswordHandler = async (req: any, res: any) => {
   try {
-    const { id } = req.params;
+    const id = req.user._id;
     const { newPassword, oldPassword } = req.body;
     if (!id) return res.status(200).json({
       errorCode: 400,
       errorMessage: "User ID is required",
       data: null
     });
+    if (!oldPassword)
+    return res.status(200).json({
+      errorCode: 400,
+      errorMessage: "Old password is required",
+      data: null,
+    });
+
     if (!newPassword)
       return res.status(200).json({
         errorCode: 400,
@@ -273,16 +280,18 @@ const updatePasswordHandler = async (req: any, res: any) => {
         errorMessage: "New password must be at least 6 characters",
         data: null
       });
-    if (!oldPassword)
+    
+    if (oldPassword === newPassword)
       return res.status(200).json({
         errorCode: 400,
-        errorMessage: "Old password is required",
+        errorMessage: "New password must be different from old password",
         data: null
       });
+   
     const user = await updatePassword(id, newPassword, oldPassword);
     res.status(200).json({
       errorCode: 200,
-      errorMessage: "User updated successfully",
+      errorMessage: "Password updated successfully",
       data: user
     });
   } catch (error) {
