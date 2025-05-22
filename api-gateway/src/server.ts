@@ -20,7 +20,7 @@ app.use(cors({
 // Giới hạn 5 request/phút cho mỗi IP đến comment-service
 const commentLimiter = rateLimit({
   windowMs: 60000,
-  max: 5,
+  max: 15,
   message: { 
 	errorCode: 429,
 	errorMessage: "Bạn đang thao tác quá nhanh, vui lòng thử lại sau 1 phút",}

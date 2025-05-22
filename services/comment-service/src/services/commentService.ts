@@ -108,10 +108,19 @@ class CommentService implements ICommentService {
   /**
    * Create a new comment
    */
-  async createComment(data: CreateCommentDTO): Promise<IComment> {
+  async createComment(data: CreateCommentDTO): Promise<any> {
     try {
       const comment = new CommentModel(data);
-      return await comment.save();
+      const item = await comment.save();
+      const user = await userClient.getUserById(data.userId);
+      return {
+        id: item._id,
+        content: item.content,
+        postId: item.postId,
+        user: user,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      };
     } catch (error) {
       console.error('Error creating comment:', error);
       throw error;
@@ -161,13 +170,11 @@ class CommentService implements ICommentService {
       const comments = await Promise.all(
         items.map(async (item: any) => {
           try {
-            const post = await postClient.getPostById(item.postId);
             const user = await userClient.getUserById(item.userId);
             return {
               id: item._id,
               content: item.content,
               postId: item.postId,
-              post: post,
               user: user,
               createdAt: item.createdAt,
               updatedAt: item.updatedAt,

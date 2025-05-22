@@ -106,6 +106,21 @@ export default function PostDetailPage() {
 					setComments(p.comments || []);
 				})
 				.finally(() => setIsLoading(false));
+			fetch(`${apiParser(api.apiPath.comment)}/post/${id}`, {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${getAccessToken()}`,
+				},
+			})
+				.then((res) => res.json()
+			)
+				.then((data) => {
+					console.log(data)
+					if (data.errorCode == 200) {
+						setComments(data.data);
+					}
+				});
 	}, [id, isUserReady, user?._id]);
 
 	const handleFollow = () => {
@@ -253,13 +268,23 @@ export default function PostDetailPage() {
 
 	const handleComment = () => {
 		if (!comment.trim() || !data) return;
-		fetch(`/api/comments/create`, {
+		const token = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("accessToken="))
+            ?.split("=")[1];
+		console.log(token);
+        if (!token) return;
+		fetch(`${apiParser(api.apiPath.comment)}/save`, {
 			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ content: comment, idPost: data.post.postId }),
+			headers: { 
+				"Content-Type": "application/json" ,
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify({ content: comment, postId: data.post.postId }),
 		})
 			.then((res) => res.json())
 			.then((data) => {
+				console.log(data)
 				setComments((prev) => [data.data, ...prev]);
 				setComment("");
 			});
@@ -501,7 +526,7 @@ export default function PostDetailPage() {
 					{comments.map((c, idx) => (
 						<div key={idx} className="flex gap-4 items-start">
 							<img
-								src={c.user.profilePicture}
+								src={c.user.profilePicture || 'https://placehold.co/400'}
 								alt="user"
 								className="w-10 h-10 rounded-full"
 							/>
@@ -512,7 +537,7 @@ export default function PostDetailPage() {
 									</p>
 									<span className="text-gray-500">·</span>
 									<span className="text-sm text-gray-500">
-										{c.createdAt}
+										{formatDate(c.createdAt)}
 									</span>
 								</div>
 								<p className="text-sm">{c.content}</p>
