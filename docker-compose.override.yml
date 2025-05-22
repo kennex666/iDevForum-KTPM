@@ -12,8 +12,7 @@ services:
     volumes:
       - ./api-gateway/src:/app/src
       - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
-    ports:
-      - "3000:3000"
+
 
   authenticate-service:
     build:
@@ -23,9 +22,6 @@ services:
       - ./services/authenticate-service/src:/app/src
       - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
 
-    ports:
-      - "3005:3005"
-
   comment-service:
     build:
       context: ./services/comment-service
@@ -33,8 +29,6 @@ services:
     volumes:
       - ./services/comment-service/src:/app/src
       - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
-    ports:
-      - "3001:3001"
 
   third-party-service:
     build:
@@ -43,8 +37,6 @@ services:
     volumes:
       - ./services/third-party-service/src:/app/src
       - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
-    ports:
-      - "3004:3004"
 
   file-service:
     build:
@@ -53,8 +45,6 @@ services:
     volumes:
       - ./services/file-service/src:/app/src
       - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
-    ports:
-      - "3003:3003"
 
   post-service:
     build:
@@ -63,8 +53,6 @@ services:
     volumes:
       - ./services/post-service/src:/app/src
       - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
-    ports:
-      - "3002:3002"
 
   user-service:
     build:
@@ -73,8 +61,7 @@ services:
     volumes:
       - ./services/user-service/src:/app/src
       - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
-    ports:
-      - "3006:3006"
+
   postreport-service:
     build:
       context: ./services/postreport-service
@@ -82,8 +69,7 @@ services:
     volumes:
       - ./services/postreport-service/src:/app/src
       - /app/node_modules    # Ghi đè node_modules trong container bằng thư mục trống
-    ports:
-      - "3007:3007"
+
   web-app:
     build:
       context: ./web-app

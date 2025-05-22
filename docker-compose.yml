@@ -4,8 +4,6 @@ services:
   # MongoDB
   mongodb:
     image: mongo:6
-    ports:
-      - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: secret
@@ -17,8 +15,6 @@ services:
   redis:
     image: redis:6
     container_name: redis
-    ports:
-      - "6379:6379"
     networks:
       - app-network
 
@@ -49,8 +45,6 @@ services:
   # Comment Service
   comment-service:
     build: ./services/comment-service
-    ports:
-      - "3001:3001"
     environment:
       MONGO_URI: mongodb://admin:secret@mongodb:27017/commentdb?authSource=admin
     depends_on:
@@ -61,8 +55,6 @@ services:
   # third-party service
   third-party-service:
     build: ./services/third-party-service
-    ports:
-      - "3004:3004"
     environment:
       MONGO_URI: mongodb://admin:secret@mongodb:27017/thirdpartydb?authSource=admin
     depends_on:
@@ -73,8 +65,6 @@ services:
   # Post Service
   post-service:
     build: ./services/post-service
-    ports:
-      - "3002:3002"
     environment:
       MONGO_URI: mongodb://admin:secret@mongodb:27017/postdb?authSource=admin
     depends_on:
@@ -85,8 +75,6 @@ services:
   # File Service
   file-service:
     build: ./services/file-service
-    ports:
-      - "3003:3003"
     environment:
       MONGO_URI: mongodb://admin:secret@mongodb:27017/filedb?authSource=admin
     depends_on:
@@ -97,8 +85,6 @@ services:
   # Authenticate Service
   authenticate-service:
     build: ./services/authenticate-service
-    ports:
-      - "3005:3005"
     environment:
       MONGO_URI: mongodb://admin:secret@mongodb:27017/authdb?authSource=admin
     depends_on:
@@ -109,8 +95,6 @@ services:
   # User Service
   user-service:
     build: ./services/user-service
-    ports:
-      - "3006:3006"
     environment:
       MONGO_URI: mongodb://admin:secret@mongodb:27017/userdb?authSource=admin
     depends_on:
@@ -121,8 +105,6 @@ services:
    # Post report Service
   postreport-service:
     build: ./services/postreport-service
-    ports:
-      - "3007:3007"
     environment:
       MONGO_URI: mongodb://admin:secret@mongodb:27017/postreportdb?authSource=admin
     depends_on:
