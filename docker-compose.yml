@@ -51,6 +51,18 @@ services:
       - mongodb
     networks:
       - app-network
+  
+  # third-party service
+  third-party-service:
+    build: ./services/third-party-service
+    ports:
+      - "3004:3004"
+    environment:
+      MONGO_URI: mongodb://admin:secret@mongodb:27017/thirdpartydb?authSource=admin
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
 
   # Post Service
   post-service:

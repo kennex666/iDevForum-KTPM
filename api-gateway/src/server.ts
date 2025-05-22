@@ -114,6 +114,15 @@ app.use(
 );
 
 app.use(
+	"/api/thirdparty",
+	conditionalAuthenticate(["POST"]),
+	createProxyMiddleware({
+		target: "http://third-party-service:3004",
+		changeOrigin: true,
+	})
+)
+
+app.use(
 	"/api/postreport",
 	conditionalAuthenticate(["GET","POST", "PUT", "DELETE"]),
 	createProxyMiddleware({
