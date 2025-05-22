@@ -28,38 +28,53 @@ app.use('/', thirdPartyRoute);
 const PORT = process.env.PORT || 3004;
 
 const startReviewConsumer = async () => {
-	const conn = await amqp.connect(RABBITMQ_URL);
-	const channel = await conn.createChannel();
+	let retries = 15;
+	while (retries > 0) {
+		try {
+			const conn = await amqp.connect(RABBITMQ_URL);
+			const channel = await conn.createChannel();
 
-	const queue = "review_post";
-	await channel.assertQueue(queue, { durable: true });
+			const queue = "review_post";
+			await channel.assertQueue(queue, { durable: true });
 
-	channel.consume(queue, async (msg) => {
-		if (msg !== null) {
-			const data = JSON.parse(msg.content.toString());
-			console.log("📩 Nhận bài viết:", data);
+			console.log("✅ [RabbitMQ] Đã kết nối và chờ nhận bài viết...");
 
-			// Kiểm duyệt
-			const resultReview = await reviewPostQueue(msg.content);
+			channel.consume(queue, async (msg) => {
+				if (msg !== null) {
+					const data = JSON.parse(msg.content.toString());
+					console.log("📩 Nhận bài viết!");
 
-			// Gửi kết quả ngược lại queue
-			const resultQueue = "review_result";
-			await channel.assertQueue(resultQueue, { durable: true });
+					const resultReview = await reviewPostQueue(msg.content);
 
-			const result = {
-				postId: data.postId,
-				...resultReview
-			};
+					const resultQueue = "review_result";
+					await channel.assertQueue(resultQueue, { durable: true });
 
-			channel.sendToQueue(resultQueue, Buffer.from(JSON.stringify(result)), {
-				persistent: true,
+					const result = {
+						postId: data.postId,
+						...resultReview,
+					};
+
+					channel.sendToQueue(
+						resultQueue,
+						Buffer.from(JSON.stringify(result)),
+						{
+							persistent: true,
+						}
+					);
+					channel.ack(msg);
+				}
 			});
-			channel.ack(msg);
+			break; // Kết nối thành công thì thoát khỏi vòng lặp
+		} catch (error) {
+			console.error("❌ Kết nối RabbitMQ thất bại:", error.message);
+			retries--;
+			console.log(`🔁 Thử lại kết nối trong 5s... (${5 - retries}/5)`);
+			await new Promise((res) => setTimeout(res, 5000));
 		}
-	});
+	}
 };
 
-startReviewConsumer();
-
-
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+	console.log(`Server running on port ${PORT}`)
+	startReviewConsumer();
+});

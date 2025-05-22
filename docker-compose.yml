@@ -13,6 +13,14 @@ services:
       - mongo_data:/data/db
     networks:
       - app-network
+      
+  redis:
+    image: redis:6
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
 
   # RabbitMQ (nếu bạn dùng message-broker kiểu AMQP)
   rabbitmq:

@@ -124,12 +124,12 @@ export const reviewPostQueue = async (prompt: any) => {
 
 	try {
 		const completion = await openai.chat.completions.create({
-			model: "gpt-4o-mini", // Hoặc "gpt-4" nếu cần
+			model: "gpt-4o", // Hoặc "gpt-4" nếu cần
 			messages: [
 				{
 					role: "system",
 					content:
-						"Bạn là một người kiểm duyệt viên của trang diễn đàn. Bạn sẽ có nhiệm vụ kiểm soát người dùng có đang spam, đăng nội dung lăng mạ, nhạy cảm hay không. Bài viết không được ngắn, phải có ý nghĩa" +
+						"Bạn là một người kiểm duyệt viên của trang diễn đàn. Bạn sẽ có nhiệm vụ kiểm soát người dùng có đang spam, đăng nội dung lăng mạ, nhạy cảm hay không. Người dùng có thể viết bài viết bằng mọi định dạng!" +
 						"\nBạn sẽ trả về chuỗi JSON và không giải thích gì thêm." +
 						'\nChuỗi JSON, mẫu: {"status": 200, "message": "Bài đăng hợp lệ"}' +
 						"\nStatus: 200 là duyệt bài, 400 là bài đăng bị từ chối. - message là lý do bị từ chối.",
@@ -144,11 +144,6 @@ export const reviewPostQueue = async (prompt: any) => {
 					role: "assistant",
 					content: '{"status": 400, "message": "Spam"}',
 				},
-				{ role: "user", content: "Sử dụng Netbeans" },
-				{
-					role: "assistant",
-					content: '{"status": 400, "message": "Spam"}',
-				},
 				{
 					role: "user",
 					content:
@@ -158,7 +153,7 @@ export const reviewPostQueue = async (prompt: any) => {
 					role: "assistant",
 					content: '{"status": 200, "message": "Bài đã được duyệt"}',
 				},
-				{ role: "user", content: prompt },
+				{ role: "user", content: JSON.stringify(prompt) },
 			],
 			temperature: 0.3,
 		});
