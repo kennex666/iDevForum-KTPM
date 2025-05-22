@@ -77,7 +77,7 @@ export const apiProduction = {
 };
 
 
-export const api = process.env.NODE_ENV == "development" ? apiDevelopment : apiProduction;
+export const api = apiProduction;
 
 export const apiParser = (apiPath: string, env: "client" | "server" = "client"): any => {
 	const domain = api.domain[(env || "client") as keyof typeof api.domain] || api.domain.client;
