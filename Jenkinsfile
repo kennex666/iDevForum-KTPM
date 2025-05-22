@@ -19,6 +19,7 @@ pipeline {
 						sh '''
 							docker compose down || echo "Nothing to stop"
 							docker compose up -d --build
+							docker compose -p idev4rumproduction down --volumes --remove-orphans
 						'''
 					} else {
 						echo "🚀 Deploying app via docker-compose on Windows..."
