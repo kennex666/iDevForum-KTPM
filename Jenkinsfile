@@ -17,7 +17,7 @@ pipeline {
 					if (isUnix()) {
 						echo "🚀 Deploying app via docker-compose on Ubuntu..."
 						sh '''
-							docker compose -p idev4rumproduction down --volumes --remove-orphans || true
+							docker compose down --volumes --remove-orphans
 							docker rm -f redis || true
 							docker compose up -d --build
 						'''
