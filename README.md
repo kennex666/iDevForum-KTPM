@@ -115,18 +115,33 @@
 
 ---
 
-## 💡 Future Improvements
+## 💡 Future Improvements & Known Issues
 
 - Bổ sung trang quản trị nội dung cho giảng viên hoặc quản trị viên.
 - Nâng cấp hệ thống phân tích AI để phân loại bài viết theo lĩnh vực.
 - Tích hợp OAuth2 đăng nhập qua Google hoặc Facebook.
 - Nâng hiệu năng với Redis clustering và Rate Limit thông minh hơn.
-
+> [!WARNING]
+> - Sửa các lỗ hổng (do lười nên handle chưa kỹ hoặc trên frontend, vui lòng sửa nếu bạn muốn sử dụng an toàn)
+> - Secret key gắn vào project vì không kịp handle, không khuyến nghị làm theo khi bạn không quen với việc kiểm soát và quản lý mã nguồn. Chúng tôi trong quá trình làm dự án luôn private và tới khi public, các key đều đã được revoke.
 ---
 
 ## ❤️ Special Thanks
 
-Cảm ơn thầy cô và các bạn đã hỗ trợ nhóm trong suốt quá trình thực hiện dự án này. iDev4rum là sản phẩm xuất phát từ đam mê, và nhóm mong muốn nó sẽ được tiếp tục phát triển để phục vụ cộng đồng sinh viên IUH.
+Cảm ơn thầy cô và các bạn đã hỗ trợ nhóm trong suốt quá trình thực hiện dự án này. iDev4rum là sản phẩm xuất phát từ đam mê, cũng là một dự án môn học có ý nghĩa được bắt đầu từ tháng 04 2024.
+
+> Bạn muốn sử dụng mẫu? [https://github.com/kennex666/ForumKnowledge-JavaWWW](Xem tại đây)
+> Mẫu được phát triển và thiết kế bởi Dương Thái Bảo, hãy ghi nguồn nếu có thể (Mã nguồn mở)
 
 ---
 
+## Contributors
+- Latest update at 10:00 P.M. 22/05/2025
+
+| No  | Full Name | Title | Student Code | Total commits  | Additions | Deletions | Join time | Disontinued |
+| :--: |:--:| :--: | :--: | --:| --: | --: | :--: | :--: |
+| 01. | Dương Thái Bảo | Leader | 21037621  | 75 | 48,229 | 22,500 | 12/24  | 05/25 |
+| 02. | Nguyễn Thành Luân | Contributor | 21123021 | 61 | 35,821 | 27,873 | 12/24  | 05/25 |
+| 03. | Lê Nguyễn Duy Khang | Contributor | 21063601 | 35 | 7,260 | 602 | 12/24  | 05/25 |
+| 04. | Phan Đình Thái | Contributor | 21038281 | 18 | 5,908 | 348 | 12/24  | 05/25 |
+| 05. | Copilot | Contributor | 00000000 | 2 | 4 | 4 | 12/24  | 05/25 |
