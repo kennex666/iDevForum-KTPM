@@ -94,7 +94,6 @@ export const userClient = {
 			if (!response.data) return null;
 			return response.data.data;
 		} catch (error) {
-			console.error("Error fetching user by ID:", error);
 			throw new Error("Failed to fetch user data");
 		}
 	},
@@ -110,7 +109,6 @@ export const postClient = {
 			if (!response.data) return null;
 			return response.data;
 		} catch (error) {
-			console.error("Error fetching post by ID:", error);
 			throw new Error("Failed to fetch post data");
 		}
 	},

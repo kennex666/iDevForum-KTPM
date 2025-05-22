@@ -5,17 +5,15 @@ import CircuitBreaker from "opossum";
 
 // Limiter: giới hạn concurrent requests
 const limiter = new Bottleneck({
-	maxConcurrent: 5,
+	maxConcurrent: 5, // Tối đa 5 task đồng thời
 	minTime: 200, // 200ms giữa các request
 	reservoir: 100, // chỉ cho tổng cộng 100 request trong 1 chu kì
 	reservoirRefreshAmount: 100, // reset thì nạp lại 100 request cho reservoir
-	reservoirRefreshInterval: 30000, // Thời gian refresh reservoir: 30s
+	reservoirRefreshInterval: 60000, // Thời gian refresh reservoir: 60s
 });
 
 
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://api-gateway:3000/api/user";
-
-const RETRY_TIME = 3;
 
 // Khi có request bị queued
 limiter.on("queued", (info) => {
@@ -27,6 +25,26 @@ limiter.on("queued", (info) => {
 limiter.on("idle", () => {
 	console.info("✅ Limiter idle - no pending request.");
 });
+const requestWithRetry = async (
+	requestFn: () => Promise<any>,
+	retries = 5
+): Promise<any> => {
+	let lastError;
+	for (let attempt = 1; attempt <= retries; attempt++) {
+		try {
+			console.log(`🔁 Attempt ${attempt}`);
+			return await requestFn();
+		} catch (error) {
+			lastError = error;
+			console.warn(`❌ Failed at attempt ${attempt}: ${error.message}`);
+			if (attempt < retries) {
+				const wait = 1000 * attempt; // exponential backoff
+				await new Promise((res) => setTimeout(res, wait));
+			}
+		}
+	}
+	throw lastError;
+};
 
 // Breaker config
 const circuitBreakerOptions: CircuitBreaker.Options = {
@@ -43,27 +61,34 @@ const userAxios = axios.create({
 
 // Retry: tự động gửi lại khi lỗi mạng, lỗi server
 axiosRetry(userAxios, {
-    retries: RETRY_TIME,
-    retryDelay: axiosRetry.exponentialDelay,
+    retries: 5,
+	retryDelay: (retryCount) => {
+		console.log(`⏳ Retry attempt #${retryCount}`);
+		return axiosRetry.exponentialDelay(retryCount);
+	},
     retryCondition: (error) => {
-        return axiosRetry.isNetworkOrIdempotentRequestError(error);
-    },
+		console.log("Retry...");
+		return true; // retry tất cả lỗi
+	},
 });
 
 const createSafeCaller = (axiosInstance: typeof axios) => {
 	const breaker = new CircuitBreaker(
 		(config: AxiosRequestConfig) =>
-			limiter.schedule(() => axiosInstance.request(config)),
+			requestWithRetry(
+				() => limiter.schedule(() => axiosInstance.request(config)),
+				5 // số lần retry
+			),
 		circuitBreakerOptions
 	);
 
-	// Log trạng thái breaker
 	breaker.on("open", () => console.warn("🚨 Breaker opened"));
 	breaker.on("halfOpen", () => console.info("⏳ Breaker half-open"));
 	breaker.on("close", () => console.info("✅ Breaker closed"));
 
 	return (config: AxiosRequestConfig) => breaker.fire(config);
 };
+
 
 const safeUserAxios = createSafeCaller(userAxios as any);
 
@@ -79,7 +104,6 @@ export const UserClient = {
 			});
 			return response.data;
         } catch (error) {
-            console.error("Error fetching user by ID:", error);
             throw error;
         }
     },
