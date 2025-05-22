@@ -82,7 +82,7 @@ export const UserClient = {
             console.error("Error fetching user by ID:", error);
             throw error;
         }
-    }
+    },
 	getFollowingUserIds: async (token: string) => {
 		try {
 			const response = await axios.get(
