@@ -6,6 +6,7 @@ import {
   getUserById, deleteUser,
   updatePassword, searchUsers,
   createUserByAdmin,
+  updateUserProfile,
 } from "../services/userService";
 
 const registerUser = async (req: any, res: any) => {
@@ -218,6 +219,41 @@ const updateUserHandler = async (req: any, res: any) => {
       });
   }
 }
+
+export const updateUserProfileHandler = async (req: any, res: any) => {
+	try {
+    const id = req.user._id;
+		console.log("userId");
+		if (!id)
+			return res.status(200).json({
+				errorCode: 400,
+				errorMessage: "User ID is required",
+				data: null,
+			});
+		const updateData = req.body;
+		const user = await updateUserProfile(id, updateData);
+
+		res.status(200).json({
+			errorCode: 200,
+			errorMessage: "User updated successfully",
+			data: user,
+		});
+	} catch (error) {
+    console.log(error)
+		if (error instanceof Error) {
+			return res.status(200).json({
+				errorCode: 400,
+				errorMessage: error.message,
+				data: null,
+			});
+		} else
+			return res.status(200).json({
+				errorCode: 500,
+				errorMessage: "Internal server error",
+				data: null,
+			});
+	}
+};
 const deleteUserHandler = async (req: any, res: any) => {
   try {
     const { id } = req.params;

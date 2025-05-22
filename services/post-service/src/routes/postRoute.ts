@@ -1,11 +1,12 @@
 import express from 'express';
-import { createPostController, deletePostController, updatePostByAdminController, getPostByIdController, getPostController, searchPostController, updatePostController, acctionBookmarkController, getPostByAuthor, getBookmarkByUserId } from '../controllers/postController';
+import { createPostController, deletePostController, updatePostByAdminController, getPostByIdController, getPostController, searchPostController, updatePostController, acctionBookmarkController, getPostByAuthor, getBookmarkByUserId, getPostsFromFollowedAuthors } from '../controllers/postController';
 import { authenticate } from '../utils/authenticate';
 
 const postRoute = express.Router();
 
 postRoute.get('/', getPostController);
 
+postRoute.get("/feed", authenticate, getPostsFromFollowedAuthors);
 
 postRoute.post('/save',authenticate ,createPostController);
 

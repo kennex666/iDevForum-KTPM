@@ -3,6 +3,67 @@ import { createPost, getPosts, getPostById, updatePost,actionBookmark, deletePos
 import { Request, Response } from 'express';
 import { toSlugWithTimestamp } from '../utils/string';
 import { PostStatus } from '../models/postStatus';
+import { UserClient } from '../clients/users';
+
+export const getPostsFromFollowedAuthors = async (
+	req: Request,
+	res: Response
+) => {
+	try {
+		const offset = Number(req.query.offset) || 0;
+		const limit = Number(req.query.limit) || 10;
+
+		const token = req.headers["authorization"]?.split(" ")[1];
+		if (!token) {
+			return res.status(200).json({
+				errorCode: 401,
+				errorMessage: "Bạn chưa đăng nhập",
+				data: null,
+			});
+		}
+
+		// 🧠 Gọi user service lấy danh sách tác giả đang follow
+		const response = await UserClient.getFollowingUserIds(token);
+		if (response.errorCode !== 200) {
+			return res.status(200).json({
+				errorCode: 400,
+				errorMessage:
+					response.errorMessage || "Không thể lấy danh sách theo dõi",
+				data: null,
+			});
+		}
+
+		const userIds: string[] = response.data || [];
+		if (userIds.length === 0) {
+			return res.status(200).json({
+				errorCode: 204,
+				errorMessage: "Bạn chưa theo dõi tác giả nào",
+				data: [],
+				total: 0,
+			});
+		}
+
+		const query = { userId: { $in: userIds } };
+		const result = await getPosts({ offset, limit }, query);
+
+		return res.status(200).json({
+			errorCode: 200,
+			errorMessage:
+				"Lấy bài viết từ danh sách tác giả đang theo dõi thành công",
+			data: result.data,
+			total: result.total,
+		});
+	} catch (err) {
+		console.error("Error while fetching followed posts:", err);
+		return res.status(200).json({
+			errorCode: 500,
+			errorMessage:
+				err instanceof Error ? err.message : "Lỗi không xác định",
+			data: null,
+		});
+	}
+};
+
 
 const getPostByAuthor = async (req: Request, res: Response) => {
     try {

@@ -59,6 +59,21 @@ const updateUser = async (id: string, updateData: Partial<IUser>): Promise<IUser
 	return userUpdate;
 };
 
+export const updateUserProfile = async (
+	id: string,
+	updateData: any
+) => {
+	if (!Types.ObjectId.isValid(id))
+		throw new Error("ID is not in valid format!");
+	
+	const userUpdate = await UserModel.findByIdAndUpdate(id, updateData, {
+		new: true,
+	});
+
+	if (!userUpdate) throw new Error("User not found!");
+	return userUpdate;
+};
+
 const getAllUsers = async (): Promise<IUser[]> => {
 	return await UserModel.find();
 }

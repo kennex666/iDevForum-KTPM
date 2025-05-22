@@ -299,15 +299,16 @@
 											} else {
 												createToast(
 													"Không tìm thấy bài viết!",
-                                                    "error"
+													"error"
 												);
 											}
 										}
 									})
 									.catch((error) => {
-										createToast("Lỗi fetch bài viết!", 
-                                           "error"
-                                        );
+										createToast(
+											"Lỗi fetch bài viết!",
+											"error"
+										);
 										window.location.href = "/";
 									});
 							} else {
@@ -370,7 +371,9 @@
 										action: function customFunction(
 											editor
 										) {
-											createToast("Custom Button Clicked!");
+											createToast(
+												"Custom Button Clicked!"
+											);
 										},
 										className: "fa fa-star",
 										title: "Custom Button",
@@ -436,15 +439,23 @@
 									const formData = new FormData();
 									formData.append("file", file);
 
-									fetch("/api/upload/image", {
-										method: "POST",
-										body: formData,
-									})
+									fetch(
+										"http://localhost:3000/api/file/image",
+										{
+											method: "POST",
+											body: formData,
+											headers: {
+												Authorization:
+													"Bearer " +
+													getCookie("accessToken"),
+											},
+										}
+									)
 										.then((response) => response.json())
 										.then((data) => {
-											if (data.url) {
+											if (data.data.fileUrl) {
 												// Insert the image URL as markdown
-												const imageMarkdown = `!IMAGE:[${data.url}]`;
+												const imageMarkdown = `![](${data.data.fileUrl})`;
 												const doc =
 													simplemde.codemirror.getDoc();
 												const cursor = doc.getCursor();
@@ -463,10 +474,14 @@
 												"Error uploading image:",
 												error
 											);
-											createToast("Error uploading the image.");
+											createToast(
+												"Error uploading the image."
+											);
 										});
 								} else {
-									createToast("Only image files are allowed!");
+									createToast(
+										"Only image files are allowed!"
+									);
 								}
 
 								event.preventDefault(); // Prevent default browser behavior
@@ -486,17 +501,27 @@
 											const formData = new FormData();
 											formData.append("file", file);
 
-											fetch("/api/upload/image", {
-												method: "POST",
-												body: formData,
-											})
+											fetch(
+												"http://localhost:3000/api/file/image",
+												{
+													method: "POST",
+													body: formData,
+													headers: {
+														Authorization:
+															"Bearer " +
+															getCookie(
+																"accessToken"
+															),
+													},
+												}
+											)
 												.then((response) =>
 													response.json()
 												)
 												.then((data) => {
-													if (data.url) {
+													if (data.data.fileUrl) {
 														// Insert the image URL as markdown
-														const imageMarkdown = `!IMAGE:[${data.url}]`;
+														const imageMarkdown = `![](${data.data.fileUrl})`;
 														const doc =
 															simplemde.codemirror.getDoc();
 														const cursor =
@@ -601,7 +626,9 @@
 										return;
 									}
 									if (!description.value) {
-										createToast("Vui lòng nhập mô tả ngắn!");
+										createToast(
+											"Vui lòng nhập mô tả ngắn!"
+										);
 										description.focus();
 										return;
 									}
@@ -656,9 +683,12 @@
 													data.errorCode &&
 													data.errorCode == 200
 												) {
-													createToast(editPostId != 0
+													createToast(
+														editPostId != 0
 															? "Cập nhật bài viết thành công, vui lòng chờ kiểm duyệt!"
-															: "Đã tạo bài viết thành công, vui lòng chờ kiểm duyệt!", "success")
+															: "Đã tạo bài viết thành công, vui lòng chờ kiểm duyệt!",
+														"success"
+													);
 													setTimeout(() => {
 														window.location.href =
 															"/posts/" +
@@ -677,7 +707,9 @@
 												);
 											});
 									} catch (error) {
-										createToast("Đăng bài thất bại! Lỗi js");
+										createToast(
+											"Đăng bài thất bại! Lỗi js"
+										);
 									}
 								});
 						};
