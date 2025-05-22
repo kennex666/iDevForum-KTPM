@@ -428,7 +428,6 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                                     type="button"
                                     className="btn btn-primary d-flex align-items-center"
                                     onClick={handleSave}
-                                    disabled={!formData.name || !formData.username || !formData.email}
                                 >
                                     <i className="fas fa-save me-2"></i>
                                     {isEditing ? 'Update User' : 'Save User'}

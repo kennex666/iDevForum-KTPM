@@ -30,6 +30,7 @@ enum PostStatus {
     PUBLISHED = 'PUBLISHED', // Trang thai dang duoc hien thi
     DELETED = 'DELETED', // Trang thai da bi xoa
     SUSPENDED = 'SUSPENDED', // Trang thai da bi tam ngung
+    PENDING = 'PENDING', // Trang thai dang cho duyet
 }
 
 const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
@@ -87,15 +88,17 @@ const PostsTable: React.FC<PostsTableProps> = ({ posts }: any) => {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case PostStatus.PUBLISHED:
-                return 'success';
-            case PostStatus.DELETED:
-                return 'danger';
-            case PostStatus.SUPERSEDED:
-                return 'warning';
-            default:
-                return 'secondary';
-        }
+			case PostStatus.PUBLISHED:
+				return "success";
+			case PostStatus.DELETED:
+			case PostStatus.SUSPENDED:
+			case "SUSPENDED":
+				return "danger";
+			case PostStatus.PENDING:
+				return "warning";
+			default:
+				return "secondary";
+		}
     };
 
     const handleCloseModal = () => {

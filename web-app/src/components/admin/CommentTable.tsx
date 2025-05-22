@@ -42,89 +42,113 @@ const CommentTable: React.FC<CommentTableProps> = ({ items, handleDeleteComment 
     };
 
     return (
-        <div className="table-responsive">
-            <table className="table table-hover table-striped">
-                <thead className="thead-dark">
-                    <tr>
-                        <th className="px-4">Người bình luận</th>
-                        <th className="px-4">Nội dung</th>
-                        <th className="px-4">Bài viết</th>
-                        <th className="px-4">Ngày bình luận</th>
-                        <th className="px-4">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {items.map((item) => (
-                        <tr key={item.commentId} className="align-middle">
-                            <td className="px-4">
-                                <div className="d-flex align-items-center">
-                                    <img
-                                        className="rounded-circle me-2"
-                                        width="40"
-                                        height="40"
-                                        src={item.user?.avatar || 'https://picsum.photos/200'}
-                                        alt={item.id}
-                                    />
-                                    <span className="fw-bold">{item.user?.name || 'Người dùng ẩn danh'}</span>
-                                </div>
-                            </td>
-                            <td className="px-4">
-                                <div className="text-wrap" style={{ maxWidth: '300px' }}>
-                                    {item.content}
-                                </div>
-                            </td>
-                            <td className="px-4">
-                                <a 
-                                    href={item.post?.url || '#'} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-decoration-none"
-                                >
-                                    <span className="text-primary">{item.post?.title || 'Không có tiêu đề'}</span>
-                                </a>
-                            </td>
-                            <td className="px-4 text-muted">
-                                {new Date(item.createdAt).toLocaleDateString()}
-                            </td>
-                            <td className="px-4">
-                                <button
-                                    className={`btn btn-sm ${deletingId === item.id ? 'btn-secondary' : 'btn-danger'}`}
-                                    onClick={() => handleDelete(item.commentId)}
-                                    disabled={deletingId === item.id}
-                                >
-                                    {deletingId === item.id ? (
-                                        <>
-                                            <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                                            Đang xóa...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <i className="fas fa-trash me-1"></i>
-                                            Xóa
-                                        </>
-                                    )}
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-                <tfoot className="table-light">
-                    <tr>
-                        <th className="px-4">Người bình luận</th>
-                        <th className="px-4">Nội dung</th>
-                        <th className="px-4">Bài viết</th>
-                        <th className="px-4">Ngày bình luận</th>
-                        <th className="px-4">Thao tác</th>
-                    </tr>
-                </tfoot>
-            </table>
+		<div className="table-responsive">
+			<table className="table table-hover table-striped">
+				<thead className="thead-dark">
+					<tr>
+						<th className="px-4">Người bình luận</th>
+						<th className="px-4">Nội dung</th>
+						<th className="px-4">Bài viết</th>
+						<th className="px-4">Ngày bình luận</th>
+						<th className="px-4">Thao tác</th>
+					</tr>
+				</thead>
+				<tbody>
+					{items.map((item) => (
+						<tr key={item.commentId} className="align-middle">
+							<td className="px-4">
+								<div className="d-flex align-items-center">
+									<img
+										className="rounded-circle me-2"
+										width="40"
+										height="40"
+										src={
+											item.post?.user?.profilePicture ||
+											"https://picsum.photos/200"
+										}
+										alt={item.id}
+									/>
+									<span className="fw-bold">
+										{item.post.user?.name ||
+											"Người dùng ẩn danh"}
+									</span>
+								</div>
+							</td>
+							<td className="px-4">
+								<div
+									className="text-wrap"
+									style={{ maxWidth: "300px" }}
+								>
+									{item.content}
+								</div>
+							</td>
+							<td className="px-4">
+								<a
+									href={
+										!item.post?.post.url
+											? "#"
+											: "/posts/" + item.post?.post._id
+									}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="text-decoration-none"
+								>
+									<span className="text-primary">
+										{item.post?.post.title ||
+											"Không có tiêu đề"}
+									</span>
+								</a>
+							</td>
+							<td className="px-4 text-muted">
+								{new Date(item.createdAt).toLocaleDateString()}
+							</td>
+							<td className="px-4">
+								<button
+									className={`btn btn-sm ${
+										deletingId === item.id
+											? "btn-secondary"
+											: "btn-danger"
+									}`}
+									onClick={() => handleDelete(item.commentId)}
+									disabled={deletingId === item.id}
+								>
+									{deletingId === item.id ? (
+										<>
+											<span
+												className="spinner-border spinner-border-sm me-1"
+												role="status"
+												aria-hidden="true"
+											></span>
+											Đang xóa...
+										</>
+									) : (
+										<>
+											<i className="fas fa-trash me-1"></i>
+											Xóa
+										</>
+									)}
+								</button>
+							</td>
+						</tr>
+					))}
+				</tbody>
+				<tfoot className="table-light">
+					<tr>
+						<th className="px-4">Người bình luận</th>
+						<th className="px-4">Nội dung</th>
+						<th className="px-4">Bài viết</th>
+						<th className="px-4">Ngày bình luận</th>
+						<th className="px-4">Thao tác</th>
+					</tr>
+				</tfoot>
+			</table>
 
-            <Toast
-                message={toast?.message || ''}
-                type={toast?.type || 'success'}
-            />
-        </div>
-    );
+			<Toast
+				message={toast?.message || ""}
+				type={toast?.type || "success"}
+			/>
+		</div>
+	);
 };
 
 CommentTable.propTypes = {

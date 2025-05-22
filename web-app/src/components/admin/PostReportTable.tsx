@@ -79,7 +79,7 @@ const PostReportTable: React.FC = () => {
         fetchReports();
     }, []);
 
-    const handleStatusChange = async (reportId: string, newStatus: PostReportState) => {
+    const handleStatusChange = async (reportId: string, postId: String, newStatus: PostReportState) => {
         try {
             // Replace with actual API call
             setReports(prevReports =>
@@ -104,7 +104,20 @@ const PostReportTable: React.FC = () => {
                     data: { state: newStatus }
                 }
             )
-            
+            const response2 = await axios(
+                `${apiParser(api.apiPath.post.updateStatus)}/${postId}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer " + token,
+                    },
+                    data: {
+                        status: newStatus == "ACCEPTED" ? "DELETED" : newStatus == "REJECTED" ? "PUBLISHED" : "PENDING",
+                    },
+                }
+            );
+    
             setToast({
                 message: `Report ${reportId} status updated to ${newStatus}`,
                 type: 'success'
@@ -213,7 +226,7 @@ const PostReportTable: React.FC = () => {
                                         <select
                                             className={`form-select form-select-sm bg-${getStatusColor(report.state)} text-white`}
                                             value={report.state}
-                                            onChange={(e) => handleStatusChange(report.postreportId, e.target.value as PostReportState)}
+                                            onChange={(e) => handleStatusChange(report.postreportId, report.postId,e.target.value as PostReportState)}
                                             style={{ minWidth: '120px' }}
                                         >
                                             <option value={PostReportState.PROCCESSING}>Processing</option>

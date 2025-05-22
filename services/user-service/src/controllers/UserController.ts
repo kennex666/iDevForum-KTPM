@@ -47,6 +47,41 @@ const registerUser = async (req: any, res: any) => {
     }
   }
 }
+
+export const updateAdminRole = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(200).json({
+      errorCode: 400,
+      errorMessage: "User ID is required",
+      data: null
+    });
+    const user = await updateUser(id, { role: 1 });
+    try {
+      await userCache.clear(id);
+      console.log("clear cache");
+    } catch (e) {}
+    res.status(200).json({
+      errorCode: 200,
+      errorMessage: "User updated successfully",
+      data: user
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      return res.status(200).json({
+        errorCode: 400,
+        errorMessage: error.message,
+        data: null
+      });
+    } else
+      return res.status(200).json({
+        errorCode: 500,
+        errorMessage: "Internal server error",
+        data: null
+      });
+  }
+}
+
 const getUserByIdHandler = async (req: any, res: any) => {
   try {
     console.log("userId", req.params.id);

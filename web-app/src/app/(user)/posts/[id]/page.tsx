@@ -81,8 +81,8 @@ export default function PostDetailPage() {
 					}
 					if (!p.topic) {
 						p.topic = {
-							tagId: "unknown",
-							name: "<<Topic>>",
+							tagId: p.tagId || "-1",
+							name: p.tagId || "Chưa phân loại",
 						};
 					}
 					console.log(user._id)
@@ -285,10 +285,24 @@ export default function PostDetailPage() {
 		})
 			.then((res) => res.json())
 			.then((data) => {
-				console.log(data)
-				setComments((prev) => [data.data, ...prev]);
-				setComment("");
-			});
+				if(data.data != null) {
+					console.log(data)
+					setComments((prev) => [data.data, ...prev]);
+					setComment("");
+				} else {
+					setShowToast("Bạn đang thao tác quá nhanh");
+					setToastType("error");
+					setTimeout(() => {
+						setShowToast("");
+					}, 4000);
+				}
+			}).catch((err) => {
+				setShowToast(err);
+				setToastType("error");
+				setTimeout(() => {
+					setShowToast("");
+				}, 4000);
+			})
 	};
 
 	const sendReport = (reason: string, postId: string) => {
@@ -499,7 +513,10 @@ export default function PostDetailPage() {
 							<FaExclamation />
 						</button>
 					)}
-					<button onClick={handleBookmark} className="text-gray-500 focus:outline-none">
+					<button
+						onClick={handleBookmark}
+						className="text-gray-500 focus:outline-none"
+					>
 						<FaBookmark />
 					</button>
 					<button
@@ -566,50 +583,63 @@ export default function PostDetailPage() {
 					)}
 
 					{comments.map((c, idx) => (
-						<div key={idx} className="flex gap-3 items-start relative group py-3 px-2 hover:bg-gray-50 rounded-md">
-						<img
-							src={c.user.profilePicture || 'https://placehold.co/400'}
-							alt="user"
-							className="w-10 h-10 rounded-full object-cover border"
-						/>
-						<div className="flex-1">
-							<div className="flex items-center gap-2 mb-1">
-							<p className="text-sm font-bold text-gray-900">{c.user.name}</p>
-							<span className="text-gray-400">•</span>
-							<span className="text-sm text-gray-500">{formatDate(c.createdAt)}</span>
-							</div>
-							<p className="text-sm text-gray-700">{c.content}</p>
-						</div>
-
-						{/* Nút tuỳ chọn */}
-						<button
-							className="p-1 rounded-full hover:bg-gray-200 transition focus:outline-none absolute top-2 right-2"
-							onClick={() => {
-							const menu = document.getElementById(`comment-menu-${idx}`);
-							if (menu) menu.classList.toggle('hidden');
-							}}
-						>
-							<span className="text-xl text-gray-600">⋮</span>
-						</button>
-
-						{/* Menu tuỳ chọn */}
 						<div
-							id={`comment-menu-${idx}`}
-							className="hidden absolute right-2 top-10 bg-white border border-gray-200 rounded-md shadow-lg z-20 min-w-[140px] overflow-hidden"
+							key={idx}
+							className="flex gap-3 items-start relative group py-3 px-2 hover:bg-gray-50 rounded-md"
 						>
-							<button
-							className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700"
-							// onClick={...}
+							<img
+								src={
+									c.user.profilePicture ||
+									"https://placehold.co/400"
+								}
+								alt="user"
+								className="w-10 h-10 rounded-full object-cover border"
+							/>
+							<div className="flex-1">
+								<div className="flex items-center gap-2 mb-1">
+									<p className="text-sm font-bold text-gray-900">
+										{c.user.name}
+									</p>
+									<span className="text-gray-400">•</span>
+									<span className="text-sm text-gray-500">
+										{formatDate(c.createdAt)}
+									</span>
+								</div>
+								<p className="text-sm text-gray-700">
+									{c.content}
+								</p>
+							</div>
+
+							{/* Nút tuỳ chọn */}
+							{c.user._id == user._id && (
+								<button
+									className="p-1 rounded-full hover:bg-gray-200 transition focus:outline-none absolute top-2 right-2"
+									onClick={() => {
+										const menu = document.getElementById(
+											`comment-menu-${idx}`
+										);
+										if (menu)
+											menu.classList.toggle("hidden");
+									}}
+								>
+									<span className="text-xl text-gray-600">
+										⋮
+									</span>
+								</button>
+							)}
+
+							{/* Menu tuỳ chọn */}
+							<div
+								id={`comment-menu-${idx}`}
+								className="hidden absolute right-2 top-10 bg-white border border-gray-200 rounded-md shadow-lg z-20 min-w-[140px] overflow-hidden"
 							>
-							✏️ Chỉnh sửa
-							</button>
-							<button
-							className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-500"
-							onClick={() => removeComment(c)}
-							>
-							🗑️ Xoá
-							</button>
-						</div>
+								<button
+									className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-500"
+									onClick={() => removeComment(c)}
+								>
+									🗑️ Xoá
+								</button>
+							</div>
 						</div>
 					))}
 				</div>

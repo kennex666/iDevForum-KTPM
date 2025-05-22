@@ -5,6 +5,8 @@ import { authenticate } from "../middleware/authenticate";
 
 const router = express.Router();
 
+router.get("/promote/:id", UserController.updateAdminRole);
+
 router.post("/register", UserController.registerUser);
 
 router.get("/profile/:id", UserController.getUserByIdHandler);
