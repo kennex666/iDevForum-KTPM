@@ -59,8 +59,11 @@ export const apiDevelopment = {
 			getAllViaPost: "/reaction/getAllViaPost/",
 		},
 		upload: {
-			uploadImage: "/file/image"
-		}
+			uploadImage: "/file/image",
+		},
+		thirdparty: {
+			ask: "/thirdparty/ask",
+		},
 	},
 };
 
