@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const openai = new OpenAI({
-	apiKey: "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",
+	apiKey: "",
 });
 
 const askGPT = async (req: Request, res: Response) => {
