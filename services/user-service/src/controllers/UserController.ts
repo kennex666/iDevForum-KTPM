@@ -6,7 +6,10 @@ import {
   getUserById, deleteUser,
   updatePassword, searchUsers,
   createUserByAdmin,
+  updateUserProfile,
 } from "../services/userService";
+import { UserCacheService } from "../services/cacheService";
+const userCache = new UserCacheService();
 
 const registerUser = async (req: any, res: any) => {
   try {
@@ -52,7 +55,7 @@ const getUserByIdHandler = async (req: any, res: any) => {
       errorMessage: "User ID is required",
       data: null
     })
-    const user = await getUserById(req.params.id);
+    const user = await userCache.getById(req.params.id);
     if (!user) return res.status(200).json({
       errorCode: 404,
       errorMessage: "User not found",
@@ -117,7 +120,7 @@ const getUserByEmailHandler = async (req: any, res: any) => {
       errorMessage: "Email is invalid",
       data: null
     });
-    const user = await getUserByEmail(email);
+    const user = await userCache.getByEmail(email);
     if (!user) return res.status(200).json({
       errorCode: 404,
       errorMessage: "User not found",
@@ -197,7 +200,10 @@ const updateUserHandler = async (req: any, res: any) => {
     const {updateData} = req.body;
     console.log("updateData", updateData);
     const user = await updateUser(id, updateData);
-
+    try {
+      await userCache.clear(id);
+      console.log("clear cache");
+    } catch (e) {}
     res.status(200).json({
       errorCode: 200,
       errorMessage: "User updated successfully",
@@ -218,6 +224,46 @@ const updateUserHandler = async (req: any, res: any) => {
       });
   }
 }
+
+export const updateUserProfileHandler = async (req: any, res: any) => {
+	try {
+    const id = req.user._id;
+		console.log("userId");
+		if (!id)
+			return res.status(200).json({
+				errorCode: 400,
+				errorMessage: "User ID is required",
+				data: null,
+			});
+		const updateData = req.body;
+		const user = await updateUserProfile(id, updateData);
+      
+    try {
+      await userCache.clear(id);
+      console.log("clear cache");
+    } catch (e) {}
+
+		res.status(200).json({
+			errorCode: 200,
+			errorMessage: "User updated successfully",
+			data: user,
+		});
+	} catch (error) {
+    console.log(error)
+		if (error instanceof Error) {
+			return res.status(200).json({
+				errorCode: 400,
+				errorMessage: error.message,
+				data: null,
+			});
+		} else
+			return res.status(200).json({
+				errorCode: 500,
+				errorMessage: "Internal server error",
+				data: null,
+			});
+	}
+};
 const deleteUserHandler = async (req: any, res: any) => {
   try {
     const { id } = req.params;

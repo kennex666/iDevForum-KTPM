@@ -1,4 +1,4 @@
-import { actionFollow, getCountFollower, isFollower } from "../services/followService";
+import { actionFollow, getCountFollower, getFollowingList, isFollower } from "../services/followService";
 
 export const followUser = async (req: any, res: any) => {
     const userId = req.user._id;
@@ -58,3 +58,31 @@ export const getAuthorProfileFollower = async (req: any, res:any)  => {
         },
     });
 }
+
+export const getFollowingUserIds = async (req: any, res: any) => {
+	try {
+		const userId = req.user._id;
+		if (!userId) {
+			return res.status(200).json({
+				errorCode: 401,
+				errorMessage: "Bạn chưa đăng nhập",
+				data: null,
+			});
+		}
+
+		const followingIds = await getFollowingList(userId);
+
+		return res.status(200).json({
+			errorCode: 200,
+			errorMessage: "Lấy danh sách đang theo dõi thành công",
+			data: followingIds,
+		});
+	} catch (err) {
+		console.error("Error fetching following list:", err);
+		return res.status(200).json({
+			errorCode: 500,
+			errorMessage: "Lỗi khi lấy danh sách following",
+			data: null,
+		});
+	}
+};

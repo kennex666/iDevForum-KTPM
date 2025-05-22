@@ -104,15 +104,33 @@ export default function SearchPage() {
 							</a>
 						</div>
 						{/* Post list */}
-						<PostList
+						{posts.length == 0 ? (
+							<div className="flex flex-col items-center space-y-4">
+								<h2 className="text-2xl font-semibold">
+									Không có bài viết nào
+								</h2>
+								<p
+									onClick={() => {
+										if (!q) return;
+										window.location.href = `/search-ai?q=${encodeURIComponent(
+											q
+										)}`;
+									}}
+									className="text-blue-500 text-center hover:underline cursor-pointer"
+								>
+									Bạn có muốn thử AI content? Click vào đây
+								</p>
+							</div>
+						) : 
+						(<PostList
 							posts={posts}
 							total={total}
 							action={action}
 							currentPage={currentPage}
-						/>
+						/>)}
 					</div>
 					{/* Right: Sidebar */}
-					<Sidebar/>
+					<Sidebar />
 				</div>
 			</div>
 		</div>

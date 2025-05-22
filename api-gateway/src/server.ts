@@ -104,7 +104,6 @@ app.use(
 
 app.use(
 	"/api/thirdparty",
-	conditionalAuthenticate(["POST"]),
 	createProxyMiddleware({
 		target: "http://third-party-service:3004",
 		changeOrigin: true,

@@ -26,6 +26,7 @@ const markdownStyles: Record<string, string[]> = {
 		"text-gray-600",
 		"my-4",
 	],
+	img: ["max-w-full", "rounded", "shadow", "my-4"],
 };
 
 const applyMarkdownStyles = (el: HTMLElement) => {

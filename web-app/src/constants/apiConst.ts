@@ -20,6 +20,7 @@ export const apiDevelopment = {
 			get: "/user/profile/:id",
 			getFollowerProfile: "/user/action/follower",
 			update: "/user/profile/:id",
+			updateNew: "/user/updateUserProfile",
 			delete: "/user/profile/:id",
 			updatePassword: "/user/updatepassword",
 			createByAdmin: "/user/createUserByAdmin",
@@ -45,6 +46,11 @@ export const apiDevelopment = {
 			search: "/postreport/search",
 		},
 		comment: "/comment",
+		commentNew: {
+			create: "/comment/save",
+			getCommentViaPost: "/comment/post/",
+			delete: "/comment/",
+		},
 		like: "/like",
 		topic: "/topic",
 		reaction: {
@@ -52,13 +58,19 @@ export const apiDevelopment = {
 			getAllViaUser: "/reaction/getAllViaUser/",
 			getAllViaPost: "/reaction/getAllViaPost/",
 		},
+		upload: {
+			uploadImage: "/file/image",
+		},
+		thirdparty: {
+			ask: "/thirdparty/ask",
+		},
 	},
 };
 
 export const apiProduction = {
 	...apiDevelopment,
 	domain: {
-		client: "idev4rum.pj.io.vn",
+		client: "idev4rum.pj.io.vn/api-gateway",
 		server: "idev4rum.pj.io.vn/api-gateway",
 	},
 	protocol: "https",

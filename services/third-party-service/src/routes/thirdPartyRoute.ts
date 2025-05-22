@@ -1,7 +1,7 @@
 import express from 'express';
 import { authenticate } from '../utils/authenticate';
 import {sendMail} from '../controllers/mailController';
-import { askGPT } from '../controllers/aiController';
+import { askGPT, reviewPost } from '../controllers/aiController';
 
 const thirdPartyRoute = express.Router();
 
@@ -15,6 +15,8 @@ thirdPartyRoute.get('/', (req, res) => {
 // // /email
 // thirdPartyRoute.post('/email', authenticate, sendMail);
 // // /ai
-// thirdPartyRoute.get('/ai', authenticate, askGPT);
+thirdPartyRoute.post('/ask', askGPT);
+thirdPartyRoute.post("/review-post", reviewPost);
+
 
 export default thirdPartyRoute;
