@@ -130,8 +130,9 @@
 
 Cảm ơn thầy cô và các bạn đã hỗ trợ nhóm trong suốt quá trình thực hiện dự án này. iDev4rum là sản phẩm xuất phát từ đam mê, cũng là một dự án môn học có ý nghĩa được bắt đầu từ tháng 04 2024.
 
-> Bạn muốn sử dụng mẫu của iDev4rum: [Xem tại đây - Version cũ có template](https://github.com/kennex666/ForumKnowledge-JavaWWW)
-> Mẫu được phát triển và thiết kế bởi Dương Thái Bảo, hãy ghi nguồn nếu có thể (Mã nguồn mở)
+Bạn muốn sử dụng mẫu của iDev4rum: [Xem tại đây - Version cũ có template](https://github.com/kennex666/ForumKnowledge-JavaWWW)
+
+Mẫu được phát triển và thiết kế bởi Dương Thái Bảo, hãy ghi nguồn nếu có thể (Mã nguồn mở)
 
 ---
 
