@@ -1,4 +1,5 @@
 "use client";
+import { getAccessToken } from "@/app/utils/cookiesParse";
 import Navbar from "@/components/user/Navbar";
 import PostList from "@/components/user/PostList";
 import Sidebar from "@/components/user/sidebar/Sidebar";
@@ -12,7 +13,7 @@ import { use, useEffect, useState } from "react";
 
 
 export default function HomePage() {
-	const activeTab = "home"; // lấy từ query nếu cần
+	const [activeTab, setActiveTab] = useState("home"); // lấy từ query nếu cần
 	// const posts = [ 
 	// 	{
 	// 		title: "Giới thiệu về Java",
@@ -37,20 +38,16 @@ export default function HomePage() {
 	const [ currentPage, setCurrentPage ] = useState(0);
 	
 	const fetchPosts = async () => {
-		const params: Record<string, any> = {};
-
-		params.sort = -1;
-
-		if (activeTab !== "home") {
-			params.topicId = activeTab; // hoặc topicId ?? undefined để tránh null
-		}
-		const res = await axios.get(apiParser(api.apiPath.post.getAll) + `?offset=${currentPage * 10}`, {
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${user.accessToken}`,
-			},
-			params,
-		});
+		const res = await axios.get(
+			apiParser(api.apiPath.post.getAll) +
+				`${activeTab !== "home" ? "/feed" : ""}?offset=${currentPage * 10}`,
+			{
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${getAccessToken()}`,
+				},
+			}
+		);
 
 		const data = await res.data;
 		if (data?.data) {
@@ -109,7 +106,7 @@ export default function HomePage() {
 			<div className="container mx-auto px-12 lg:w-10/12">
 				<div className="flex justify-between items-start py-4">
 					<div className="w-2/3 space-y-8">
-						<TabBar activeTab={activeTab} />
+						<TabBar activeTab={activeTab} setActiveTab={setActiveTab} />
 						<PostList posts={posts} total={total} action={action} currentPage={currentPage} />
 						{/* Phân trang nếu cần */}
 					</div>

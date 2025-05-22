@@ -78,3 +78,10 @@ export const isFollower = async (userId: string, targetId: string) => {
 	}).catch(() => []);
     return result.length > 0;
 }
+
+export const getFollowingList = async (userId: string): Promise<string[]> => {
+	const following = await FollowingModel.find({ followerId: userId }).select(
+		"followingId"
+	);
+	return following.map((f) => f.followingId.toString());
+};

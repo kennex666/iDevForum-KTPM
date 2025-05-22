@@ -13,6 +13,7 @@ import axios from "axios";
 import { useParams } from "next/navigation";
 import { getAccessToken } from "@/app/utils/cookiesParse";
 import Toast from "@/components/Toast";
+import UpdateUserModal from "@/components/user/UpdateUserModel";
 
 export default function AuthorHome() {
 	const { id } = useParams();
@@ -35,6 +36,8 @@ export default function AuthorHome() {
 	
 	const [currentBookmarks, setCurrentBookmarks] = useState(0);
 	const [totalBookmark, setTotalBookmark] = useState(0);
+	const [showModalUpdate, setShowModalUpdate] = useState(false);
+
 
 	const fetchPosts = async () => {
 		const params: Record<string, any> = {};
@@ -243,6 +246,20 @@ export default function AuthorHome() {
 
 	return (
 		<div className="container mx-auto px-12 lg:w-10/12">
+			{showModalUpdate && (
+				<UpdateUserModal
+					currentUser={user}
+					onClose={() => setShowModalUpdate(false)}
+					onUpdated={() => fetchUserProfile()}
+					setToast={(data: any) => {
+						setToastType(data.type);
+						setShowToast(data.message);
+						setTimeout(()=>{
+							setShowToast("");
+						}, 4000)
+					}}
+				/>
+			)}
 			{showToast && (
 				<Toast
 					message={showToast}
@@ -358,15 +375,24 @@ export default function AuthorHome() {
 								>
 									{isFollowing ? "Đang theo dõi" : "Theo dõi"}
 								</button>
-								<a
-									href={`mailto:${
-										user?.email || "idev4rum@pj.io.vn"
-									}`}
-								>
-									<div className="bg-blue-400 rounded-full px-4 py-2 text-white text-sm font-bold hover:bg-blue-300 hover:cursor-pointer">
-										<FaRegEnvelope className="text-lg text-white stroke-black stroke-1" />
-									</div>
-								</a>
+								{isLogin && me?._id === user?._id ? (
+									<button
+										onClick={() => setShowModalUpdate(true)}
+										className="text-sm text-gray-600 hover:underline"
+									>
+										Chỉnh sửa hồ sơ
+									</button>
+								) : (
+									<a
+										href={`mailto:${
+											user?.email || "idev4rum@pj.io.vn"
+										}`}
+									>
+										<div className="bg-blue-400 rounded-full px-4 py-2 text-white text-sm font-bold hover:bg-blue-300 hover:cursor-pointer">
+											<FaRegEnvelope className="text-lg text-white stroke-black stroke-1" />
+										</div>
+									</a>
+								)}
 							</div>
 						</div>
 					</div>

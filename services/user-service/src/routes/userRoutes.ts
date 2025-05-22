@@ -16,6 +16,12 @@ router.get("/search", UserController.searchUsersHandler);
 
 router.post("/search-email", UserController.getUserByEmailHandler);
 
+router.put(
+	"/updateUserProfile",
+	authenticate,
+	UserController.updateUserProfileHandler
+);
+
 router.put("/profile/:id", UserController.updateUserHandler);
 
 router.delete("/profile/:id", UserController.deleteUserHandler);
