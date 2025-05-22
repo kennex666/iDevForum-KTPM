@@ -32,6 +32,9 @@ export default function AuthorHome() {
 	// Toát
 	const [toastType, setToastType] = useState("error");
 	const [showToast, setShowToast] = useState("");
+	
+	const [currentBookmarks, setCurrentBookmarks] = useState(0);
+	const [totalBookmark, setTotalBookmark] = useState(0);
 
 	const fetchPosts = async () => {
 		const params: Record<string, any> = {};
@@ -59,6 +62,43 @@ export default function AuthorHome() {
 			console.error("Error fetching posts:", data);
 		}
 	};
+
+	const [bookmarks, setBookmarks] = useState<any>([]);
+
+	useEffect(() => {
+		if (isUserReady) {
+			fetch(`${apiParser(api.apiPath.post.getBookmark)}${id}?offset=${currentBookmarks * 10}`)
+				.then((res) => {
+					return res.json();
+				})
+				.then((data) => {
+					if (data?.data) {
+						setBookmarks(data.data);
+					} else {
+						console.error("Error fetching bookmarks:", data);
+						setBookmarks([]);
+					}
+				})
+				.catch((error) => {
+					console.error("Error fetching bookmarks:", error);
+					setBookmarks([]);
+				});
+		}
+	}, [isUserReady]);
+
+	const actionBookmark = {
+		prev: () => {
+			if (currentBookmarks > 0) {
+				setCurrentBookmarks(currentBookmarks - 1);
+			}
+		},
+		next: () => {
+			if (currentBookmarks < Math.floor(totalBookmark / 10)) {
+				setCurrentBookmarks(currentBookmarks + 1);
+			}
+		},
+	};
+
 
 	const getFollowerProfile = async () => {
 		const queryParams = new URLSearchParams({
@@ -229,7 +269,7 @@ export default function AuthorHome() {
 					<div className="flex flex-row space-x-10 items-center pt-2 text-nowrap scrollbar-custom px-5 mt-4">
 						{[
 							{ id: "home", label: "Trang chủ" },
-							// { id: "bookmark", label: "Danh sách" },
+							{ id: "bookmark", label: "Danh sách đã lưu" },
 							{ id: "author", label: "Về tác giả" },
 						].map((tab) => (
 							<button
@@ -254,7 +294,14 @@ export default function AuthorHome() {
 								total={total}
 							/>
 						)}
-						{active === "bookmark" && null}
+						{active === "bookmark" && (
+							<PostList
+								posts={bookmarks}
+								action={actionBookmark}
+								currentPage={currentBookmarks}
+								total={totalBookmark}
+							/>
+						)}
 						{active === "author" && (
 							<div className="flex flex-col space-y-3 ps-6 pe-11">
 								{" "}
@@ -285,15 +332,17 @@ export default function AuthorHome() {
 							<h2 className="font-semibold text-lg">
 								{user?.name}
 							</h2>
-							<p className="text-gray-500">{`${totalFollowers.toLocaleString(
-								// I want this like 1,000
-								// 10,000
-								"en-US",
-								{
-									minimumFractionDigits: 0,
-									maximumFractionDigits: 0,
-								}
-							) || 0} Followers`}</p>
+							<p className="text-gray-500">{`${
+								totalFollowers.toLocaleString(
+									// I want this like 1,000
+									// 10,000
+									"en-US",
+									{
+										minimumFractionDigits: 0,
+										maximumFractionDigits: 0,
+									}
+								) || 0
+							} Followers`}</p>
 							<p className="text-sm text-gray-500">
 								{user?.bio ||
 									"Người dùng hiện không viết mô tả nào về bản thân họ"}
@@ -321,82 +370,6 @@ export default function AuthorHome() {
 							</div>
 						</div>
 					</div>
-
-					{user && (
-						<div className="mt-12">
-							<h3 className="font-semibold mb-5">
-								Đã lưu gần đây
-							</h3>
-							<div className="space-y-5">
-								{user.bookMarks ? (
-									user.bookMarks.map(
-										(bookmark: any, idx: any) => (
-											<div key={idx} className="py-2">
-												<a
-													href={`/author/${bookmark.post.author.userId}`}
-													className="flex flex-row items-center space-x-2 mb-3 text-sm"
-												>
-													<img
-														src={
-															bookmark.post.author
-																.profilePicture
-														}
-														alt="User profile image"
-														className="rounded-full w-6 h-6"
-													/>
-													<span className="font-semibold hover:text-gray-500">
-														{
-															bookmark.post.author
-																.name
-														}
-													</span>
-												</a>
-												<a
-													href={`/posts/${bookmark.post.postId}`}
-												>
-													<h2 className="font-semibold">
-														{bookmark.post.title}
-													</h2>
-												</a>
-												<div className="flex items-center space-x-2 text-xs mt-2">
-													<p>
-														{new Date(
-															bookmark.post.date
-														).toLocaleDateString()}
-													</p>
-													<p>·</p>
-													<p>
-														{
-															bookmark.post.topic
-																.name
-														}
-													</p>
-												</div>
-											</div>
-										)
-									)
-								) : // Login to see bookmarks
-								isLogin ? (
-									<p className="text-gray-500 mb-4">
-										Bạn chưa lưu nội dung nào
-									</p>
-								) : (
-									<p className="text-gray-500 mb-4">
-										Vui lòng đăng nhập để xem danh sách đã
-										lưu
-									</p>
-								)}
-							</div>
-							{user.bookMarks && (
-								<a
-									href="/bookmarks"
-									className="text-blue-500 text-sm hover:text-blue-400"
-								>
-									Xem danh sách đầy đủ
-								</a>
-							)}
-						</div>
-					)}
 
 					<Footer />
 				</div>

@@ -80,9 +80,11 @@ export default function MyProfileHome() {
 			console.error("Error fetching posts:", data);
 		}
 	};
-
 	useEffect(() => {
-		if (isUserReady) fetchPosts();
+		if (isUserReady) {
+			window.location.href = `/author/${user._id}`;
+			fetchPosts();
+		}
 	}, [isUserReady, currentPage]);
 
 	const action = {
@@ -127,7 +129,7 @@ export default function MyProfileHome() {
 					<div className="flex flex-row space-x-10 items-center pt-2 text-nowrap scrollbar-custom px-5 mt-4">
 						{[
 							{ id: "home", label: "Trang chủ" },
-							// { id: "bookmark", label: "Danh sách" },
+							{ id: "bookmark", label: "Danh sách đã lưu" },
 							{ id: "author", label: "Về tác giả" },
 						].map((tab) => (
 							<button
@@ -152,7 +154,12 @@ export default function MyProfileHome() {
 								total={total}
 							/>
 						)}
-						{active === "bookmark" && null}
+						{active === "bookmark" && <PostList
+								posts={posts}
+								action={action}
+								currentPage={currentPage}
+								total={total}
+							/>}
 						{active === "author" && (
 							<div className="flex flex-col space-y-3 ps-6 pe-11">
 								{" "}

@@ -1,8 +1,9 @@
 export interface Post {
-	userId?:string;
+	userId?: string;
 	postId?: string;
 	title: string;
 	description: string;
+	status: any;
 	url: string;
 	author: any;
 	user?: any;

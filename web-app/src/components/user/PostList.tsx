@@ -1,5 +1,6 @@
 import { Post } from "@/interfaces/Post";
 import PostItem from "./PostItem";
+import { EUserRole, useUser } from "@/context/UserContext";
 
 const PostList = ({ 
 	posts, total = posts?.length || 0, 
@@ -7,6 +8,9 @@ const PostList = ({
 	currentPage = 0
 	}
 	: { posts: Post[], total?: any, action?: any, currentPage?: any }) => {
+
+	const { user, isUserReady } = useUser();
+
 	if (!posts || posts.length === 0) {
 		return (
 			<div className="flex flex-col items-center space-y-4">
@@ -24,7 +28,10 @@ const PostList = ({
 		<div>
 			<div className="flex flex-col space-y-3">
 				{posts.map((post, idx) => (
-					<PostItem key={idx} post={post} />
+					post.status != "PUBLISHED"
+					&& user.role != EUserRole.ADMIN && 
+					post.userId != user._id ? null :
+					(<PostItem key={idx} post={post} />)
 				))}
 			</div>
 			<div className="flex justify-center mt-4">

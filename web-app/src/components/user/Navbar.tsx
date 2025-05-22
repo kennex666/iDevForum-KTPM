@@ -216,7 +216,7 @@ export default function Navbar() {
 								>
 									<div className="py-1 space-y-1">
 										<a
-											href="/profile"
+											href={`/author/${user._id}`}
 											className="block px-4 py-2 text-sm text-gray-700 flex items-center"
 										>
 											<FaUser />

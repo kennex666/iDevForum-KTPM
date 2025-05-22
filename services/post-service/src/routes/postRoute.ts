@@ -19,7 +19,7 @@ postRoute.get("/:id", getPostByIdController);
 postRoute.put('/admin/:id', authenticate, updatePostByAdminController);
 
 // Cập nhật bài viết
-postRoute.put('/:id', updatePostController);
+postRoute.put("/:id", authenticate, updatePostController);
 
 // Xoá bài viết
 postRoute.delete('/:id', deletePostController);

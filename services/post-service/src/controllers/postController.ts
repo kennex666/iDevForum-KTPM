@@ -234,6 +234,26 @@ const updatePostController = async (req:Request, res:Response) => {
     }
 
     try {
+        // check post:
+        const oldPost = await getPostById(id);
+        if (!oldPost) {
+            res.status(200).json({
+                errorCode: 404,
+                message: "Không tìm thấy bài đăng",
+                data: null,
+            });
+            return;
+        }
+        // check userId
+        const userId = req.user._id;
+        if (oldPost.userId !== userId) {
+            res.status(200).json({
+                errorCode: 403,
+                message: "Bạn không có quyền thực hiện hành động này",
+                data: null,
+            });
+            return;
+        }
         const post = await updatePost(id,title,description,content,tagId);
         res.status(200).json({
             errorCode: 200,

@@ -47,6 +47,9 @@ const PostItem = ({ post }: { post: Post }) => {
 					href={`/posts/${post.postId}`}
 					className="text-2xl font-bold hover:underline"
 				>
+					{post?.status != "PUBLISHED"
+						? "[" + post?.status + "] "
+						: ""}
 					{post.title}
 				</a>
 				<p className="mt-2">{post.description}</p>
