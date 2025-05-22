@@ -4,6 +4,10 @@ import { Request, Response } from 'express';
 import { toSlugWithTimestamp } from '../utils/string';
 import { PostStatus } from '../models/postStatus';
 import { UserClient } from '../clients/users';
+import amqp from "amqplib";
+
+const RABBITMQ_URL = "amqp://rabbitmq:5672";
+
 
 export const getPostsFromFollowedAuthors = async (
 	req: Request,
@@ -197,6 +201,31 @@ const createPostController = async (req: Request, res: Response) => {
                 userId: userId,
                 tagId,
             });
+
+            try {
+                // Gửi message lên queue
+                const conn = await amqp.connect(RABBITMQ_URL);
+                const channel = await conn.createChannel();
+
+                const queue = "review_post";
+                await channel.assertQueue(queue, { durable: true });
+
+                const msg = {
+					postId: post._id,
+					title,
+					content,
+				};
+
+                channel.sendToQueue(queue, Buffer.from(JSON.stringify(msg)), { persistent: true });
+                await channel.close();
+                await conn.close();
+            } catch (e){
+                return res.status(200).json({
+                    errorCode: 200,
+                    errorMessage: "Tạo bài viết thành công. Vui lòng chờ kiểm duyệt viên!",
+                    data: post,
+                });
+            }
 
             return res.status(200).json({
                 errorCode: 200,

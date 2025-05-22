@@ -113,4 +113,75 @@ const reviewPost = async (req: Request, res: Response) => {
 	}
 };
 
+export const reviewPostQueue = async (prompt: any) => {
+
+	if (!prompt) {
+		return {
+			status:400,
+			message: "Prompt is required"
+		}
+	}
+
+	try {
+		const completion = await openai.chat.completions.create({
+			model: "gpt-4o-mini", // Hoặc "gpt-4" nếu cần
+			messages: [
+				{
+					role: "system",
+					content:
+						"Bạn là một người kiểm duyệt viên của trang diễn đàn. Bạn sẽ có nhiệm vụ kiểm soát người dùng có đang spam, đăng nội dung lăng mạ, nhạy cảm hay không. Bài viết không được ngắn, phải có ý nghĩa" +
+						"\nBạn sẽ trả về chuỗi JSON và không giải thích gì thêm." +
+						'\nChuỗi JSON, mẫu: {"status": 200, "message": "Bài đăng hợp lệ"}' +
+						"\nStatus: 200 là duyệt bài, 400 là bài đăng bị từ chối. - message là lý do bị từ chối.",
+				},
+				{ role: "user", content: "âbsjahshaks" },
+				{
+					role: "assistant",
+					content: '{"status": 400, "message": "Spam"}',
+				},
+				{ role: "user", content: "Tìm người yêu Sài Gòn" },
+				{
+					role: "assistant",
+					content: '{"status": 400, "message": "Spam"}',
+				},
+				{ role: "user", content: "Sử dụng Netbeans" },
+				{
+					role: "assistant",
+					content: '{"status": 400, "message": "Spam"}',
+				},
+				{
+					role: "user",
+					content:
+						"JavaScript là một ngôn ngữ lập trình phổ biến và mạnh mẽ, chủ yếu được sử dụng để phát triển các trang web động...",
+				},
+				{
+					role: "assistant",
+					content: '{"status": 200, "message": "Bài đã được duyệt"}',
+				},
+				{ role: "user", content: prompt },
+			],
+			temperature: 0.3,
+		});
+
+		const reply = completion.choices[0].message.content;
+
+		try {
+			const parsed = JSON.parse(reply || "");
+			return parsed
+		} catch (jsonError) {
+			console.error("❌ Không parse được JSON từ GPT:", reply);
+			return {
+				status: 500,
+				message: "GPT trả về không đúng định dạng JSON."
+			};
+		}
+	} catch (error: unknown) {
+		console.error("❌ Lỗi gọi OpenAI:", error);
+		return {
+			status: 500,
+			message: "GPT lỗi!"
+		}
+	}
+};
+
 export { askGPT, reviewPost };
